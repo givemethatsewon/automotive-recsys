@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "automotive-recsys"
+version = "0.1.0"
+description = "Amazon Automotive 5-core recommendation experiments"
+requires-python = ">=3.12,<3.14"
+dependencies = ["numpy>=2.2,<3", "polars>=1.30,<2"]
+
+[project.scripts]
+automotive-recsys = "automotive_recsys.cli:main"
+
+[project.optional-dependencies]
+training = [
+    "torch>=2.5,<3",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/automotive_recsys"]
+
+[dependency-groups]
+colab = [
+    "google-colab-cli>=0.7.5",
+]
+dev = [
+    "pypdf>=6.21.4",
+]
