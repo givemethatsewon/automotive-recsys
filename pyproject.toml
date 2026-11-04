@@ -22,7 +22,9 @@ packages = ["src/automotive_recsys"]
 
 [dependency-groups]
 colab = [
+    "google-api-python-client>=2.201.0",
     "google-colab-cli>=0.7.5",
+    "matplotlib>=3.10,<4",
 ]
 dev = [
     "pypdf>=6.21.4",

@@ -151,13 +151,16 @@ results/experiments/
 | train/valid 학습·best/last·early stopping·optimizer/RNG 복원 | 구현됨. 세 모델 모두 한 epoch pilot 검증 완료 |
 | 입력 hash·실제 설정·seed·GPU/PyTorch·epoch total loss/시간 | 저장됨 |
 | valid 전체/그룹별 지표 | best/latest JSON에 저장됨 |
-| valid 사용자별 지표 | best 시점 Parquet 저장됨. n_train/n_gt 추가 필요 |
-| valid top-100 | ID 저장 가능. score 추가 필요. pilot에서는 저장 생략 |
-| 모든 검증 시점의 전체 지표·분해 loss | 기록 확장 필요. 현재 history의 검증 지표는 NDCG 중심 |
-| 독립적인 최종 test evaluator와 사용자/후보 집합 대조 | 구현·검증 필요 |
-| run manifest의 코드/전체 환경/CU·집계표·seed 통계/paired CI | 기록·집계 구현 필요 |
-| item exposure·Tail Recall·재정렬·차종 평가 | 추가 구현 필요. 특징 의존 항목은 테이블 도착 후 진행 |
-| 장기 실행 중 checkpoint의 VM 밖 회수 | 본실험 전에 운용 보완 필요. VM 내부 복원만으로 충분하지 않음 |
+| valid 사용자별 지표 | n_train/n_gt/n_tail_gt 포함 Parquet 구현·작은 평가 fixture 검증 |
+| valid/test top-100 | iid와 원래 score 저장 구현. 본 모델 seed별 저장, 보조 실험 test 후보는 생략 |
+| 모든 검증 시점의 전체 지표·분해 loss | epochs CSV/JSONL에 구현. 검증하지 않은 epoch는 null |
+| 독립적인 최종 test evaluator와 사용자/후보 집합 대조 | frozen valid 선택·동일 cohort·history mask 검사 구현. 실제 test는 선택 고정 후 실행 |
+| run manifest의 코드/전체 환경/CU·집계표·seed 통계/paired CI | source snapshot/환경 기록·계정 CU 관측·보고서 자동 생성 구현. 3-seed/단일 baseline 집계 fixture 검증 |
+| item exposure·Tail Recall·재정렬·차종 평가 | exposure와 Tail Recall 구현. 텍스트/차종은 특징 파일 미제공으로 미실시, 재정렬은 별도 단계 |
+| 장기 실행 중 checkpoint의 VM 밖 회수 | Drive 불변 세대/MD5·SHA 검증/2세대 보존/복구 구현. 실제 Drive 인증·왕복 검증 후 본실험 시작 |
+
+실제 산출물 이름·위치와 진행 로그, 자동 실행/복구는 [DURABLE_EXPERIMENTS](DURABLE_EXPERIMENTS.md)를 따른다.
+학습/복구/평가/집계의 작은 테스트 19개를 통과했다. 코드 구현은 본실험의 결과 획득 완료를 뜻하지 않는다.
 
 본실험의 완료 조건은 선택 규칙을 고정한 test 결과를 입력·코드·checkpoint·사용자별 출력으로 추적할 수 있고,
 네 모델 비교, seed별 결과, 그룹 비교, 실행 시간/비용, 실제 수행한 ablation이 갖춰지는 것이다.

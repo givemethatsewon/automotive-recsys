@@ -75,20 +75,24 @@ def info_nce(left, right, temperature=0.2):
 
 def objective(embedding, graph, users, positives, negatives, model="lightgcn", layers=3,
               regularization=1e-4, cl_weight=0.1, temperature=0.2, eps=0.1,
-              contrast_layer=1, noise=None, symmetric_backward=False):
+              contrast_layer=1, noise=None, symmetric_backward=False, return_components=False):
     final, contrast = encode(embedding, graph, model, layers, eps, contrast_layer,
                              perturbed=model == "xsimgcl", noise=noise, symmetric_backward=symmetric_backward)
     user, positive, negative = final[users], final[positives], final[negatives]
-    loss = F.softplus((user * negative).sum(1) - (user * positive).sum(1)).mean()
+    bpr = F.softplus((user * negative).sum(1) - (user * positive).sum(1)).mean()
     # Shared raw-embedding L2 protocol across models; record this recipe choice.
     penalty = sum(embedding[index].square().sum() for index in [users, positives, negatives])
-    loss = loss + regularization * penalty / (2 * len(users))
-    if model == "xsimgcl":
+    reg = regularization * penalty / (2 * len(users))
+    contrastive = bpr.new_zeros(())
+    if model == "xsimgcl" and cl_weight != 0:
         uids, iids = torch.unique(users), torch.unique(positives)
-        loss = loss + cl_weight * (
+        contrastive = (
             info_nce(final[uids], contrast[uids], temperature)
             + info_nce(final[iids], contrast[iids], temperature)
         )
+    loss = bpr + reg + cl_weight * contrastive
+    if return_components:
+        return loss, {"bpr": bpr.detach(), "cl_raw": contrastive.detach(), "regularization": reg.detach()}
     return loss
 
 
@@ -138,7 +142,7 @@ def deterministic_topk(scores, k):
 
 
 @torch.inference_mode()
-def full_catalog_topk(embedding, user_ids, n_users, seen_uid, seen_iid, k=100, batch_size=512):
+def full_catalog_topk(embedding, user_ids, n_users, seen_uid, seen_iid, k=100, batch_size=512, return_scores=False):
     """Exact all-item scoring/top-k on GPU, bounded by a user batch.
 
     Embeddings remain on GPU. Small history indices and final top-k IDs cross
@@ -154,6 +158,7 @@ def full_catalog_topk(embedding, user_ids, n_users, seen_uid, seen_iid, k=100, b
     if np.any(embedding.shape[0] - n_users - counts[user_ids] < k):
         raise ValueError("An evaluated user has fewer than k unseen candidates.")
     output = np.empty((len(user_ids), k), dtype=np.int32)
+    selected_scores = np.empty((len(user_ids), k), dtype=np.float32) if return_scores else None
     item_embeddings = embedding[n_users:].T
     for start in range(0, len(user_ids), batch_size):
         batch = user_ids[start:start + batch_size]
@@ -167,4 +172,6 @@ def full_catalog_topk(embedding, user_ids, n_users, seen_uid, seen_iid, k=100, b
                    torch.as_tensor(history.astype(np.int64), device=scores.device)] = -torch.inf
         selected = deterministic_topk(scores, k)
         output[start:start + len(batch)] = selected.cpu().numpy().astype(np.int32)
-    return output
+        if return_scores:
+            selected_scores[start:start + len(batch)] = scores.gather(1, selected).cpu().numpy()
+    return (output, selected_scores) if return_scores else output

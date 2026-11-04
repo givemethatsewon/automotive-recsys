@@ -3,6 +3,7 @@
 Credentials are isolated from other gcloud/MCP workflows and from the Git repo.
 """
 
+import argparse
 import os
 from pathlib import Path
 import re
@@ -12,9 +13,12 @@ import sys
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--drive", action="store_true", help="Authorize the experiment's file-scoped Drive backup separately")
+    args = parser.parse_args()
     os.umask(0o077)
     root = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
-    config = root / "automotive-recsys" / "colab" / "gcloud"
+    config = root / "automotive-recsys" / ("drive" if args.drive else "colab") / "gcloud"
     config.mkdir(parents=True, exist_ok=True, mode=0o700)
     config.chmod(0o700)
     command = shutil.which("gcloud")
@@ -23,10 +27,10 @@ def main():
     scopes = ",".join([
         "openid", "https://www.googleapis.com/auth/cloud-platform",
         "https://www.googleapis.com/auth/userinfo.email",
-        "https://www.googleapis.com/auth/colaboratory",
+        "https://www.googleapis.com/auth/drive.file" if args.drive else "https://www.googleapis.com/auth/colaboratory",
     ])
     environment = os.environ | {"CLOUDSDK_CONFIG": str(config)}
-    print("Opening Google sign-in in your browser. Select the account holding your Colab compute units.", flush=True)
+    print("Opening Google sign-in. Authorize file-scoped experiment backups on your Drive." if args.drive else "Opening Google sign-in in your browser. Select the account holding your Colab compute units.", flush=True)
     process = subprocess.Popen(
         [command, "auth", "application-default", "login", f"--scopes={scopes}", "--disable-quota-project"],
         env=environment, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
@@ -47,7 +51,7 @@ def main():
                 file.chmod(0o600)
     if status:
         raise SystemExit(status)
-    print("Colab CLI credentials saved with owner-only permissions outside the project.", flush=True)
+    print("Drive backup credentials saved separately with owner-only permissions." if args.drive else "Colab CLI credentials saved with owner-only permissions outside the project.", flush=True)
 
 
 if __name__ == "__main__":

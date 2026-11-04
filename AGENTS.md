@@ -99,8 +99,19 @@ scripts/colab.sh new -s automotive-pilot --gpu L4
 - `best.pt`는 valid로 고른 checkpoint, `last.pt`는 재시작용이다. test 점수로 epoch·seed·모델·재정렬 계수를 선택하지 않는다.
 - 작은 pilot·성능 benchmark·실패/중단 실행은 최종 모델 성능표에서 분리한다. 가설과 반대인 결과도 보존한다.
 - 50 epoch는 시작 예산이다. valid 수렴 곡선에 근거해 조정하며, 수렴했다고 미리 단정하지 않는다.
-- 현재 학습기는 valid만 평가한다. **최종 test evaluator, 전체 실행 집계/불확실성 분석, 추천 score 저장, 장기 checkpoint 외부 회수**는 본실험 전에 보완해야 한다.
+- `evaluate_run.py`의 독립 test evaluator, seed 집계/paired bootstrap, 추천 score·item exposure·Tail Recall, 불변 세대 기반 Drive 회수를 구현했다. 실제 운용 상태는 [DURABLE_EXPERIMENTS](docs/DURABLE_EXPERIMENTS.md)와 Drive `progress.json`에서 확인한다. 구현 완료와 실제 본실험 완료를 구분한다.
 - 차종·상품 텍스트는 아직 제공 폴더에 없다. 이 정보가 필요 없는 모델 비교를 먼저 수행할 수 있다. 특징 파일이 오면 원래 ID로 join하고 출처·시점·unknown 처리를 기록한다.
 - 사용자 차종 추출에 valid/test 리뷰를 사용하지 않는다. unknown을 호환/불일치로 단정하지 않고 coverage와 함께 보고한다.
 - 차종 가점에 쓴 정보로 측정한 mismatch 감소는 독립적인 효과 검증이 아니다. 같은 사용자 집합에서 NDCG 변화와 추출 품질을 함께 확인한다.
 - 데이터·사용자별 추천·checkpoint·실행 token·개인 자료는 Git에 넣지 않는다. 버전 관리에는 코드·설정·문서와 필요한 집계표만 포함한다.
+
+## 자동 본실험과 진행 로그
+
+- [DURABLE_EXPERIMENTS](docs/DURABLE_EXPERIMENTS.md)의 인증·예산·32개 작업·저장 계약을 따른다. 본 모델은 3 seeds, Popularity는 1회다. 최대 100 epoch와 valid early stopping은 수렴 보장이 아니다.
+- Drive OAuth는 `~/.config/automotive-recsys/drive/gcloud/`에 별도로 보관한다. 기존 Colab 로그인과 분리하며 `drive.file`을 사용한다. credential은 source/data bundle·Drive·log·notebook에 넣지 않는다.
+- `scripts/experiment.py prepare`로 입력/source snapshot과 plan을 확인하고 `scripts/colab_campaign.py --background`로 제어한다. 실제 Drive upload/download/hash·checkpoint 재개 확인 후 본실험을 시작한다.
+- 학습 이벤트는 JSONL, epoch/최종 표는 CSV, 진행 상황은 `progress.txt`/JSON으로 남긴다. progress는 모델/variant/seed/epoch/step/best valid/마지막 검증된 Drive 저장 시각과 완료 작업 수를 반드시 포함한다.
+- 체크포인트 이름과 resume artifacts는 내용 hash가 붙은 불변 파일이다. 전송 확인 후 `restore.json`을 갱신하고 두 세대가 참조하는 파일은 삭제하지 않는다. 삭제는 이 캠페인의 manifest가 가리키고 hash가 일치하는 생성 파일에만 수행한다.
+- CU 잔액/소모율을 worker도 확인하고 완료/실패/중단 시 자기 VM을 반납한다. 계정 감소 100 CU 또는 잔액 30 CU가 초기 중단 기준이다. 다른 세션의 비용과 합산될 수 있음을 명시한다.
+- 단일 학습 작업 감시용 Codex 자동화를 만들지 않는다. LLM이 수시간 로그를 반복해서 읽지 않도록 worker와 가벼운 controller가 저장·복구·보고서를 담당한다. 맥이 꺼져도 원격 실행은 계속되지만 VM 재할당에는 켜진 controller가 필요하다.
+- 살아 있는 worker를 WebSocket 단절만으로 중복 실행하지 않는다. 자동 재할당은 최대 6회 worker이며 다른 세션은 종료하지 않는다. completed marker는 plan hash를 대조한 뒤 재사용한다.

@@ -12,7 +12,7 @@ Amazon Reviews 2023 Automotive의 전처리된 5-core 데이터를 사용한다.
 - 인기순 추천의 검증 집합 전체 평가: 사용자 220,516명, 상품 후보 248,186개.
 - NDCG@10 **0.00197863**, Recall@10 **0.00349243**, APLT@10 **0.0**.
 - 사용자별 지표, 그룹별 집계, 사용자별 상위 100개 추천 저장.
-- 지표·GPU 수식·이미 본 상품 제외·경계 동점·음성 추출 테스트 11개 통과.
+- 지표·GPU 수식·이미 본 상품 제외·경계 동점·음성 추출·실험 기록/복구/집계 테스트를 제공한다.
 - M3 Max 로컬 GPU 연산 점검 기록을 보관했다. 사용자의 선택에 따라 실제 학습은 Colab GPU에서 진행한다.
 - Colab CLI 0.7.5 설치 및 전용 브라우저 인증 완료. [Colab 실행 방법](docs/COLAB.md).
 - 세 모델 모두 전체 train 1 epoch·전체 valid 평가·optimizer/RNG 체크포인트 재시작 검사 통과.
@@ -20,7 +20,8 @@ Amazon Reviews 2023 Automotive의 전처리된 5-core 데이터를 사용한다.
 
 현재 점수는 **검증(valid)** 결과다. 테스트(test) 최종 평가는 아직 실행하지 않았다.
 BPR-MF·LightGCN·XSimGCL의 CUDA 학습기와 한 epoch pilot은 구현·검증했다.
-설정 탐색과 50 epoch/seed 반복은 아직 수행하지 않았으며 pilot 점수를 최종 모델 비교에 사용하지 않는다.
+설정 탐색과 seed 42·43·44 본실험의 자동 실행·Drive 복구·JSONL/CSV 진행 기록·최종 보고서 생성을 구현했다.
+운용 절차와 실제 검증 상태는 [Drive 본실험 안내](docs/DURABLE_EXPERIMENTS.md)를 참고한다. pilot 점수를 최종 모델 비교에 사용하지 않는다.
 
 ## 실행
 

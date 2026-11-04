@@ -19,7 +19,9 @@ def build_bundle():
     staging.mkdir(parents=True, exist_ok=True)
     files = [(path, path.relative_to(root).as_posix()) for path in sorted((root / "src").rglob("*.py"))]
     files += [(path, path.relative_to(root).as_posix()) for path in sorted((root / "tests").glob("*.py"))]
-    files += [(root / "scripts" / "benchmark_local.py", "scripts/benchmark_local.py")]
+    files += [(path, path.relative_to(root).as_posix()) for path in sorted((root / "scripts").iterdir()) if path.suffix in {".py", ".sh"}]
+    files += [(root / name, name) for name in ["pyproject.toml", "uv.lock", "AGENTS.md"]]
+    files += [(path, path.relative_to(root).as_posix()) for path in sorted((root / "docs").glob("*.md"))]
     files += [(path, f"data/{path.name}") for path in sorted((root / "data").iterdir()) if path.suffix in {".parquet", ".json", ".txt"}]
     files += [(root / "results/popularity_valid/metrics.json", "reference/popularity_valid_metrics.json")]
     archive = staging / "input.tar"
