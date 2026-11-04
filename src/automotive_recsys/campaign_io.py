@@ -91,7 +91,7 @@ class DurableRun:
         for path in sorted(self.output.rglob("*")):
             if path.is_file() and path.suffix in {".json", ".jsonl", ".csv", ".parquet", ".npz"}:
                 relative = path.relative_to(self.output).as_posix()
-                destination = ("snapshots/" + checksums(path)["sha256"] + "/" if immutable else "") + relative
+                destination = (Path("snapshots") / Path(relative).parent / (checksums(path)["sha256"] + "-" + path.name)).as_posix() if immutable else relative
                 metadata = self.store.put(path, self.prefix + "/" + destination)
                 artifacts.append({"relative": relative, "id": metadata["id"], "sha256": metadata["sha256"]})
         return artifacts

@@ -65,6 +65,35 @@ try:
     sys.path.insert(0, str(root / "src"))
     import torch
     assert torch.cuda.is_available(), "CUDA required"
+    # Before the study, prove that a real optimizer/RNG checkpoint survives a
+    # Drive round trip into a separate output directory and continues training.
+    if not store.get_json("preflight/verified.json"):
+        from automotive_recsys.campaign_io import CampaignJournal, DurableRun
+        from automotive_recsys.train_gpu import run_training
+        journal = CampaignJournal(root / "results/preflight_journal", store, CONFIG["plan"], CONFIG["worker"], budget_guard)
+        run_id = "preflight_bpr_mf_seed42"
+        first = root / "results/preflight_source"
+        durable = DurableRun(journal, run_id, first)
+        previous = durable.restore()
+        if previous is None:
+            run_training(root / "data", first, "bpr_mf", epochs=1, eval_every=1,
+                         verify_resume=True, save_recommendations=False, event_hook=durable.hook,
+                         run_metadata={"purpose": "external checkpoint recovery preflight"})
+        recovered = root / "results/preflight_recovered"
+        durable = DurableRun(journal, run_id, recovered)
+        checkpoint = durable.restore()
+        assert checkpoint is not None, "No committed external checkpoint"
+        verified = run_training(root / "data", recovered, "bpr_mf", epochs=2, eval_every=1,
+                                resume=checkpoint, verify_resume=True, save_recommendations=False,
+                                event_hook=durable.hook, run_metadata={"purpose": "external checkpoint recovery preflight"})
+        assert verified["completed_epochs"] == 2 and verified["resume_check"]["passed"]
+        durable.completed(verified)
+        store.put_json({"passed": True, "plan_hash": CONFIG["plan"]["metadata"]["source_manifest_sha256"],
+                        "external_restore_then_epoch": 2, "optimizer_rng_replay": verified["resume_check"],
+                        "worker": CONFIG["worker"]}, "preflight/verified.json", root / "transfer")
+        for folder in [first, recovered]:
+            for name in ["last.pt", "best.pt"]: (folder / name).unlink(missing_ok=True)
+        print("Verified external Drive restore and epoch-2 continuation.", flush=True)
     from automotive_recsys.campaign import run_campaign
     result = run_campaign(root, DRIVE_CREDENTIAL, CONFIG["root_id"], CONFIG["plan"], CONFIG["worker"], guard=budget_guard)
     status = result["status"]
