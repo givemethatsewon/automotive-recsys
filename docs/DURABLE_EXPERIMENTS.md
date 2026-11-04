@@ -76,6 +76,15 @@ Drive에 새 비공개 프로젝트 폴더를 만들고 URL을 `results/campaign
 
 2026-11-05 작은 테스트 19개 통과. 새 loss/평가 기록 경로로 실제 L4에서 세 모델의 전체 train 한 epoch·전체 valid·optimizer/RNG replay를 다시 통과했다. train 시간은 BPR 16.52초 / LightGCN 54.48초 / XSimGCL 114.12초, 확장된 전체 valid 집계는 약 9.7–10.2초였다. 시험 결과/로그를 회수하고 VM을 종료했으며 잔액 174.93 CU·활성 0개를 확인했다. 이 pilot은 최종 test 결과가 아니다. 이후 진행 이벤트/환경 metadata 필드의 변경은 수학·optimizer를 바꾸지 않았다.
 
-Drive 인증 완료 후 실제 upload/download/hash 대조와 별도 출력 디렉터리에서 재개를 확인해야 본실험을 시작한다. 차종·텍스트 특징은 미제공이므로 해당 실험은 미실시로 남긴다.
+2026-11-05 실제 Drive upload/download의 MD5·SHA-256 검증, 두 세대 보관/이전 세대 정리, 별도 출력 폴더 복원을 통과했다. L4에서 실제 BPR checkpoint를 외부 저장 후 내려받아 epoch 2를 이어 학습했고, optimizer/RNG replay의 최대 파라미터 차이는 이번 검사에서 0이었다. 이는 이 실행의 관측값이며 일반적인 bitwise 재현 보장은 아니다. 차종·텍스트 특징은 미제공이므로 해당 실험은 미실시로 남긴다.
 
 worker 시작 시 별도 preflight로 BPR 1 epoch의 실제 optimizer/RNG checkpoint를 Drive에 보관하고 다른 출력 폴더로 내려받아 epoch 2를 이어 학습한다. 복원 후 optimizer/RNG update replay까지 통과해야 본실험을 실행한다. 이 preflight는 32개 본 작업/최종 성능표에 포함하지 않고 `preflight/verified.json`으로 구분한다.
+
+## 2026-11-05 본실험 시작 기록
+
+- ID: `automotive-20261104T204146Z` (ID의 날짜는 UTC, 한국 날짜는 11월 5일).
+- 고정 실행 소스 commit: `060f5a312a15f9a4469452bb6637b09ec792a4b6`, 입력 51개 파일의 SHA 확인.
+- worker: `auto-20261104t204146z-1`, NVIDIA L4. 시작 시각 한국 05:49.
+- Drive: [실험 폴더](https://drive.google.com/drive/folders/1IBQzFgM2ZDR-zz4mgwk6BjIf6c9pRwmx), [현재 진행 로그](https://drive.google.com/file/d/1THXOtfc99Ps6u-YS5pURLUb2GhnE73vo/view).
+- 외부 checkpoint 재개 preflight 통과 후 `popularity_valid` 본실험 단계 진입을 확인했다. 이 기록은 시작 사실이며 32개 작업/최종 test 평가 완료를 뜻하지 않는다. 최신 상태는 Drive progress를 읽는다.
+- local controller PID/log는 `results/campaigns/automotive-20261104T204146Z/`에서 관리한다. 결과 완료 시 같은 경로의 `report/`에 CSV/PNG/HTML/Markdown을 내려받는다.
