@@ -26,6 +26,9 @@ def run_campaign(root, credential_file, root_id, plan, identity="colab", guard=N
 
     def load_completed(job):
         record = store.get_json(f"runs/{job['run_id']}/completed.json")
+        if not record:
+            candidate = store.get_json(f"runs/{job['run_id']}/restore.json")
+            if candidate and candidate.get("status") == "completed": record = candidate
         if record:
             if record["summary"]["campaign_plan_hash"] != plan_hash(plan): raise ValueError("Completed run belongs to a different plan.")
             return record
@@ -125,7 +128,9 @@ def run_campaign(root, credential_file, root_id, plan, identity="colab", guard=N
         return {"status": "paused"}
     except Exception as error:
         journal.state["status"] = "failed"
-        journal.log("worker_failed", {"type": type(error).__name__, "message": str(error).splitlines()[0][:350]})
+        journal.log("worker_failed", {"type": type(error).__name__, "stage": journal.state.get("stage"),
+                    "locations": [{"file": Path(frame.filename).name, "line": frame.lineno, "function": frame.name}
+                                  for frame in traceback.extract_tb(error.__traceback__)[-6:]]})
         journal.progress("failed", force=True, check_control=False)
         journal.sync_small()
         raise
