@@ -113,10 +113,11 @@ def control(config):
         state["workers"].append(item); save()
         try:
             call("exec", "-s", worker, "--timeout", 120, "-f", ROOT / "scripts/colab_campaign_init.py")
-            call("install", "-s", worker, "numpy>=2.2,<3", "polars>=1.30,<2", "matplotlib>=3.10,<4", "google-api-python-client==2.201.0", "google-colab-cli==0.7.5", timeout=900)
+            call("exec", "-s", worker, "--timeout", 900, "-f", ROOT / "scripts/colab_campaign_env.py", timeout=960)
             call("upload", "-s", worker, ROOT / "src/automotive_recsys/drive_store.py", "/content/automotive-bootstrap/drive_store.py")
             call("upload", "-s", worker, ROOT / "scripts/operational_io.py", "/content/automotive-bootstrap/operational_io.py")
             call("upload", "-s", worker, ROOT / "src/automotive_recsys/controller_policy.py", "/content/automotive-bootstrap/runtime_policy.py")
+            call("upload", "-s", worker, ROOT / "scripts/colab_campaign_entry.py", "/content/automotive-bootstrap/campaign-worker.py")
             # Credentials travel separately over the authenticated runtime channel.
             # They never enter a source/data bundle or the Drive output folder.
             call("upload", "-s", worker, DRIVE_CREDENTIAL, "/content/.automotive-private/drive.json")
@@ -128,7 +129,7 @@ def control(config):
             handoff.write_text(json.dumps(remote_config)); os.chmod(handoff, 0o600)
             call("upload", "-s", worker, handoff, "/content/.automotive-private/worker.json")
             stream = (directory / f"{worker}.log").open("a")
-            process = subprocess.Popen([str(ROOT / "scripts/colab.sh"), "exec", "-s", worker, "--timeout", "259200", "-f", str(ROOT / "scripts/colab_campaign_entry.py")], cwd=ROOT, stdout=stream, stderr=subprocess.STDOUT, start_new_session=True)
+            process = subprocess.Popen([str(ROOT / "scripts/colab.sh"), "exec", "-s", worker, "--timeout", "259200", "-f", str(ROOT / "scripts/colab_campaign_launcher.py")], cwd=ROOT, stdout=stream, stderr=subprocess.STDOUT, start_new_session=True)
             item["exec_pid"] = process.pid; save()
             log("Started " + worker + "; heavy work runs on its CUDA device.")
             record_controller("running")

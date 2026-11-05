@@ -49,6 +49,8 @@ def budget_guard(journal):
 
 
 try:
+    environment_manifest=Path("/content/automotive-bootstrap/kernel_environment.json")
+    if environment_manifest.exists(): store.put(environment_manifest,f"workers/{CONFIG['worker']}/kernel_environment.json")
     store.put_json({"worker": CONFIG["worker"], "started_at": time.time(), "controller_revision": CONFIG.get("controller_revision"),
                     "entry_sha256": CONFIG.get("entry_sha256")}, f"workers/{CONFIG['worker']}/started.json", root / "transfer")
     upload = Path("/content/automotive-input"); upload.mkdir(exist_ok=True)
