@@ -93,8 +93,12 @@ def control(config):
         worker = f"auto-{config['campaign_id'].removeprefix('automotive-').lower()}-{len(state['workers'])+1}"
         before = {entry.endpoint for entry in client.list_assignments()}
         error = None
-        try: call("new", "-s", worker, "--gpu", config["gpu"], timeout=240)
-        except (subprocess.SubprocessError, OSError) as caught: error = caught
+        cached = states.get(worker)
+        if cached and cached.endpoint in before:
+            log("Recovered an existing named allocation before issuing another request.")
+        else:
+            try: call("new", "-s", worker, "--gpu", config["gpu"], timeout=240)
+            except (subprocess.SubprocessError, OSError) as caught: error = caught
         # Reconcile the server before any allocation retry.
         after = {entry.endpoint for entry in client.list_assignments()}
         session = states.get(worker)

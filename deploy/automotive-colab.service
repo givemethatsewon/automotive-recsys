@@ -10,6 +10,7 @@ WorkingDirectory=%h/git/automotive-recsys
 ExecStart=%h/git/automotive-recsys/.venv/bin/python -u %h/git/automotive-recsys/scripts/colab_campaign.py --config %h/git/automotive-recsys/results/campaigns/current.json
 Restart=on-failure
 RestartSec=60
+KillMode=process
 UMask=0077
 Environment=COLAB_CLI_REQUEST_TIMEOUT=120
 MemoryMax=1G
