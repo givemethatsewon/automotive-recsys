@@ -135,9 +135,9 @@ def control(config):
                 states.add(connection.model_copy(update={"session_id": None}))
             stream = (directory / f"{worker}.log").open("a")
             process = subprocess.Popen([str(ROOT / "scripts/colab.sh"), "exec", "-s", worker, "--timeout", "259200", "-f", str(ROOT / "scripts/colab_campaign_launcher.py")], cwd=ROOT, stdout=stream, stderr=subprocess.STDOUT, start_new_session=True)
-            item["exec_pid"] = process.pid; save()
-            log("Started " + worker + "; heavy work runs on its CUDA device.")
-            record_controller("running")
+            item["exec_pid"] = process.pid; item["launched_at"] = datetime.now(timezone.utc).isoformat(); save()
+            log("Launch request sent for " + worker + "; awaiting remote acknowledgement.")
+            record_controller("awaiting_worker")
             return item
         except Exception:
             stop(item)
@@ -200,10 +200,10 @@ def control(config):
                 # Losing an exec websocket is not evidence that the kernel stopped.
                 # An assigned worker is never duplicated or killed just for a stale log.
                 (directory / "latest_progress.json").write_text(json.dumps(progress, ensure_ascii=False, indent=2) + "\n")
-                record_controller("running")
                 started = store.get_json(f"workers/{current['worker']}/started.json")
-                age = (datetime.now(timezone.utc) - datetime.fromisoformat(current["started_at"])).total_seconds()
-                if not started and age > 900:
+                record_controller("running" if started else "awaiting_worker")
+                age = (datetime.now(timezone.utc) - datetime.fromisoformat(current.get("launched_at", current["started_at"]))).total_seconds()
+                if not started and age > 180:
                     stop(current)
                     control = store.get_json("control.json", {})
                     if control.get("reason") == "operational_upgrade":
