@@ -29,6 +29,3 @@ colab = [
 dev = [
     "pypdf>=6.21.4",
 ]
-
-[tool.uv]
-override-dependencies = ["jupyter-kernel-client==1.0.2"]
