@@ -111,8 +111,13 @@ except Exception as error:
     # Avoid printing HTTP exception URLs or credential-related diagnostics.
     print("Worker ended with " + type(error).__name__ + "; inspect private progress artifacts.", flush=True)
     try:
+        from runtime_policy import transient_network_error
+        retryable = transient_network_error(error)
+    except ImportError: retryable = False
+    try:
+        store = DriveStore(DRIVE_CREDENTIAL, CONFIG["root_id"])
         progress = store.get_json("progress.json", {})
-        progress.update(status="failed", worker=CONFIG["worker"], error_type=type(error).__name__)
+        progress.update(status="failed", worker=CONFIG["worker"], error_type=type(error).__name__, retryable_failure=retryable)
         store.put_json(progress, "progress.json", root / "transfer")
     except Exception: pass
 finally:

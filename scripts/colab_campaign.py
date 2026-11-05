@@ -111,6 +111,7 @@ def control(config):
             call("install", "-s", worker, "numpy>=2.2,<3", "polars>=1.30,<2", "matplotlib>=3.10,<4", "google-api-python-client==2.201.0", "google-colab-cli==0.7.5", timeout=900)
             call("upload", "-s", worker, ROOT / "src/automotive_recsys/drive_store.py", "/content/automotive-bootstrap/drive_store.py")
             call("upload", "-s", worker, ROOT / "scripts/operational_io.py", "/content/automotive-bootstrap/operational_io.py")
+            call("upload", "-s", worker, ROOT / "src/automotive_recsys/controller_policy.py", "/content/automotive-bootstrap/runtime_policy.py")
             # Credentials travel separately over the authenticated runtime channel.
             # They never enter a source/data bundle or the Drive output folder.
             call("upload", "-s", worker, DRIVE_CREDENTIAL, "/content/.automotive-private/drive.json")
@@ -156,9 +157,9 @@ def control(config):
             if progress.get("status") in {"paused", "failed"}:
                 control = store.get_json("control.json", {})
                 cost = snapshot_cost()
-                if progress.get("status") == "paused" and control.get("reason") == "operational_upgrade":
+                if control.get("reason") == "operational_upgrade" or (progress.get("retryable_failure") and not control.get("stop_requested")):
                     if current: stop(current)
-                    control.update(stop_requested=False, reason="operational_upgrade_completed")
+                    control.update(stop_requested=False, reason="recovering_retryable_worker")
                     store.put_json(control, "control.json", directory / "staging")
                     progress.update(status="resuming", stage="resuming_after_upgrade")
                     store.put_json(progress, "progress.json", directory / "staging")
