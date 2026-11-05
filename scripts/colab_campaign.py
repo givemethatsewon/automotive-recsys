@@ -114,6 +114,12 @@ def control(config):
         try:
             call("exec", "-s", worker, "--timeout", 120, "-f", ROOT / "scripts/colab_campaign_init.py")
             call("exec", "-s", worker, "--timeout", 900, "-f", ROOT / "scripts/colab_campaign_env.py", timeout=960)
+            receipt = directory / "staging" / (worker + "-environment.json")
+            receipt.parent.mkdir(exist_ok=True); receipt.unlink(missing_ok=True)
+            call("download", "-s", worker, "/content/automotive-bootstrap/kernel_environment.json", receipt)
+            prepared = json.loads(receipt.read_text())
+            if not prepared.get("unchanged") or not prepared.get("cuda_verified"):
+                raise RuntimeError("Remote environment readiness check failed.")
             call("upload", "-s", worker, ROOT / "src/automotive_recsys/drive_store.py", "/content/automotive-bootstrap/drive_store.py")
             call("upload", "-s", worker, ROOT / "scripts/operational_io.py", "/content/automotive-bootstrap/operational_io.py")
             call("upload", "-s", worker, ROOT / "src/automotive_recsys/controller_policy.py", "/content/automotive-bootstrap/runtime_policy.py")
