@@ -128,6 +128,11 @@ def control(config):
             handoff = directory / "staging/worker.json"; handoff.parent.mkdir(exist_ok=True)
             handoff.write_text(json.dumps(remote_config)); os.chmod(handoff, 0o600)
             call("upload", "-s", worker, handoff, "/content/.automotive-private/worker.json")
+            connection = states.get(worker)
+            if connection:
+                # A new frontend identity attaches to the same kernel; kernel
+                # variables/data survive without reusing a closed WS session.
+                states.add(connection.model_copy(update={"session_id": None}))
             stream = (directory / f"{worker}.log").open("a")
             process = subprocess.Popen([str(ROOT / "scripts/colab.sh"), "exec", "-s", worker, "--timeout", "259200", "-f", str(ROOT / "scripts/colab_campaign_launcher.py")], cwd=ROOT, stdout=stream, stderr=subprocess.STDOUT, start_new_session=True)
             item["exec_pid"] = process.pid; save()
