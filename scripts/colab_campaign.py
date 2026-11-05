@@ -82,6 +82,7 @@ def control(config):
                  "account_delta_cu": state["initial_balance_cu"] - usage.paid_compute_units_balance,
                  "account_rate_cu_hour": usage.consumption_rate_hourly,
                  "effective_budget_cu": effective_budget(config["plan"], control),
+                 "stop_requested": bool(control.get("stop_requested")), "stop_reason": control.get("reason"),
                  "note": "Account-level observations include any other concurrent Colab usage; no fabricated per-run CU attribution."}
         store.put_json(value, "account_cost.json", directory / "staging")
         (directory / "account_cost.json").write_text(json.dumps(value, indent=2) + "\n")
@@ -173,6 +174,10 @@ def control(config):
                 snapshot_cost(); log("Worker " + progress["status"] + "; verified Drive results retained.")
                 record_controller(progress["status"]); return
             cost = snapshot_cost()
+            if cost["stop_requested"] and cost["stop_reason"] != "operational_upgrade" and (not current or current["endpoint"] not in active):
+                progress.update(status="paused", stage="user_pause_without_active_runtime")
+                store.put_json(progress, "progress.json", directory / "staging")
+                record_controller("paused"); return
             if cost["current_balance_cu"] <= config["plan"]["minimum_balance"] or cost["account_delta_cu"] >= cost["effective_budget_cu"]:
                 store.put_json({"stop_requested": True, "reason": "compute_unit_budget"}, "control.json", directory / "staging")
                 log("Compute limit reached; worker will pause at its next control check.")
@@ -190,9 +195,13 @@ def control(config):
                 age = (datetime.now(timezone.utc) - datetime.fromisoformat(current["started_at"])).total_seconds()
                 if not started and age > 900:
                     stop(current)
-                    store.put_json(progress | {"status": "failed", "error_type": "WorkerDidNotStart"}, "progress.json", directory / "staging")
-                    log("Released a worker that never acknowledged entry; inspect its log before resuming.")
-                    return
+                    control = store.get_json("control.json", {})
+                    if control.get("reason") == "operational_upgrade":
+                        control.update(stop_requested=False, reason="recovering_bootstrap")
+                        store.put_json(control, "control.json", directory / "staging")
+                    store.put_json(progress | {"status": "resuming", "stage": "recovering_bootstrap", "error_type": "WorkerDidNotStart"}, "progress.json", directory / "staging")
+                    log("Released a worker that never acknowledged entry; applying the bounded recovery policy.")
+                    continue
             network_failures = 0
         except RecoveryLimitReached:
             mark_interrupted("six_consecutive_workers_without_durable_progress")
