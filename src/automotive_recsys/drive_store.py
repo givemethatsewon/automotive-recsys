@@ -19,12 +19,13 @@ def checksums(path):
 class DriveStore:
     fields = "id,name,size,md5Checksum,webViewLink,modifiedTime,appProperties,parents"
 
-    def __init__(self, credential_file, root_id=None):
+    def __init__(self, credential_file, root_id=None, chunk_bytes=64 << 20):
         from google.oauth2.credentials import Credentials
         from googleapiclient.discovery import build
         self.credentials = Credentials.from_authorized_user_file(str(credential_file))
         self.service = build("drive", "v3", credentials=self.credentials, cache_discovery=False)
         self.root_id = root_id
+        self.chunk_bytes = chunk_bytes
         self.folders = {"": root_id} if root_id else {}
 
     def create_root(self, name):
@@ -78,7 +79,7 @@ class DriveStore:
         existing = self.find(relative)
         if existing and existing.get("md5Checksum") == checksum["md5"] and int(existing.get("size", -1)) == checksum["bytes"]:
             return existing | checksum
-        media = MediaFileUpload(str(source), resumable=True, chunksize=8 << 20)
+        media = MediaFileUpload(str(source), resumable=True, chunksize=self.chunk_bytes)
         body = {"name": name, "appProperties": {"sha256": checksum["sha256"]}}
         if existing:
             request = self.service.files().update(fileId=existing["id"], body=body, media_body=media, fields=self.fields)
@@ -111,7 +112,7 @@ class DriveStore:
         temporary = destination.with_suffix(destination.suffix + ".download")
         with temporary.open("wb") as stream:
             request = self.service.files().get_media(fileId=file_id)
-            download = MediaIoBaseDownload(stream, request, chunksize=8 << 20)
+            download = MediaIoBaseDownload(stream, request, chunksize=self.chunk_bytes)
             finished = False
             while not finished: _, finished = download.next_chunk(num_retries=5)
         if expected_sha256 and checksums(temporary)["sha256"] != expected_sha256:

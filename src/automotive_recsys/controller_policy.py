@@ -1,5 +1,16 @@
 """Bound unsuccessful recovery without counting productive runtime renewals."""
 import re
+import math
+
+
+def effective_budget(plan, control):
+    value = float(control.get("cu_budget", plan["cu_budget"]))
+    if not math.isfinite(value) or value <= 0: raise ValueError("Invalid operational CU budget")
+    return value
+
+
+def owner_matches(config, owner):
+    return not owner or config.get("controller_id") == owner.get("controller_id")
 
 
 def progress_token(progress, previous=None):

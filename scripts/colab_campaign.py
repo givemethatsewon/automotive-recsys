@@ -2,16 +2,19 @@
 import argparse
 from datetime import datetime, timezone
 import fcntl
+import hashlib
 import json
 import os
 from pathlib import Path
 import subprocess
+import shutil
+import socket
 import sys
 import time
 
 from experiment import ROOT, PRIVATE, DRIVE_CREDENTIAL, load_config
 from automotive_recsys.drive_store import DriveStore
-from automotive_recsys.controller_policy import progress_token, unsuccessful_workers, transient_network_error
+from automotive_recsys.controller_policy import progress_token, unsuccessful_workers, transient_network_error, effective_budget, owner_matches
 from colab_cli.client import Client, Prod
 from colab_cli.state import StateStore
 from google.auth.transport.requests import AuthorizedSession
@@ -32,6 +35,9 @@ def control(config):
     except BlockingIOError: raise SystemExit("A controller already owns this campaign.")
     (directory / "controller.pid").write_text(str(os.getpid()) + "\n")
     store = DriveStore(DRIVE_CREDENTIAL, config["root_id"])
+    if not owner_matches(config, store.get_json("controller_owner.json")):
+        print("This campaign belongs to another controller host; no VM action taken.", flush=True)
+        return
     client = Client(Prod(), AuthorizedSession(Credentials.from_authorized_user_file(str(COLAB_CREDENTIAL))))
     states = StateStore(str(STATE_FILE))
     worker_path = directory / "controller_state.json"
@@ -44,6 +50,7 @@ def control(config):
     def record_controller(status, reason=None):
         value = {"status": status, "reason": reason, "updated_at": datetime.now(timezone.utc).isoformat(),
                  "recovery_limit": "6 consecutive workers without durable progress", "workers_started": len(state["workers"]),
+                 "host": socket.gethostname(), "controller_id": config.get("controller_id"),
                  "last_progress_token": state.get("last_progress_token")}
         (directory / "controller_status.json").write_text(json.dumps(value, indent=2) + "\n")
         try: store.put_json(value, "controller_status.json", directory / "staging")
@@ -69,10 +76,12 @@ def control(config):
         states.remove(worker["worker"])
     def snapshot_cost():
         usage = client.get_consumption_user_info()
+        control = store.get_json("control.json", {})
         value = {"time": datetime.now(timezone.utc).isoformat(), "initial_balance_cu": state["initial_balance_cu"],
                  "current_balance_cu": usage.paid_compute_units_balance,
                  "account_delta_cu": state["initial_balance_cu"] - usage.paid_compute_units_balance,
                  "account_rate_cu_hour": usage.consumption_rate_hourly,
+                 "effective_budget_cu": effective_budget(config["plan"], control),
                  "note": "Account-level observations include any other concurrent Colab usage; no fabricated per-run CU attribution."}
         store.put_json(value, "account_cost.json", directory / "staging")
         (directory / "account_cost.json").write_text(json.dumps(value, indent=2) + "\n")
@@ -101,11 +110,14 @@ def control(config):
             call("exec", "-s", worker, "--timeout", 120, "-f", ROOT / "scripts/colab_campaign_init.py")
             call("install", "-s", worker, "numpy>=2.2,<3", "polars>=1.30,<2", "matplotlib>=3.10,<4", "google-api-python-client==2.201.0", "google-colab-cli==0.7.5", timeout=900)
             call("upload", "-s", worker, ROOT / "src/automotive_recsys/drive_store.py", "/content/automotive-bootstrap/drive_store.py")
+            call("upload", "-s", worker, ROOT / "scripts/operational_io.py", "/content/automotive-bootstrap/operational_io.py")
             # Credentials travel separately over the authenticated runtime channel.
             # They never enter a source/data bundle or the Drive output folder.
             call("upload", "-s", worker, DRIVE_CREDENTIAL, "/content/.automotive-private/drive.json")
             call("upload", "-s", worker, COLAB_CREDENTIAL, "/content/.automotive-private/colab.json")
-            remote_config = config | item | {"initial_balance_cu": state["initial_balance_cu"]}
+            remote_config = config | item | {"initial_balance_cu": state["initial_balance_cu"],
+                "entry_sha256": hashlib.sha256((ROOT / "scripts/colab_campaign_entry.py").read_bytes()).hexdigest(),
+                "operational_io_sha256": hashlib.sha256((ROOT / "scripts/operational_io.py").read_bytes()).hexdigest()}
             handoff = directory / "staging/worker.json"; handoff.parent.mkdir(exist_ok=True)
             handoff.write_text(json.dumps(remote_config)); os.chmod(handoff, 0o600)
             call("upload", "-s", worker, handoff, "/content/.automotive-private/worker.json")
@@ -113,6 +125,7 @@ def control(config):
             process = subprocess.Popen([str(ROOT / "scripts/colab.sh"), "exec", "-s", worker, "--timeout", "259200", "-f", str(ROOT / "scripts/colab_campaign_entry.py")], cwd=ROOT, stdout=stream, stderr=subprocess.STDOUT, start_new_session=True)
             item["exec_pid"] = process.pid; save()
             log("Started " + worker + "; heavy work runs on its CUDA device.")
+            record_controller("running")
             return item
         except Exception:
             stop(item)
@@ -122,6 +135,9 @@ def control(config):
     network_failures = 0
     while True:
         try:
+            if not owner_matches(config, store.get_json("controller_owner.json")):
+                log("Controller ownership changed; exiting without touching the live runtime.")
+                return
             progress = store.get_json("progress.json", {})
             state["last_progress_token"] = progress_token(progress, state.get("last_progress_token")); save()
             current = state["workers"][-1] if state["workers"] else None
@@ -134,14 +150,29 @@ def control(config):
                             store.download(item["id"], directory / folder / item["name"], item.get("appProperties", {}).get("sha256"))
                 cost = snapshot_cost()
                 log(f"Completed; report downloaded; account CU delta {cost['account_delta_cu']:.2f}.")
-                subprocess.run(["osascript", "-e", 'display notification "3-seed 결과와 보고서가 Drive 및 프로젝트 폴더에 저장됐어." with title "빅데이터 실험 완료"'], check=False, capture_output=True)
+                if shutil.which("osascript"):
+                    subprocess.run(["osascript", "-e", 'display notification "3-seed 결과와 보고서가 Drive 및 프로젝트 폴더에 저장됐어." with title "빅데이터 실험 완료"'], check=False, capture_output=True)
                 record_controller("completed"); return
             if progress.get("status") in {"paused", "failed"}:
+                control = store.get_json("control.json", {})
+                cost = snapshot_cost()
+                if progress.get("status") == "paused" and control.get("reason") == "operational_upgrade":
+                    if current: stop(current)
+                    control.update(stop_requested=False, reason="operational_upgrade_completed")
+                    store.put_json(control, "control.json", directory / "staging")
+                    progress.update(status="resuming", stage="resuming_after_upgrade")
+                    store.put_json(progress, "progress.json", directory / "staging")
+                    continue
+                if progress.get("pause_reason") == "compute_unit_budget" and not control.get("stop_requested") and cost["account_delta_cu"] < cost["effective_budget_cu"] and cost["current_balance_cu"] > config["plan"]["minimum_balance"]:
+                    progress.update(status="resuming", stage="resuming_with_operational_budget")
+                    store.put_json(progress, "progress.json", directory / "staging")
+                    if current: stop(current)
+                    continue
                 if current: stop(current)
                 snapshot_cost(); log("Worker " + progress["status"] + "; verified Drive results retained.")
                 record_controller(progress["status"]); return
             cost = snapshot_cost()
-            if cost["current_balance_cu"] <= config["plan"]["minimum_balance"] or cost["account_delta_cu"] >= config["plan"]["cu_budget"]:
+            if cost["current_balance_cu"] <= config["plan"]["minimum_balance"] or cost["account_delta_cu"] >= cost["effective_budget_cu"]:
                 store.put_json({"stop_requested": True, "reason": "compute_unit_budget"}, "control.json", directory / "staging")
                 log("Compute limit reached; worker will pause at its next control check.")
                 if not current or current["endpoint"] not in active: return
@@ -153,6 +184,7 @@ def control(config):
                 # Losing an exec websocket is not evidence that the kernel stopped.
                 # An assigned worker is never duplicated or killed just for a stale log.
                 (directory / "latest_progress.json").write_text(json.dumps(progress, ensure_ascii=False, indent=2) + "\n")
+                record_controller("running")
                 started = store.get_json(f"workers/{current['worker']}/started.json")
                 age = (datetime.now(timezone.utc) - datetime.fromisoformat(current["started_at"])).total_seconds()
                 if not started and age > 900:
@@ -190,7 +222,13 @@ def main():
             command = [sys.executable, str(Path(__file__).resolve()), "--config", str(directory / "config.json")]
             process = subprocess.Popen(command, cwd=ROOT, stdout=stream, stderr=subprocess.STDOUT, start_new_session=True)
         print(json.dumps({"pid": process.pid, "log": str(directory / "controller.log"), "drive_url": config["drive_url"]}, indent=2))
-    else: control(config)
+    else:
+        try: control(config)
+        except Exception as error:
+            path = Path(config["local_dir"]) / "controller_failure.json"
+            path.write_text(json.dumps({"type": type(error).__name__, "time": datetime.now(timezone.utc).isoformat()}) + "\n")
+            print("Controller exited with " + type(error).__name__ + "; no secret diagnostics logged.", flush=True)
+            raise SystemExit(1)
 
 
 if __name__ == "__main__": main()

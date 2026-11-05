@@ -1,9 +1,20 @@
 import unittest
 
-from automotive_recsys.controller_policy import progress_token, unsuccessful_workers, transient_network_error
+from automotive_recsys.controller_policy import progress_token, unsuccessful_workers, transient_network_error, effective_budget, owner_matches
 
 
 class ControllerPolicyTests(unittest.TestCase):
+    def test_operational_budget_does_not_mutate_frozen_plan(self):
+        plan = {"cu_budget": 100}
+        self.assertEqual(effective_budget(plan, {"cu_budget": 130}), 130)
+        self.assertEqual(plan["cu_budget"], 100)
+        with self.assertRaises(ValueError): effective_budget(plan, {"cu_budget": float("inf")})
+
+    def test_handoff_prevents_an_old_host_from_acting(self):
+        owner = {"controller_id": "server"}
+        self.assertTrue(owner_matches({"controller_id": "server"}, owner))
+        self.assertFalse(owner_matches({}, owner))
+        self.assertFalse(owner_matches({"controller_id": "mac"}, owner))
     def test_productive_renewals_do_not_exhaust_recovery_limit(self):
         workers = [{"start_progress_token": [8, "x", epoch]} for epoch in range(1, 15)]
         self.assertEqual(unsuccessful_workers(workers, [8, "x", 15]), 0)

@@ -112,7 +112,15 @@ scripts/colab.sh new -s automotive-pilot --gpu L4
 - `scripts/experiment.py prepare`로 입력/source snapshot과 plan을 확인하고 `scripts/colab_campaign.py --background`로 제어한다. 실제 Drive upload/download/hash·checkpoint 재개 확인 후 본실험을 시작한다.
 - 학습 이벤트는 JSONL, epoch/최종 표는 CSV, 진행 상황은 `progress.txt`/JSON으로 남긴다. progress는 모델/variant/seed/epoch/step/best valid/마지막 검증된 Drive 저장 시각과 완료 작업 수를 반드시 포함한다.
 - 체크포인트 이름과 resume artifacts는 내용 hash가 붙은 불변 파일이다. 전송 확인 후 `restore.json`을 갱신하고 두 세대가 참조하는 파일은 삭제하지 않는다. 삭제는 이 캠페인의 manifest가 가리키고 hash가 일치하는 생성 파일에만 수행한다.
-- CU 잔액/소모율을 worker도 확인하고 완료/실패/중단 시 자기 VM을 반납한다. 계정 감소 100 CU 또는 잔액 30 CU가 초기 중단 기준이다. 다른 세션의 비용과 합산될 수 있음을 명시한다.
+- CU 잔액/소모율을 worker도 확인하고 완료/실패/중단 시 자기 VM을 반납한다. 초기 계획의 100 CU는 frozen plan에 보존하고, 2026-11-05 사용자의 끝까지 자동 실행 요청에 따라 `control.json.cu_budget=130`을 운영 상한으로 적용한다. 잔액 30 CU 조건은 유지한다. 다른 세션의 비용과 합산될 수 있음을 명시한다.
 - 단일 학습 작업 감시용 Codex 자동화를 만들지 않는다. LLM이 수시간 로그를 반복해서 읽지 않도록 worker와 가벼운 controller가 저장·복구·보고서를 담당한다. 맥이 꺼져도 원격 실행은 계속되지만 VM 재할당에는 켜진 controller가 필요하다.
-- 살아 있는 worker를 WebSocket 단절만으로 중복 실행하지 않는다. 자동 재할당은 **저장된 진척이 없는 연속 worker 최대 6회**로 제한하며 다른 세션은 종료하지 않는다. 완료 실행 수나 검증된 checkpoint epoch가 전진하면 연속 실패 한도를 다시 계산한다. 계산 예산 100 CU/잔액 30 CU는 그대로 유지한다. completed marker는 plan hash를 대조한 뒤 재사용한다.
+- 살아 있는 worker를 WebSocket 단절만으로 중복 실행하지 않는다. 자동 재할당은 **저장된 진척이 없는 연속 worker 최대 6회**로 제한하며 다른 세션은 종료하지 않는다. 완료 실행 수나 검증된 checkpoint epoch가 전진하면 연속 실패 한도를 다시 계산한다. completed marker는 plan hash를 대조한 뒤 재사용한다.
 - 2026-11-05 총 VM 6개 한도에 도달해 유효한 진척이 있어도 멈춘 문제를 확인했다. controller의 일시적 연결 오류는 backoff 후 재시도하며, 영구 오류/진척 없는 재할당 한도에 도달하면 `controller_status.json`과 가능한 Drive progress에 실제 중단 상태를 기록한다. 기존 모델 소스/input/선택 plan은 바꾸지 않고 제어기 revision을 별도로 기록한다.
+
+## Ubuntu 제어기 운영
+
+- 제어기는 기존 `ubuntu-wan` 서버의 `~/git/automotive-recsys`와 user systemd `automotive-colab.service`에서 운영한다. 서버는 GPU 학습을 하지 않는다. Mac 절전/네트워크 변경과 무관하게 실행을 재개하기 위한 제어 호스트다.
+- Drive `controller_owner.json`의 ID와 config의 `controller_id`가 일치하는 호스트만 VM을 제어한다. Mac 제어기는 먼저 종료하고 서버를 시작하며, 정상 학습 중인 VM을 중복 실행하지 않는다.
+- 서버의 credential은 `~/.config/automotive-recsys/`에 0700/0600으로 보관한다. SSH로 별도 전송하며 소스 archive/Git/Drive에 넣지 않는다.
+- `scripts/operational_io.py`는 frozen 모델 코드를 유지하는 버전별 I/O adapter다. 기본 checkpoint 간격은 600초, best/최초/마지막 강제 저장은 유지하고 Drive 전송 chunk는 64 MiB다. SHA와 정책을 worker별 operational manifest 및 실행 manifest에 기록한다. adapter 변경을 학습 수식 최적화로 표현하지 않는다.
+- `deploy/automotive-colab.service`는 예기치 않은 제어기 종료 시 재시작한다. 정상 완료/사용자 pause/진척 없는 연속 실패 한도는 자동 무한 재시작하지 않는다. provider의 자원 거절이나 인증 철회까지 무조건 완료를 보장한다고 표현하지 않는다.

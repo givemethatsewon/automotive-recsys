@@ -1,6 +1,7 @@
 """Remote kernel entry: verified Drive inputs, unattended study, own VM release."""
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import sys
@@ -39,13 +40,17 @@ def budget_guard(journal):
     journal.state["account_balance_cu"] = usage.paid_compute_units_balance
     journal.state["account_cu_since_start"] = CONFIG["initial_balance_cu"] - usage.paid_compute_units_balance
     last_cost = time.monotonic()
-    if usage.paid_compute_units_balance <= CONFIG["plan"]["minimum_balance"] or CONFIG["initial_balance_cu"] - usage.paid_compute_units_balance >= CONFIG["plan"]["cu_budget"]:
+    control = store.get_json("control.json", {})
+    operational_budget = float(control.get("cu_budget", CONFIG["plan"]["cu_budget"]))
+    if not math.isfinite(operational_budget) or operational_budget <= 0: raise ValueError("Invalid operational CU budget")
+    if usage.paid_compute_units_balance <= CONFIG["plan"]["minimum_balance"] or CONFIG["initial_balance_cu"] - usage.paid_compute_units_balance >= operational_budget:
         journal.state["pause_reason"] = "compute_unit_budget"
         raise StopRequested("Compute budget reached; verified checkpoints retained.")
 
 
 try:
-    store.put_json({"worker": CONFIG["worker"], "started_at": time.time()}, f"workers/{CONFIG['worker']}/started.json", root / "transfer")
+    store.put_json({"worker": CONFIG["worker"], "started_at": time.time(), "controller_revision": CONFIG.get("controller_revision"),
+                    "entry_sha256": CONFIG.get("entry_sha256")}, f"workers/{CONFIG['worker']}/started.json", root / "transfer")
     upload = Path("/content/automotive-input"); upload.mkdir(exist_ok=True)
     manifest_path = store.download(CONFIG["manifest"]["id"], upload / "manifest.json", CONFIG["manifest"]["sha256"])
     manifest = json.loads(manifest_path.read_text())
@@ -65,6 +70,10 @@ try:
     sys.path.insert(0, str(root / "src"))
     import torch
     assert torch.cuda.is_available(), "CUDA required"
+    assert checksums(Path("/content/automotive-bootstrap/operational_io.py"))["sha256"] == CONFIG["operational_io_sha256"]
+    from operational_io import install
+    operational_io = install()
+    store.put_json(operational_io | {"source_sha256": CONFIG["operational_io_sha256"]}, f"workers/{CONFIG['worker']}/operational_io.json", root / "transfer")
     # Before the study, prove that a real optimizer/RNG checkpoint survives a
     # Drive round trip into a separate output directory and continues training.
     if not store.get_json("preflight/verified.json"):
