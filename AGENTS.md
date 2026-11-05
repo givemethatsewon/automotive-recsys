@@ -124,3 +124,6 @@ scripts/colab.sh new -s automotive-pilot --gpu L4
 - 서버의 credential은 `~/.config/automotive-recsys/`에 0700/0600으로 보관한다. SSH로 별도 전송하며 소스 archive/Git/Drive에 넣지 않는다.
 - `scripts/operational_io.py`는 frozen 모델 코드를 유지하는 버전별 I/O adapter다. 기본 checkpoint 간격은 600초, best/최초/마지막 강제 저장은 유지하고 Drive 전송 chunk는 64 MiB다. SHA와 정책을 worker별 operational manifest 및 실행 manifest에 기록한다. adapter 변경을 학습 수식 최적화로 표현하지 않는다.
 - `deploy/automotive-colab.service`는 예기치 않은 제어기 종료 시 재시작한다. 정상 완료/사용자 pause/진척 없는 연속 실패 한도는 자동 무한 재시작하지 않는다. provider의 자원 거절이나 인증 철회까지 무조건 완료를 보장한다고 표현하지 않는다.
+- Colab 기본 kernel 의존성을 전역 설치로 바꾸지 않는다. `colab_campaign_env.py`의 별도 venv와 CUDA/버전 불변 readiness receipt를 검증한다. 원격 Python 오류가 CLI exit 0으로 보일 수 있으므로 exit code만으로 준비/시작 성공을 판정하지 않는다.
+- CLI `status`의 BUSY/IDLE은 로컬 캐시다. Drive 시작 receipt와 실제 새 progress/checkpoint를 우선한다. 시작 receipt가 180초 안에 없을 때만 미시작 worker를 반납한다. 살아 있는 worker에 진단용 `exec`를 추가하면 실행 대기가 생길 수 있으므로 학습 중에는 Drive/log를 읽는다.
+- systemd main만 종료하는 장애 시험으로 자동 재시작·동일 GPU 채택·진척 지속을 확인한다. `KillMode=process`를 유지하여 제어기 재시작으로 학습 자식을 끊지 않는다. 증거는 Drive `operations/controller_restart_verified.json`에 저장한다.
