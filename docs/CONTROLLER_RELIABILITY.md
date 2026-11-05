@@ -43,3 +43,5 @@
 - 이는 안정적으로 L4를 할당받는 경우의 운영 추정이다. Colab 공급 대기, 재시도, 실제 early stopping으로 변하며 완료 시각 보장이 아니다. 최대 100 epoch에 도달한 모델은 미수렴 가능성을 보고한다.
 
 완료 시 GPU를 반납하고 CSV/그림/HTML/Markdown 및 완료 상태를 Drive에 저장한다. 서버 제어기가 결과를 내려받은 뒤 정상 종료한다. 사용자 Mac과 LLM 대화가 계속 연결될 필요가 없다.
+
+장애 시험 최종 판정: 2026-11-05 12:28:28 UTC(21:28 KST) 통과. systemd는 main process 종료 60초 후 자동 재시작했고, 추가 worker/추가 GPU 할당 없이 같은 worker 13이 epoch 6을 진행했다. Drive epoch 5 checkpoint와 이후 새 progress를 확인했다. 테스트/운영 정책 작은 검사는 25개 통과했다.
