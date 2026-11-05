@@ -114,4 +114,5 @@ scripts/colab.sh new -s automotive-pilot --gpu L4
 - 체크포인트 이름과 resume artifacts는 내용 hash가 붙은 불변 파일이다. 전송 확인 후 `restore.json`을 갱신하고 두 세대가 참조하는 파일은 삭제하지 않는다. 삭제는 이 캠페인의 manifest가 가리키고 hash가 일치하는 생성 파일에만 수행한다.
 - CU 잔액/소모율을 worker도 확인하고 완료/실패/중단 시 자기 VM을 반납한다. 계정 감소 100 CU 또는 잔액 30 CU가 초기 중단 기준이다. 다른 세션의 비용과 합산될 수 있음을 명시한다.
 - 단일 학습 작업 감시용 Codex 자동화를 만들지 않는다. LLM이 수시간 로그를 반복해서 읽지 않도록 worker와 가벼운 controller가 저장·복구·보고서를 담당한다. 맥이 꺼져도 원격 실행은 계속되지만 VM 재할당에는 켜진 controller가 필요하다.
-- 살아 있는 worker를 WebSocket 단절만으로 중복 실행하지 않는다. 자동 재할당은 최대 6회 worker이며 다른 세션은 종료하지 않는다. completed marker는 plan hash를 대조한 뒤 재사용한다.
+- 살아 있는 worker를 WebSocket 단절만으로 중복 실행하지 않는다. 자동 재할당은 **저장된 진척이 없는 연속 worker 최대 6회**로 제한하며 다른 세션은 종료하지 않는다. 완료 실행 수나 검증된 checkpoint epoch가 전진하면 연속 실패 한도를 다시 계산한다. 계산 예산 100 CU/잔액 30 CU는 그대로 유지한다. completed marker는 plan hash를 대조한 뒤 재사용한다.
+- 2026-11-05 총 VM 6개 한도에 도달해 유효한 진척이 있어도 멈춘 문제를 확인했다. controller의 일시적 연결 오류는 backoff 후 재시도하며, 영구 오류/진척 없는 재할당 한도에 도달하면 `controller_status.json`과 가능한 Drive progress에 실제 중단 상태를 기록한다. 기존 모델 소스/input/선택 plan은 바꾸지 않고 제어기 revision을 별도로 기록한다.

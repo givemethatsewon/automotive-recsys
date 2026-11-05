@@ -11,6 +11,7 @@ import time
 
 from experiment import ROOT, PRIVATE, DRIVE_CREDENTIAL, load_config
 from automotive_recsys.drive_store import DriveStore
+from automotive_recsys.controller_policy import progress_token, unsuccessful_workers, transient_network_error
 from colab_cli.client import Client, Prod
 from colab_cli.state import StateStore
 from google.auth.transport.requests import AuthorizedSession
@@ -18,6 +19,10 @@ from google.oauth2.credentials import Credentials
 
 COLAB_CREDENTIAL = PRIVATE / "colab/gcloud/application_default_credentials.json"
 STATE_FILE = PRIVATE / "colab/sessions.json"
+os.environ.setdefault("COLAB_CLI_REQUEST_TIMEOUT", "120")
+
+
+class RecoveryLimitReached(RuntimeError): pass
 
 
 def control(config):
@@ -36,6 +41,26 @@ def control(config):
 
     def save(): worker_path.write_text(json.dumps(state, indent=2) + "\n")
     def log(message): print(datetime.now(timezone.utc).isoformat() + " " + message, flush=True)
+    def record_controller(status, reason=None):
+        value = {"status": status, "reason": reason, "updated_at": datetime.now(timezone.utc).isoformat(),
+                 "recovery_limit": "6 consecutive workers without durable progress", "workers_started": len(state["workers"]),
+                 "last_progress_token": state.get("last_progress_token")}
+        (directory / "controller_status.json").write_text(json.dumps(value, indent=2) + "\n")
+        try: store.put_json(value, "controller_status.json", directory / "staging")
+        except Exception: pass
+    def mark_interrupted(reason):
+        record_controller("interrupted", reason)
+        try:
+            assigned = {entry.endpoint for entry in client.list_assignments()}
+            if state["workers"] and state["workers"][-1]["endpoint"] in assigned: return
+            progress = store.get_json("progress.json", {})
+            if progress.get("status") == "completed": return
+            progress.update(status="interrupted", controller_reason=reason, detected_at=datetime.now(timezone.utc).isoformat())
+            store.put_json(progress, "progress.json", directory / "staging")
+            text_path = directory / "staging/interrupted-progress.txt"
+            text_path.write_text("상태: 중단\n이유: " + reason + "\n완료 작업: " + str(progress.get("completed_runs", 0)) + "/32\n마지막 저장: " + (progress.get("durable_checkpoint") or "확인 필요") + "\n")
+            store.put(text_path, "progress.txt")
+        except Exception: pass
     def call(*arguments, timeout=600):
         subprocess.run([str(ROOT / "scripts/colab.sh"), *map(str, arguments)], cwd=ROOT, timeout=timeout, check=True)
     def stop(worker):
@@ -53,7 +78,8 @@ def control(config):
         (directory / "account_cost.json").write_text(json.dumps(value, indent=2) + "\n")
         return value
     def provision():
-        if len(state["workers"]) >= 6: raise RuntimeError("Automatic recovery limit reached; checkpoints remain on Drive.")
+        if unsuccessful_workers(state["workers"], state.get("last_progress_token")) >= 6:
+            raise RecoveryLimitReached("Six consecutive runtimes made no durable progress.")
         worker = f"auto-{config['campaign_id'].removeprefix('automotive-').lower()}-{len(state['workers'])+1}"
         before = {entry.endpoint for entry in client.list_assignments()}
         error = None
@@ -68,7 +94,8 @@ def control(config):
                 client.unassign(created.pop())
                 log("Released an assignment from this allocation whose local handoff was incomplete.")
             raise RuntimeError("Allocation handoff failed; no duplicate allocation requested.") from error
-        item = {"worker": worker, "endpoint": session.endpoint, "started_at": datetime.now(timezone.utc).isoformat()}
+        item = {"worker": worker, "endpoint": session.endpoint, "started_at": datetime.now(timezone.utc).isoformat(),
+                "start_progress_token": state.get("last_progress_token")}
         state["workers"].append(item); save()
         try:
             call("exec", "-s", worker, "--timeout", 120, "-f", ROOT / "scripts/colab_campaign_init.py")
@@ -91,11 +118,12 @@ def control(config):
             stop(item)
             raise
 
-    save(); log("Controller ready; polling Drive once per 120 seconds.")
+    save(); record_controller("starting"); log("Controller ready; polling Drive once per 120 seconds.")
     network_failures = 0
     while True:
         try:
             progress = store.get_json("progress.json", {})
+            state["last_progress_token"] = progress_token(progress, state.get("last_progress_token")); save()
             current = state["workers"][-1] if state["workers"] else None
             active = {entry.endpoint for entry in client.list_assignments()}
             if progress.get("status") == "completed":
@@ -107,10 +135,11 @@ def control(config):
                 cost = snapshot_cost()
                 log(f"Completed; report downloaded; account CU delta {cost['account_delta_cu']:.2f}.")
                 subprocess.run(["osascript", "-e", 'display notification "3-seed 결과와 보고서가 Drive 및 프로젝트 폴더에 저장됐어." with title "빅데이터 실험 완료"'], check=False, capture_output=True)
-                return
+                record_controller("completed"); return
             if progress.get("status") in {"paused", "failed"}:
                 if current: stop(current)
-                snapshot_cost(); log("Worker " + progress["status"] + "; verified Drive results retained."); return
+                snapshot_cost(); log("Worker " + progress["status"] + "; verified Drive results retained.")
+                record_controller(progress["status"]); return
             cost = snapshot_cost()
             if cost["current_balance_cu"] <= config["plan"]["minimum_balance"] or cost["account_delta_cu"] >= config["plan"]["cu_budget"]:
                 store.put_json({"stop_requested": True, "reason": "compute_unit_budget"}, "control.json", directory / "staging")
@@ -132,10 +161,19 @@ def control(config):
                     log("Released a worker that never acknowledged entry; inspect its log before resuming.")
                     return
             network_failures = 0
+        except RecoveryLimitReached:
+            mark_interrupted("six_consecutive_workers_without_durable_progress")
+            log("Recovery halted after six workers without durable progress; saved results retained.")
+            return
         except Exception as error:
             network_failures += 1
             log("Control check error: " + type(error).__name__ + "; no secret diagnostics logged.")
+            if transient_network_error(error):
+                record_controller("waiting_for_network", type(error).__name__)
+                time.sleep(min(120 * network_failures, 600))
+                continue
             if network_failures >= 5:
+                mark_interrupted(type(error).__name__)
                 log("Controller stopped after repeated errors. A running worker still saves and self-releases independently.")
                 return
         time.sleep(120)

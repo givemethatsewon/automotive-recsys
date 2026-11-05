@@ -59,7 +59,9 @@ Drive에 새 비공개 프로젝트 폴더를 만들고 URL을 `results/campaign
 
 가벼운 local controller는 120초마다 네트워크로 상태를 확인한다. 학습 kernel은 LLM/채팅과 독립적으로 작동한다. worker가 완료/실패/중단되면 결과를 올리고 자기 VM을 반납한다. controller도 종료를 확인하며 완료 보고서를 로컬로 내려받고 macOS 알림을 띄운다.
 
-**맥이 잠들거나 꺼지면 자동 VM 재할당과 로컬 다운로드는 깨어난 뒤 가능하다.** 이미 실행 중인 worker는 Drive 저장·CU 확인·종료를 스스로 수행한다. Colab runtime 자체가 사라지면 맥이 켜진 controller가 새 VM을 만들고 재개한다. WebSocket 단절만으로 살아 있는 학습을 중복 실행하지 않는다. 자동 재할당은 최대 6개 worker로 제한한다. 실패 상태는 무한 재시도하지 않는다.
+**맥이 잠들거나 꺼지면 자동 VM 재할당과 로컬 다운로드는 깨어난 뒤 가능하다.** 이미 실행 중인 worker는 Drive 저장·CU 확인·종료를 스스로 수행한다. Colab runtime 자체가 사라지면 맥이 켜진 controller가 새 VM을 만들고 재개한다. WebSocket 단절만으로 살아 있는 학습을 중복 실행하지 않는다. 자동 재할당은 진척 없는 연속 worker 최대 6개로 제한한다. 실제 완료 실행/저장 epoch가 전진하면 이 연속 실패 수를 다시 계산하며, 총 CU 예산은 그대로 적용한다. 일시적인 네트워크 단절은 backoff 후 재시도한다. 영구 오류로 멈추면 controller 상태와 가능한 Drive 진행 로그를 중단 상태로 갱신한다.
+
+11월 5일 18:20 한국 시각 상태 점검에서 설정 탐색 8개 완료, XSimGCL 6 epoch 도중 중단/5 epoch 외부 저장, 활성 VM 0개를 확인했다. 이전 제어기가 누적 worker 6개 한도에 걸려 종료됐는데 progress에는 running이 남아 있었다. 위 연속 무진척 기준과 네트워크 재연결 정책은 이 실측 문제를 보완한 것이다. 중간 seed 42 valid 최고 NDCG는 BPR-MF 0.00136339, LightGCN 0.00420011, 진행 중인 XSimGCL 0.00504616이다. 최종 test/3-seed 결과가 아니다.
 
 ```bash
 .venv/bin/python scripts/experiment.py pause
