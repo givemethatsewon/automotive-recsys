@@ -1,0 +1,11 @@
+{
+  "completed_final_records": 17,
+  "main_models_all_three_seeds": true,
+  "same_input_fingerprints": true,
+  "plan_hash": "577676ff4d1a74ca7688b24f9ba18aaa3a7b83f91e4d5faf6c264d3171a5a237",
+  "validation_only_frozen_selection": true,
+  "same_test_cohort_and_group_aggregation": true,
+  "campaign_completed": false,
+  "completed_runs": 31,
+  "snapshot_at": "2026-11-06T19:57:28.573492+00:00"
+}

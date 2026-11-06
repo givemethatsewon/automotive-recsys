@@ -5,23 +5,29 @@ Amazon Reviews 2023 Automotive의 전처리된 5-core 데이터를 사용한다.
 
 프로젝트 위치: `/Users/givemethatsewon/git/automotive-recsys`
 
-## 현재 완료된 것
+## 결과 확인: 2026-11-07 스냅샷
 
-- Python 3.12 전용 `.venv`와 `uv.lock`.
-- 입력 데이터 계약 점검 39개 통과. 원본 파일은 수정하지 않았다.
-- 인기순 추천의 검증 집합 전체 평가: 사용자 220,516명, 상품 후보 248,186개.
-- NDCG@10 **0.00197863**, Recall@10 **0.00349243**, APLT@10 **0.0**.
-- 사용자별 지표, 그룹별 집계, 사용자별 상위 100개 추천 저장.
-- 지표·GPU 수식·이미 본 상품 제외·경계 동점·음성 추출·실험 기록/복구/집계 테스트를 제공한다.
-- M3 Max 로컬 GPU 연산 점검 기록을 보관했다. 사용자의 선택에 따라 실제 학습은 Colab GPU에서 진행한다.
-- Colab CLI 0.7.5 설치 및 전용 브라우저 인증 완료. [Colab 실행 방법](docs/COLAB.md).
-- 세 모델 모두 전체 train 1 epoch·전체 valid 평가·optimizer/RNG 체크포인트 재시작 검사 통과.
-- CUDA 프로파일링으로 LightGCN 약 3.48배, XSimGCL 약 2.19배 속도 개선. [GPU 점검 결과](docs/GPU_REVIEW.md).
+**주 모델 3개 × seed 42·43·44의 학습·test 평가와 Popularity test 평가는 완료됐다.**
+전체 캠페인은 04:57 KST 기록 기준 **31/32개 완료**이며, CL=0 보조 실험 seed 44는 진행 중이다.
+완료된 주 비교 결과는 [한국어 결과 정리](docs/RESULTS_2026-11-07.md)와 [CSV](docs/results/2026-11-07/main_comparison.csv)에 있다.
 
-현재 점수는 **검증(valid)** 결과다. 테스트(test) 최종 평가는 아직 실행하지 않았다.
-BPR-MF·LightGCN·XSimGCL의 CUDA 학습기와 한 epoch pilot은 구현·검증했다.
-설정 탐색과 seed 42·43·44 본실험의 자동 실행·Drive 복구·JSONL/CSV 진행 기록·최종 보고서 생성을 구현했다.
-운용 절차와 실제 검증 상태는 [Drive 본실험 안내](docs/DURABLE_EXPERIMENTS.md)를 참고한다. pilot 점수를 최종 모델 비교에 사용하지 않는다.
+| 모델 | test NDCG@10 평균 | seed SD | 비인기 노출 APLT@10 (%) |
+|---|---:|---:|---:|
+| Popularity | 0.00204150 | 해당 없음(결정적 1회) | 0 |
+| BPR-MF | 0.00117841 | 0.00004268 | 0.15524280 |
+| LightGCN | 0.00369642 | 0.00004705 | 0.73011975 |
+| XSimGCL | 0.00441927 | 0.00011744 | 0.00004198 |
+
+XSimGCL의 정확도가 가장 높지만 비인기 노출은 거의 0이다. 이번 조건에서 대조학습이 비인기 노출도 개선했다는 결론은 지지되지 않는다.
+사용자 158,805명, 전체 학습 상품 후보 248,186개의 동일 warm-start test 평가이며 valid 점수나 pilot 점수를 섞지 않았다.
+seed SD와 사용자별 CI는 다르다. CL=0 3-seed 집계·paired CI·최종 자동 보고서는 마지막 보조 실험 완료 후 생성된다.
+
+실제 GPU 학습은 Colab L4, 자동 제어기는 기존 Ubuntu 서버에서 운영한다. Mac이 꺼져도 Drive 저장·복구를 수행한다.
+재현용 입력 hash, frozen valid 선택과 완료된 test/그룹 집계를 대조했으며 모델 수식과 선택 plan은 변경하지 않았다.
+운용 절차는 [Drive 본실험 안내](docs/DURABLE_EXPERIMENTS.md), 연결 장애·재개 검증은 [제어기 기록](docs/CONTROLLER_RELIABILITY.md)에 있다.
+
+환경·입력 계약(39개 검사), 전체 train 한 epoch GPU pilot와 optimizer/RNG 재현 검증도 보관했다.
+CUDA 프로파일링 기반 최적화 근거는 [GPU 점검 결과](docs/GPU_REVIEW.md)를 참고한다.
 
 ## 실행
 
