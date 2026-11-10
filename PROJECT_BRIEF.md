@@ -112,6 +112,7 @@ XSimGCL은 정확도가 가장 높지만 비인기 노출은 거의 0이다. 3-s
 | `docs/sources/` | 회의 전사 원본, Notion 제안서/팀 개요 사본·metadata, 강의계획서 PDF, 사용자 후속 요구. 원본 밖에 해설을 쓴다. |
 | `docs/MEETING_NOTES.md` | 녹음 시각별 결정·토론 중 제안·후속 적용의 대응. |
 | `docs/RESULTS_FINAL.md`, `docs/results/final/` | 32/32 완료 결과와 3-seed/paired CI/그림/HTML. Git으로 함께 이동 가능. |
+| `docs/explainers/experiment-results-eli5.html` | 사용자가 실험을 이해하고 설명하기 위한 ELI5 시각 설명서. 모델·지표·결과·불확실성 조작과 발표 원고를 포함한 단일 오프라인 HTML. |
 | `src/automotive_recsys/` | 입력 검사·GPU 수식·학습·평가·복구·집계 구현. |
 | `data` | `/Users/givemethatsewon/Downloads/processed`로 가는 읽기용 심볼릭 링크. 원본 데이터를 복제해 Git에 넣지 않는다. |
 | `results/campaigns/automotive-20261104T204146Z/` | 로컬 실행/수집 기록. Git 제외. |

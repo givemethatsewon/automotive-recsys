@@ -13,6 +13,7 @@ Amazon Reviews 2023 Automotive의 전처리된 5-core 데이터를 사용한다.
 - [원문 보관함](docs/sources/README.md): 회의록 원본, Notion 제안서·팀 역할 개요 사본, 강의계획서 PDF, 사용자 후속 요구.
 - [회의 결정 정리](docs/MEETING_NOTES.md): 논의 중 제안과 확정 결정을 녹음 시각으로 구분.
 - [최종 결과와 파일](docs/RESULTS_FINAL.md): 32/32개 완료 보고서·CSV·그림·paired CI.
+- [처음부터 이해하는 ELI5 설명서](docs/explainers/experiment-results-eli5.html): 모델·지표 조작, 실제 결과, seed/CI, 발표 연습. HTML 하나로 오프라인에서 작동한다.
 
 ## 최종 결과: 2026-11-10 재확인
 

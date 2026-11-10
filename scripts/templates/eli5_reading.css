@@ -1,0 +1,47 @@
+/* Desktop reading baseline from the user's preferred discrete-math explainer.
+   Inline the rules used by the document; diagram layouts remain topic-specific. */
+:root{--ink:#172b40;--soft:#637284;--accent:#275bdd;--tint:#edf3ff;--paper:#fff;--line:#dce3eb;--yes:#166342;--yes-bg:#e8f5ee;--no:#ac3b34;--no-bg:#fff0ed;color-scheme:light;font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:var(--ink);background:var(--paper);font-synthesis:none}
+*{box-sizing:border-box}
+body{margin:0;font-size:17px;line-height:1.65;word-break:keep-all;overflow-wrap:break-word}
+header,main,footer{max-width:1120px;margin:0 auto;padding:0 52px}
+main>*,.twocol>*,.threecol>*{min-width:0}
+button,select,input{font:inherit}
+button,a,input,select,summary{-webkit-tap-highlight-color:transparent}
+button{cursor:pointer;color:inherit}
+button:disabled{opacity:.4;cursor:default}
+button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #e4a63f;outline-offset:4px}
+a{color:inherit;text-underline-offset:5px}
+.hero{padding:85px 0 62px;max-width:850px}
+.eyebrow{color:var(--accent);font-size:13px;letter-spacing:.15em;font-weight:700}
+.hero h1{font-size:clamp(42px,5.4vw,72px);line-height:1.15;letter-spacing:-.07em;margin:17px 0 24px;font-weight:750}
+.hero p{font-size:21px;color:var(--soft);max-width:650px;margin:0}
+.jump{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:30px;font-size:14px;color:var(--soft)}
+.jump a{text-decoration:none;border-bottom:1px solid var(--line)}
+section{border-top:1px solid var(--line);padding:64px 0 68px;scroll-margin-top:25px}
+.sectionhead{display:flex;align-items:baseline;gap:17px;margin-bottom:16px}
+.sectionhead .num{font-size:13px;color:var(--accent);font-weight:700}
+h2{font-size:clamp(27px,3.3vw,38px);line-height:1.3;letter-spacing:-.05em;margin:0}
+h3{font-size:20px;line-height:1.4;margin:0 0 10px;letter-spacing:-.035em}
+.lead{color:var(--soft);max-width:700px;margin:0 0 30px}
+.small{font-size:14px;color:var(--soft)}
+.aside{font-size:15px;color:var(--soft);margin:20px 0 0}
+.twocol{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px}
+.threecol{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px}
+.stage{padding:35px;background:#f7f9fc;border-radius:6px;min-width:0}
+.controls{display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin:22px 0}
+.pill{border:1px solid var(--line);background:white;border-radius:30px;padding:10px 19px;min-height:44px;line-height:1.3;font-size:15px}
+.pill[aria-pressed=true],.pill.active{background:var(--ink);border-color:var(--ink);color:white}
+.pill.primary{background:var(--accent);border-color:var(--accent);color:white}
+.math{display:inline-block;max-width:100%;vertical-align:middle;line-height:1.6}
+.math math{font-family:'STIX Two Math','Cambria Math','STIXGeneral',serif;font-size:1.1em;max-width:100%}
+.formula{margin:20px 0;line-height:1.7;min-width:0;max-width:100%}
+.formula.big{font-size:clamp(24px,3.5vw,38px);text-align:center}
+.formula.medium{font-size:23px}
+.mathblock{overflow-x:auto;max-width:100%;min-width:0;padding:4px 0}
+.formula math[display=block]{margin:0}
+.visual{width:100%;display:block;height:auto}
+.scene-caption{text-align:center;color:var(--soft);margin:12px 0 0;font-size:15px}
+.takeaway{font-size:clamp(26px,3.8vw,42px);font-weight:650;letter-spacing:-.05em;max-width:800px;margin:20px 0 30px;line-height:1.5}
+.sources{font-size:13px;color:var(--soft);padding:26px 0 45px;border-top:1px solid var(--line)}
+.sources p{margin:7px 0}
+@media(prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
