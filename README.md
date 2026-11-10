@@ -5,11 +5,21 @@ Amazon Reviews 2023 Automotive의 전처리된 5-core 데이터를 사용한다.
 
 프로젝트 위치: `/Users/givemethatsewon/git/automotive-recsys`
 
-## 결과 확인: 2026-11-07 스냅샷
+## 다른 채팅에서 이어가기
+
+**[PROJECT_BRIEF.md](PROJECT_BRIEF.md)부터 읽으면 과제 설명·팀 역할·세원 담당 범위·확정 결정·완료 상태·다음 작업을 파악할 수 있다.**
+[AGENTS.md](AGENTS.md)의 읽기 순서와 실행 규칙을 함께 따른다.
+
+- [원문 보관함](docs/sources/README.md): 회의록 원본, Notion 제안서·팀 역할 개요 사본, 강의계획서 PDF, 사용자 후속 요구.
+- [회의 결정 정리](docs/MEETING_NOTES.md): 논의 중 제안과 확정 결정을 녹음 시각으로 구분.
+- [최종 결과와 파일](docs/RESULTS_FINAL.md): 32/32개 완료 보고서·CSV·그림·paired CI.
+
+## 최종 결과: 2026-11-10 재확인
 
 **주 모델 3개 × seed 42·43·44의 학습·test 평가와 Popularity test 평가는 완료됐다.**
-전체 캠페인은 04:57 KST 기록 기준 **31/32개 완료**이며, CL=0 보조 실험 seed 44는 진행 중이다.
-완료된 주 비교 결과는 [한국어 결과 정리](docs/RESULTS_2026-11-07.md)와 [CSV](docs/results/2026-11-07/main_comparison.csv)에 있다.
+전체 캠페인 **32/32개는 2026-11-07 06:58 KST에 완료**됐다. CL=0 3-seed 보조 실험·paired CI·최종 자동 보고서도 생성됐다.
+2026-11-10 확인 시 제어기는 정상 종료돼 있고 Colab 활성 할당 0개·소모율 0이다. 완료한 학습을 다시 실행할 필요가 없다.
+**Spark 원본 분석과 인기 감점·텍스트·차종 재정렬을 포함한 팀 과제 전체의 완료는 아니다.** 범위는 PROJECT_BRIEF의 RQ별 표에 있다.
 
 | 모델 | test NDCG@10 평균 | seed SD | 비인기 노출 APLT@10 (%) |
 |---|---:|---:|---:|
@@ -20,7 +30,9 @@ Amazon Reviews 2023 Automotive의 전처리된 5-core 데이터를 사용한다.
 
 XSimGCL의 정확도가 가장 높지만 비인기 노출은 거의 0이다. 이번 조건에서 대조학습이 비인기 노출도 개선했다는 결론은 지지되지 않는다.
 사용자 158,805명, 전체 학습 상품 후보 248,186개의 동일 warm-start test 평가이며 valid 점수나 pilot 점수를 섞지 않았다.
-seed SD와 사용자별 CI는 다르다. CL=0 3-seed 집계·paired CI·최종 자동 보고서는 마지막 보조 실험 완료 후 생성된다.
+seed SD와 사용자별 CI는 다르다. 최종 paired CI는 seed별 사용자 bootstrap이며 학습 seed까지 통합한 CI가 아니다.
+[최종 CSV](docs/results/final/model_comparison.csv)와 [결과 해설](docs/RESULTS_FINAL.md)을 사용한다.
+[11월 7일 04:57의 31/32 스냅샷](docs/RESULTS_2026-11-07.md)은 당시 기록으로 보존한다.
 
 실제 GPU 학습은 Colab L4, 자동 제어기는 기존 Ubuntu 서버에서 운영한다. Mac이 꺼져도 Drive 저장·복구를 수행한다.
 재현용 입력 hash, frozen valid 선택과 완료된 test/그룹 집계를 대조했으며 모델 수식과 선택 plan은 변경하지 않았다.

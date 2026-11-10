@@ -1,5 +1,7 @@
 # Drive에 보관하는 본실험
 
+2026-11-10 재확인: 캠페인 `automotive-20261104T204146Z`는 **2026-11-07 06:58 KST에 32/32개 완료**했고 제어기도 보고서를 회수한 뒤 정상 종료했다. 현재 활성 Colab 할당 0개, 소모율 0이다. [최종 결과](RESULTS_FINAL.md)와 [인수인계](../PROJECT_BRIEF.md)를 먼저 읽는다. 아래 시작/재개 명령은 새 실험 또는 미완료 캠페인의 운영 절차이며, 완료 캠페인을 다시 시작하는 지시가 아니다.
+
 코드·가상환경·제어 프로그램은 이 Git 프로젝트에서 관리한다. 학습·전체 평가는 Colab CUDA에서 실행한다.
 Drive는 결과와 복구 상태를 보관하는 영구 저장소다. 인증 파일은 Drive와 Git에 넣지 않는다.
 
@@ -26,11 +28,11 @@ CL=0 보조 실험은 encoder/noise를 유지하고 InfoNCE 계산을 생략한�
 
 총 32개 학습 작업이며 Popularity valid/test는 별도 결정적 평가다. final은 최대 100 epoch, epoch 1과 매 5 epoch에 valid 평가, 개선 없는 검증 8회 후 종료한다. 100 epoch 도달을 수렴으로 단정하지 않고 상한 부근의 best epoch를 보고서에 표시한다. coarse 15 epoch의 설정 선택에는 탐색 예산의 한계가 있다.
 
-L4 기존 실측으로 전체가 대략 25–40시간인 초기 추정이다. 전송/런타임 재할당/early stopping에 따라 달라진다. 계정 CU 감소 100 또는 잔액 30 CU에서 중단을 요청한다. 실제 Colab 단가와 잔액은 API로 확인한다. 다른 세션의 CU도 계정 감소에 포함될 수 있어 보수적으로 멈출 수 있다.
+L4 전체 25–40시간은 초기 추정이었다. frozen plan의 초기 CU 상한 100은 보존하고, 사용자 요청에 따라 운영 control에서 130 CU/최소 잔액 30 CU를 적용했다. 이번 캠페인의 종료 시 계정 감소는 약 74.79 CU다. 전송/재할당/early stopping과 다른 동시 세션이 시간·계정 관측 비용에 영향을 줄 수 있다.
 
 ## 복구가 가능한 저장 순서
 
-각 epoch 종료 때 로컬 `last.pt`를 원자적으로 저장한다. 최초 epoch, best 갱신, 마지막 epoch, 그 외 약 120초 간격에 Drive로 회수한다.
+각 epoch 종료 때 VM의 `last.pt`를 원자적으로 저장한다. 최초 epoch, best 갱신, 마지막 epoch 강제 저장은 유지한다. 일반 Drive 회수 간격은 초기 120초에서 운영 I/O adapter 적용 후 600초로 바꾸었고 64 MiB chunk를 사용했다. 모델 수식과 frozen 선택 plan은 유지했다.
 
 1. `best-e####-<SHA>.pt`, `state-e####-<SHA>.pt`와 내용 hash가 붙은 불변 artifact를 업로드한다.
 2. Drive metadata의 size/MD5를 읽어 업로드 내용과 대조한다. SHA-256을 manifest에 기록한다.
@@ -57,9 +59,9 @@ uv sync --locked --group colab
 
 Drive에 새 비공개 프로젝트 폴더를 만들고 URL을 `results/campaigns/current.json`에 기록한다. 12 GiB 이상의 여유 공간을 먼저 확인한다. 새 VM에 인증 파일 두 개를 별도 전송해 0700 디렉터리/0600 파일로 보관한다. 데이터·소스 bundle, Drive 결과, notebook 출력에는 인증 내용을 넣지 않는다. worker 종료 시 파일을 지우고 자기 endpoint만 반납한다.
 
-가벼운 local controller는 120초마다 네트워크로 상태를 확인한다. 학습 kernel은 LLM/채팅과 독립적으로 작동한다. worker가 완료/실패/중단되면 결과를 올리고 자기 VM을 반납한다. controller도 종료를 확인하며 완료 보고서를 로컬로 내려받고 macOS 알림을 띄운다.
+가벼운 controller는 기존 `ubuntu-wan` 서버의 user systemd `automotive-colab.service`에서 120초마다 상태를 확인했다. 학습 kernel은 LLM/채팅과 독립적으로 작동한다. worker는 결과를 올리고 자기 VM을 반납하며, controller는 완료 보고서를 서버 프로젝트에 내려받은 뒤 정상 종료한다. 로컬 원문/결과 검토를 위해 서버 제어기를 다시 켤 필요가 없다.
 
-**맥이 잠들거나 꺼지면 자동 VM 재할당과 로컬 다운로드는 깨어난 뒤 가능하다.** 이미 실행 중인 worker는 Drive 저장·CU 확인·종료를 스스로 수행한다. Colab runtime 자체가 사라지면 맥이 켜진 controller가 새 VM을 만들고 재개한다. WebSocket 단절만으로 살아 있는 학습을 중복 실행하지 않는다. 자동 재할당은 진척 없는 연속 worker 최대 6개로 제한한다. 실제 완료 실행/저장 epoch가 전진하면 이 연속 실패 수를 다시 계산하며, 총 CU 예산은 그대로 적용한다. 일시적인 네트워크 단절은 backoff 후 재시도한다. 영구 오류로 멈추면 controller 상태와 가능한 Drive 진행 로그를 중단 상태로 갱신한다.
+초기에는 Mac 제어기의 절전/연결 문제에 영향을 받았지만, Ubuntu로 이전한 이후에는 Mac 연결 상태가 자동 재할당·결과 수집의 조건이 아니었다. Drive owner ID로 제어 호스트를 하나로 제한한다. WebSocket 단절만으로 살아 있는 학습을 중복 실행하지 않는다. 자동 재할당은 진척 없는 연속 worker 최대 6개로 제한하고, 실제 완료 실행/저장 epoch가 전진하면 이 연속 실패 수를 다시 계산한다. 통신 오류는 backoff 후 재시도하고 중단 사유를 기록한다. [원인·장애 시험](CONTROLLER_RELIABILITY.md)에 실제 근거가 있다.
 
 11월 5일 18:20 한국 시각 상태 점검에서 설정 탐색 8개 완료, XSimGCL 6 epoch 도중 중단/5 epoch 외부 저장, 활성 VM 0개를 확인했다. 이전 제어기가 누적 worker 6개 한도에 걸려 종료됐는데 progress에는 running이 남아 있었다. 위 연속 무진척 기준과 네트워크 재연결 정책은 이 실측 문제를 보완한 것이다. 중간 seed 42 valid 최고 NDCG는 BPR-MF 0.00136339, LightGCN 0.00420011, 진행 중인 XSimGCL 0.00504616이다. 최종 test/3-seed 결과가 아니다.
 

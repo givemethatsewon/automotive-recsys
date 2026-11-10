@@ -1,0 +1,2 @@
+# Exact source transcript copies retain original whitespace.
+docs/sources/meeting-transcript.txt -text -whitespace

@@ -1,0 +1,59 @@
+{
+  "archived_at": "2026-11-10T09:18:24.817468+00:00",
+  "sources": [
+    {
+      "kind": "proposal",
+      "url": "https://app.notion.com/p/40de3a7d940880d5acb2f73f3bb48b1e?pvs=204",
+      "page_last_edited_at": "2026-11-03T08:59:01.645Z",
+      "response_as_of": "2026-11-03T08:59:22.602Z",
+      "verification": {
+        "state": "unverified"
+      },
+      "archive_observed_at": "2026-11-10T09:18:24.817468+00:00",
+      "local_file": "docs/sources/proposal.notion.md",
+      "sha256": "9fa890c41f916761dbc197136dab944107aff10aa76e065e250fb3af769128f7",
+      "truncated": "not reported",
+      "unknown_block_count": "not reported"
+    },
+    {
+      "kind": "project-overview",
+      "url": "https://app.notion.com/p/40de3a7d9408803eb856e3efecedf8a1?pvs=204",
+      "page_last_edited_at": "2026-11-04T17:54:28.914Z",
+      "response_as_of": "2026-11-04T17:54:31.251Z",
+      "verification": {
+        "state": "unverified"
+      },
+      "archive_observed_at": "2026-11-10T09:18:24.817468+00:00",
+      "local_file": "docs/sources/project-overview.notion.md",
+      "sha256": "13306d1dac55ce78580611e3c9bae688fdf475f2eeb56a715c1bf81a3dfc8cb8",
+      "truncated": "not reported",
+      "unknown_block_count": "not reported"
+    },
+    {
+      "kind": "course-syllabus",
+      "source_path": "/Users/givemethatsewon/Library/Mobile Documents/iCloud~md~obsidian/Documents/SecondBrain/University/Course/빅데이터/빅 데이터 01분반에 대한 수업 계획서.pdf",
+      "local_file": "docs/sources/course-syllabus.pdf",
+      "sha256": "4a0823767b673d17edf8495705eaa6d96722a77c5b3a482e025ae28cf0b1fc8b",
+      "archive_observed_at": "2026-11-10T09:18:24.817468+00:00"
+    }
+  ],
+  "meeting_transcript": {
+    "archived_at": "2026-11-10T09:17:02.326879+00:00",
+    "source_path": "/Users/givemethatsewon/Downloads/빅데이터 회의.txt",
+    "local_path": "docs/sources/meeting-transcript.txt",
+    "bytes": 13621,
+    "sha256": "cd721527934efdc1fcca50e3760bc278cedd626ed50bc3bb78db58392d8f66de",
+    "meeting_date": "unconfirmed",
+    "note": "Original bytes preserved. Automatic transcript has recognition errors; speaker numbers are not verified person identities."
+  },
+  "supporting_documents": [
+    {
+      "local_file": "docs/sources/README.md",
+      "sha256": "638fe4ac148dc95deb937088b09b29706921b7c1b625cb460239921c82513069"
+    },
+    {
+      "local_file": "docs/sources/conversation-decisions.md",
+      "sha256": "8d13264cf1b3b9b92c61fa1e9c31398d8446f455f1ab24d91a9fb223eaa86f06"
+    }
+  ]
+}

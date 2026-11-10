@@ -1,0 +1,32 @@
+{
+  "checked_at": "2026-11-10T09:18:37.022765+00:00",
+  "active_assignments": 0,
+  "balance_cu": 100.1381036922414,
+  "rate_cu_hour": 0.0,
+  "cost": {
+    "time": "2026-11-06T22:00:53.721613+00:00",
+    "initial_balance_cu": 174.92670031227877,
+    "current_balance_cu": 100.1381036922414,
+    "account_delta_cu": 74.78859662003737,
+    "account_rate_cu_hour": 0.0,
+    "effective_budget_cu": 130.0,
+    "stop_requested": false,
+    "stop_reason": "isolated_environment_ready_to_retry",
+    "note": "Account-level observations include any other concurrent Colab usage; no fabricated per-run CU attribution."
+  },
+  "report_sha256": {
+    "RESULTS.html": "6edbc575384a79845123a9d6ef9c69749d8d9f285b08174a6e5588efa5b54ad1",
+    "RESULTS.md": "f009c3f0928b9807e6519e95ddde0742c5886d47069ea444e5ae0d5df98e10aa",
+    "ablation_results.csv": "d2f51757c9fa85b8cd30916a625fc1bb9b8d58b58041cb7421b92cf5453b9425",
+    "all_seed_results.csv": "8e2fb9096ad44c83303d59cc21e2f9fbed782e1e2562438ebd4e768ab1d18fb6",
+    "completion.json": "2b298ab289189489da80f5fc71aaec8305103de1ba133d17a458270ab5499338",
+    "depth_results.csv": "08d442b097aede356670642d2950e661676340d8eaeb18b5eb9477be26833d5d",
+    "figures/accuracy_tail.png": "23cdd6274bfbf68b97a74861ca165393c5a6e39b8f3973f3cdc00ac90bc02a5b",
+    "figures/depth_ablation.png": "cb4d52abb07599b731d93ac00444ff54c3bf6202eb0612b5e7328821474c06bb",
+    "figures/learning_curves.png": "347276fd589f174a163c3255134340524e9264becd28dc85fc47cee6bd2a0e48",
+    "group_results.csv": "42923c9fa59bc898896227a5d7fd95cc4891fed02879770a9f4bcfffddc6f6e8",
+    "model_comparison.csv": "0e00fe9fa16e704e6dca00e7a24e7b616b3c76e82b2578a2fd524a01be32f61d",
+    "paired_differences.csv": "089f92a1b32c4bbd5976fbbb3e5bb05ed8ff23194a034765fd26d416d0edbd40",
+    "timing_cost.csv": "9d4bf0c16c677207d7fe0dd6ba84f314ccf6c8265c82aa0659cc8acdb36996b9"
+  }
+}
