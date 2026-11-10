@@ -113,6 +113,7 @@ XSimGCL은 정확도가 가장 높지만 비인기 노출은 거의 0이다. 3-s
 | `docs/MEETING_NOTES.md` | 녹음 시각별 결정·토론 중 제안·후속 적용의 대응. |
 | `docs/RESULTS_FINAL.md`, `docs/results/final/` | 32/32 완료 결과와 3-seed/paired CI/그림/HTML. Git으로 함께 이동 가능. |
 | `docs/explainers/experiment-results-eli5.html` | 사용자가 실험을 이해하고 설명하기 위한 ELI5 시각 설명서. 모델·지표·결과·불확실성 조작과 발표 원고를 포함한 단일 오프라인 HTML. |
+| `docs/explainers/experiment-results-explainer.html` | 같은 결과를 "10칸 진열대" 비유로 다시 구성한 두 번째 설명서. 결과 산점도·NDCG/APLT 계산기·CL 제거·층 수·paired CI 조작. `scripts/build_results_explainer.py`로 CSV에서 재생성. |
 | `src/automotive_recsys/` | 입력 검사·GPU 수식·학습·평가·복구·집계 구현. |
 | `data` | `/Users/givemethatsewon/Downloads/processed`로 가는 읽기용 심볼릭 링크. 원본 데이터를 복제해 Git에 넣지 않는다. |
 | `results/campaigns/automotive-20261104T204146Z/` | 로컬 실행/수집 기록. Git 제외. |

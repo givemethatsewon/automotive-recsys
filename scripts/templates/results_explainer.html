@@ -1,0 +1,307 @@
+<title>10칸 진열대 실험</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: one reading column; each section = claim → big figure you can poke → why. */
+:root{
+  --paper:#fbfcfe; --ink:#14243a; --soft:#5b6b80; --line:#dbe2ec; --panel:#f1f5fa;
+  --accent:#2457d6; --tail:#c76a12; --tail-bg:#fdf1e4; --hit:#13784a; --hit-bg:#e5f4ec;
+  --c-pop:#7d8796; --c-bpr:#1f8f84; --c-lgcn:#2457d6; --c-xsim:#b0336b; --c-cl0:#b0336b;
+  --font: -apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;
+  --mono: ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0f1724; --ink:#e6edf6; --soft:#9aabc0; --line:#27354a; --panel:#172234;
+  --accent:#7aa2ff; --tail:#f0a050; --tail-bg:#3a2a17; --hit:#4fd08f; --hit-bg:#14332a;
+  --c-pop:#9aa4b2; --c-bpr:#4cc3b6; --c-lgcn:#7aa2ff; --c-xsim:#f074aa; --c-cl0:#f074aa; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0f1724; --ink:#e6edf6; --soft:#9aabc0; --line:#27354a; --panel:#172234;
+  --accent:#7aa2ff; --tail:#f0a050; --tail-bg:#3a2a17; --hit:#4fd08f; --hit-bg:#14332a;
+  --c-pop:#9aa4b2; --c-bpr:#4cc3b6; --c-lgcn:#7aa2ff; --c-xsim:#f074aa; --c-cl0:#f074aa; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.7;word-break:keep-all;overflow-wrap:break-word;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1040px;margin:0 auto;padding-block:0}
+.wrap>*{min-width:0}
+h1,h2,h3{text-wrap:balance;letter-spacing:-.035em;margin:0}
+h1{font-size:clamp(34px,5vw,60px);line-height:1.18;font-weight:760}
+h2{font-size:clamp(25px,3.2vw,36px);line-height:1.3;font-weight:720}
+h3{font-size:19px;line-height:1.4;font-weight:700}
+p{margin:0}
+.eyebrow{font-size:13px;letter-spacing:.14em;font-weight:700;color:var(--accent)}
+.lead{color:var(--soft);font-size:19px;max-width:680px}
+.small{font-size:14px;color:var(--soft)}
+.prose{display:grid;gap:14px;max-width:700px}
+header.hero{padding-block:64px 26px;display:grid;gap:18px}
+header .lead b{color:var(--ink)}
+section{border-top:1px solid var(--line);padding-block:56px;display:grid;gap:24px;scroll-margin-top:16px}
+.head{display:grid;gap:10px}
+.stage{background:var(--panel);border-radius:10px;padding:clamp(16px,3vw,30px);display:grid;gap:18px;min-width:0}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.controls .label{font-size:13px;color:var(--soft);margin-right:4px}
+.pill{font:inherit;font-size:15px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:8px 16px;min-height:40px;cursor:pointer}
+.pill[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.pill:hover{border-color:var(--soft)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #e4a63f;outline-offset:3px}
+select,input[type=range]{font:inherit;font-size:15px;accent-color:var(--accent)}
+select{padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);min-height:40px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+@media(max-width:820px){.grid2,.grid4{grid-template-columns:minmax(0,1fr)}}
+.scroll{overflow-x:auto;max-width:100%}
+svg.fig{display:block;width:100%;height:auto}
+svg text{fill:var(--ink);font-family:var(--font)}
+svg .muted{fill:var(--soft)}
+.callout{border-left:3px solid var(--accent);padding:4px 0 4px 16px;max-width:720px}
+.callout.warn{border-color:var(--tail)}
+.tnum{font-variant-numeric:tabular-nums}
+math{font-family:'STIX Two Math','Cambria Math','STIXGeneral',serif;font-size:1.08em}
+.formula{overflow-x:auto;max-width:100%;padding:4px 0}
+.formula math[display=block]{margin:6px 0}
+/* hero */
+.detail{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 18px}
+.detail div{display:grid}
+.detail .k{font-size:12.5px;color:var(--soft);letter-spacing:.02em}
+.detail .v{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+@media(max-width:600px){.detail{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.legendnote{font-size:13.5px;color:var(--soft)}
+/* timeline */
+.steps{display:flex;gap:8px;flex-wrap:wrap}
+.stepnote{min-height:5.2em;max-width:720px}
+/* shelf */
+.shelf{display:grid;grid-template-columns:repeat(10,minmax(54px,1fr));gap:8px;min-width:580px}
+.slot{font:inherit;border:2px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:10px 4px 8px;display:grid;gap:4px;justify-items:center;cursor:pointer;min-height:96px}
+.slot .r{font-size:13px;color:var(--soft)}
+.slot .ico{width:30px;height:30px;border-radius:6px;background:var(--line)}
+.slot .tag{font-size:11.5px;line-height:1.25;min-height:2.5em;text-align:center}
+.slot.hit{border-color:var(--hit);background:var(--hit-bg)}
+.slot.hit .ico{background:var(--hit)}
+.slot.tail .ico{box-shadow:inset 0 0 0 4px var(--tail);}
+.slot.tail{outline:2px dashed var(--tail);outline-offset:2px}
+.results{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.results div{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:grid}
+.results .k{font-size:12.5px;color:var(--soft)}
+.results .v{font-size:24px;font-weight:720;font-variant-numeric:tabular-nums}
+@media(max-width:600px){.results{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stepper{display:inline-flex;align-items:center;gap:6px}
+.stepper button{width:40px;height:40px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font:inherit;font-size:20px;cursor:pointer}
+.stepper output{min-width:2ch;text-align:center;font-weight:700;font-size:20px}
+.why{background:var(--paper);border-radius:8px;padding:14px 16px;border:1px solid var(--line)}
+canvas{display:block;max-width:100%;height:auto;image-rendering:pixelated}
+.dotrow{display:grid;grid-template-columns:minmax(0,auto) minmax(0,1fr);gap:22px;align-items:center}
+@media(max-width:700px){.dotrow{grid-template-columns:minmax(0,1fr)}}
+.bignum{font-size:clamp(40px,6vw,64px);font-weight:780;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+/* model cards */
+.card{background:var(--panel);border-radius:10px;padding:16px;display:grid;gap:10px;align-content:start}
+.card .sw{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:1px}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:15px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-size:13px;color:var(--soft);font-weight:600}
+.limits{display:grid;gap:12px;max-width:760px;padding-left:20px;margin:0}
+.oneliner{font-size:clamp(21px,2.8vw,30px);font-weight:680;letter-spacing:-.03em;line-height:1.5;max-width:820px}
+footer{border-top:1px solid var(--line);padding-block:28px 48px;font-size:13px;color:var(--soft);display:grid;gap:6px}
+code{font-family:var(--mono);font-size:.88em}
+@media(prefers-reduced-motion:no-preference){svg .pt{transition:transform .35s ease}}
+</style>
+
+<div class="wrap">
+<header class="hero">
+  <p class="eyebrow">자동차용품 추천 · 최종 실험 32/32 · 2026-11-07 완료</p>
+  <h1>정확도 1등은 XSimGCL,<br>비인기 상품을 가장 많이 보여준 건 LightGCN</h1>
+  <p class="lead">상품 <b>248,186개</b> 중 한 사람에게 <b>10개</b>만 추천하는 시험을 네 모델에게 똑같이 치르게 했어요. 정답을 가장 잘 맞힌 모델과 덜 알려진 상품을 보여준 모델이 서로 달랐습니다. 아래 그림이 결과 전체예요. 점을 눌러 보세요.</p>
+</header>
+
+<section id="map" aria-labelledby="map-h">
+  <div class="head"><h2 id="map-h">한 장으로 보는 결과</h2>
+  <p class="small">위로 갈수록 정답을 잘 맞힘(NDCG@10), 오른쪽으로 갈수록 비인기 상품을 많이 보여줌(APLT@10). 학습 모델은 seed 3개 평균이고, 막대는 seed 간 표준편차예요.</p></div>
+  <div class="stage">
+    <div class="controls" role="group" aria-label="사용자 그룹">
+      <span class="label">사용자</span>
+      <button class="pill" data-group="all" aria-pressed="true">전체 158,805명</button>
+      <button class="pill" data-group="1-5" aria-pressed="false">과거 리뷰 1–5개</button>
+      <button class="pill" data-group="6+" aria-pressed="false">과거 리뷰 6개 이상</button>
+      <span class="label" style="margin-left:12px">보조 실험</span>
+      <button class="pill" id="toggle-cl0" aria-pressed="false">XSimGCL 대조학습 끔(CL=0)</button>
+    </div>
+    <div class="scroll"><svg id="scatter" class="fig" viewBox="0 0 760 420" role="img" aria-label="모델별 NDCG와 APLT 산점도"></svg></div>
+    <div id="detail" class="detail" aria-live="polite"></div>
+    <p id="detail-note" class="legendnote"></p>
+  </div>
+</section>
+
+<section id="rules" aria-labelledby="rules-h">
+  <div class="head"><p class="eyebrow">1 · 시험 규칙</p>
+  <h2 id="rules-h">미래 리뷰를 맞히는 시험, 답안지는 마지막에 한 번만 열어요</h2>
+  <p class="lead">데이터는 아마존 자동차용품 리뷰예요. 누가 어떤 상품에 리뷰를 남겼는지(남겼다=1)만 씁니다. 별점은 쓰지 않아요. 날짜로 세 구간을 나눠 각 구간에 역할을 하나씩 줬어요.</p></div>
+  <div class="stage">
+    <div class="scroll"><svg id="timeline" class="fig" viewBox="0 0 760 170" role="img" aria-label="train, valid, test 기간과 역할"></svg></div>
+    <div class="steps" role="group" aria-label="시험 단계">
+      <button class="pill" data-step="0" aria-pressed="true">① 공부</button>
+      <button class="pill" data-step="1" aria-pressed="false">② 모의고사</button>
+      <button class="pill" data-step="2" aria-pressed="false">③ 설정 고정</button>
+      <button class="pill" data-step="3" aria-pressed="false">④ 본시험</button>
+    </div>
+    <div id="stepnote" class="stepnote" aria-live="polite"></div>
+  </div>
+  <p class="callout small">본시험(test) 사용자는 train에 리뷰가 1개 이상 있는 <b>158,805명</b>이고 정답은 <b>333,797개</b>예요. 처음 보는 사용자(cold-start)는 시험에 없어요. 원래 test 리뷰의 약 55.2%만 남았는데, 이 비율은 사용자 유지율이 아닙니다.</p>
+</section>
+
+<section id="score" aria-labelledby="score-h">
+  <div class="head"><p class="eyebrow">2 · 채점 방법</p>
+  <h2 id="score-h">10칸 진열대에 점수 매기기</h2>
+  <p class="lead">모델은 사용자마다 상품 10개를 순서대로 고릅니다. 칸을 눌러 어느 칸이 정답인지, 어느 칸이 비인기 상품인지 바꿔 보세요. 아래 계산이 따라 바뀝니다.</p></div>
+  <div class="stage">
+    <div class="controls" role="group" aria-label="연필 선택">
+      <span class="label">칸을 누르면</span>
+      <button class="pill" id="mode-hit" aria-pressed="true">정답 표시/해제</button>
+      <button class="pill" id="mode-tail" aria-pressed="false">비인기 표시/해제</button>
+      <span class="label" style="margin-left:12px">예시</span>
+      <button class="pill" data-preset="a">정답 1개가 3위</button>
+      <button class="pill" data-preset="b">정답 2개 중 1위만</button>
+      <button class="pill" data-preset="c">정답이 10칸 밖</button>
+      <button class="pill" data-preset="d">비인기 2칸</button>
+    </div>
+    <div class="scroll"><div class="shelf" id="shelf"></div></div>
+    <div class="controls">
+      <span class="label">이 사용자의 test 정답 수 <span id="gsym"></span></span>
+      <span class="stepper"><button id="g-minus" aria-label="정답 수 줄이기">−</button><output id="g-out" aria-live="polite">1</output><button id="g-plus" aria-label="정답 수 늘리기">+</button></span>
+      <span class="small" id="g-hint"></span>
+    </div>
+    <div class="results tnum" id="results"></div>
+    <div class="why">
+      <div class="formula" id="calc"></div>
+      <p id="calc-why" class="small" style="color:var(--ink)"></p>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="prose">
+      <h3>왜 위 칸일수록 점수가 큰가</h3>
+      <p>사람은 진열대 왼쪽부터 봐요. 그래서 NDCG는 r번째 칸의 정답에 <span data-tex="\frac{1}{\log_2(r+1)}"></span>점을 줍니다. 1위는 1점, 3위는 0.5점, 10위는 약 0.289점이에요. 이 합이 DCG예요.</p>
+      <p>정답이 많은 사람은 점수를 받기 쉬우니, 정답을 가장 좋게 배치했을 때의 점수(IDCG)로 나눠 0~1로 맞춥니다. 진열대가 10칸이라 IDCG는 정답이 10개를 넘어도 10칸까지만 더해요.</p>
+    </div>
+    <div class="formula" style="font-size:1.05em">
+      <span data-tex-block="\mathrm{DCG}=\sum_{r=1}^{10}\frac{\mathrm{rel}_r}{\log_2(r+1)},\qquad \mathrm{IDCG}=\sum_{r=1}^{\min(|G|,10)}\frac{1}{\log_2(r+1)}"></span>
+      <span data-tex-block="\mathrm{NDCG@10}=\frac{\mathrm{DCG}}{\mathrm{IDCG}},\qquad \mathrm{Recall@10}=\frac{\text{맞힌 정답 수}}{|G|}"></span>
+      <span data-tex-block="\mathrm{APLT@10}=\frac{\text{비인기 칸 수}}{10}"></span>
+      <p class="small"><span data-tex="\mathrm{rel}_r"></span>은 r번째 칸이 정답이면 1, 아니면 0. <span data-tex="|G|"></span>는 그 사용자의 test 정답 수. 마지막에 이 값들을 158,805명 모두에 대해 평균 냅니다.</p>
+    </div>
+  </div>
+  <p class="callout small"><b>비인기 상품</b>은 train 리뷰가 10개 이하인 상품이에요. 리뷰 11개 이상을 인기 상품으로 정했고, 이 인기 상품들이 train 리뷰의 81.48%를 차지해요. 기준은 train으로만 정했고 test를 보고 다시 정하지 않았어요.</p>
+</section>
+
+<section id="tiny" aria-labelledby="tiny-h">
+  <div class="head"><p class="eyebrow">3 · 점수 읽는 법</p>
+  <h2 id="tiny-h">0.0044는 거의 0처럼 보이지만, 이 시험에서는 원래 그래요</h2>
+  <p class="lead">대부분의 사용자는 10칸 안에 정답이 하나도 없어서 0점을 받아요. 그래서 평균이 작아집니다. 10,000명을 한 칸에 한 명씩 그려 보면 감이 와요.</p></div>
+  <div class="stage">
+    <div class="controls" role="group" aria-label="모델 선택">
+      <span class="label">모델</span>
+      <button class="pill" data-dot="popularity" aria-pressed="false">Popularity</button>
+      <button class="pill" data-dot="bpr_mf" aria-pressed="false">BPR-MF</button>
+      <button class="pill" data-dot="lightgcn" aria-pressed="false">LightGCN</button>
+      <button class="pill" data-dot="xsimgcl" aria-pressed="true">XSimGCL</button>
+    </div>
+    <div class="dotrow">
+      <canvas id="dots" width="400" height="400" aria-label="10,000명 중 10칸 안에 정답이 하나라도 있는 사용자" role="img"></canvas>
+      <div class="prose">
+        <div><div class="bignum" id="dot-n">142</div><p class="small">10,000명 중 10칸 안에 정답이 1개라도 있는 사람 (Hit rate@10)</p></div>
+        <p id="dot-text"></p>
+        <p class="small">칠해진 위치는 설명용 배치예요. 실제 어떤 사용자가 맞혔는지가 아니라 비율만 실제 값입니다.</p>
+      </div>
+    </div>
+  </div>
+  <p class="callout small">절대 점수가 낮은 건 이 실험의 조건 때문이에요. 후보가 25만 개이고, 리뷰는 구매의 일부만 기록하고, 과거에 리뷰한 상품은 다시 추천하지 않아요. 그러니 이 숫자는 모델끼리 비교하는 데 쓰고, 실제 서비스에서 얼마나 잘 맞힐지를 보여 주는 값으로 읽지는 마세요.</p>
+</section>
+
+<section id="models" aria-labelledby="models-h">
+  <div class="head"><p class="eyebrow">4 · 선수 소개</p>
+  <h2 id="models-h">네 모델은 서로 다른 단서로 10칸을 채워요</h2></div>
+  <div class="grid4" id="modelcards"></div>
+  <p class="callout small">세 학습 모델은 모두 64차원 취향 벡터를 배우고, 사용자 벡터와 상품 벡터의 내적이 큰 순서로 10개를 고릅니다. 다른 건 벡터를 만드는 방법이에요. 비교를 공정하게 하려고 세 모델에 같은 L2 정규화를 걸었어요. 그래서 이 XSimGCL은 원 논문 저장소의 설정과 조금 다른 변형입니다.</p>
+</section>
+
+<section id="why" aria-labelledby="why-h">
+  <div class="head"><p class="eyebrow">5 · 의외의 결과</p>
+  <h2 id="why-h">대조학습은 정확도를 올렸지만, 비인기 상품 노출은 늘리지 않았어요</h2>
+  <p class="lead">처음 가설은 XSimGCL의 대조학습이 인기 쏠림을 풀어 비인기 상품을 더 보여줄 거라는 것이었어요. 같은 XSimGCL에서 대조학습만 끄고(CL=0) seed 3개로 다시 돌려 비교했습니다.</p></div>
+  <div class="stage">
+    <div class="controls" role="group" aria-label="대조학습 비교">
+      <span class="label">대조학습</span>
+      <button class="pill" data-cl="cl0" aria-pressed="false">끔 (CL=0)</button>
+      <button class="pill" data-cl="cl1" aria-pressed="true">켬 (CL=0.1, 본실험)</button>
+    </div>
+    <div class="scroll"><svg id="clbars" class="fig" viewBox="0 0 760 300" role="img" aria-label="대조학습 켬/끔 지표 비교"></svg></div>
+    <p id="cl-text" aria-live="polite"></p>
+    <div class="formula"><span data-tex-block="\frac{0.00441927-0.00414158}{0.00414158}\approx+6.70\%\quad(\text{NDCG@10, 켬 대비 끔})"></span></div>
+  </div>
+  <div class="grid2">
+    <div class="prose">
+      <h3>XSimGCL은 무엇을 추천했나</h3>
+      <p>XSimGCL이 추천한 상품의 평균 train 리뷰 수(ARP)는 약 1,101개로 LightGCN(약 1,598개)보다 낮아요. 그런데 비인기 비율은 거의 0이고, 10칸에 한 번이라도 등장한 상품 종류는 LightGCN의 약 1/4이에요.</p>
+      <p>즉 "가장 유명한 상품만"은 아니지만, 리뷰 11개 기준선 아래로는 거의 내려가지 않고 좁은 상품군 안에서 골랐어요. 평균 인기도(ARP)가 낮아진 것과 비인기 노출이 늘어난 것은 서로 다른 이야기입니다.</p>
+    </div>
+    <div class="scroll"><table id="exposure"></table></div>
+  </div>
+  <p class="callout warn small">이 비교는 이번 학습 설정 하나에서 나온 관측이에요. 대조학습이 원래 비인기 노출을 줄인다고 일반화할 수는 없어요. CL=0 세 실행은 모두 100 epoch 상한까지 돌았고(best epoch 75/60/75), 충분히 수렴했다는 보장은 없습니다.</p>
+</section>
+
+<section id="depth" aria-labelledby="depth-h">
+  <div class="head"><p class="eyebrow">6 · 그래프를 몇 칸 건너 볼까</p>
+  <h2 id="depth-h">LightGCN은 층을 늘릴수록 정답을 더 맞혔어요</h2>
+  <p class="lead">층 1개는 "내가 산 상품"까지, 2개는 "그 상품을 산 다른 사람"까지, 3개는 "그 사람이 산 다른 상품"까지 신호가 퍼진다는 뜻이에요.</p></div>
+  <div class="stage">
+    <label class="controls" for="depth-range"><span class="label">층 수</span>
+      <input type="range" id="depth-range" min="1" max="3" step="1" value="3" style="width:200px">
+      <output id="depth-out" style="font-weight:700">3층</output></label>
+    <div class="scroll"><svg id="depthfig" class="fig" viewBox="0 0 760 250" role="img" aria-label="LightGCN 층 수별 NDCG와 APLT"></svg></div>
+    <p id="depth-text" aria-live="polite"></p>
+  </div>
+</section>
+
+<section id="trust" aria-labelledby="trust-h">
+  <div class="head"><p class="eyebrow">7 · 우연은 아닐까</p>
+  <h2 id="trust-h">흔들림을 두 가지 방법으로 쟀어요</h2>
+  <p class="lead"><b>seed 표준편차</b>는 같은 모델을 초기값만 바꿔 세 번 학습했을 때 점수가 얼마나 흔들리는지예요. <b>paired 신뢰구간</b>은 학습을 고정해 두고, "같은 사용자"에게 두 모델 점수 차이를 잰 뒤 사용자 158,805명을 500번 다시 뽑아(bootstrap) 그 차이가 얼마나 흔들리는지예요.</p></div>
+  <div class="stage">
+    <div class="controls">
+      <label for="pair" class="label">비교</label>
+      <select id="pair"></select>
+      <span class="label" style="margin-left:8px">지표</span>
+      <button class="pill" data-metric="ndcg" aria-pressed="true">NDCG@10</button>
+      <button class="pill" data-metric="aplt" aria-pressed="false">APLT@10</button>
+    </div>
+    <div class="formula"><span id="pair-formula"></span></div>
+    <div class="scroll"><svg id="cifig" class="fig" viewBox="0 0 760 210" role="img" aria-label="seed별 사용자 paired 95% 신뢰구간"></svg></div>
+    <p id="ci-text" aria-live="polite"></p>
+  </div>
+  <p class="callout small">seed마다 따로 구간을 냈어요. seed 3개 × 15만 명을 서로 독립된 47만 명처럼 합치면 구간이 실제보다 좁아지기 때문이에요. 그래서 이 구간은 "seed까지 통틀어 95%"라는 뜻이 아닙니다.</p>
+</section>
+
+<section id="limits" aria-labelledby="limits-h">
+  <div class="head"><p class="eyebrow">8 · 이 결과가 말하지 않는 것</p>
+  <h2 id="limits-h">해석 범위</h2></div>
+  <ul class="limits">
+    <li><b>차종·텍스트 재정렬은 아직 안 했어요.</b> 특징 파일이 아직 오지 않았어요. 제안서의 "차종 정보로 비인기 용품 추천" 부분은 이번 32개 실험 범위 밖이에요.</li>
+    <li><b>기존 사용자만 평가했어요.</b> train 이력이 0인 사용자에 대한 결과가 아니에요. 그룹 "1–5개"도 이력이 적은 사용자일 뿐 신규 사용자는 아니에요.</li>
+    <li><b>리뷰는 구매의 일부예요.</b> 리뷰가 없다고 싫어했다는 뜻이 아니고, 점수가 실제 구매 전환을 뜻하지도 않아요.</li>
+    <li><b>설정 탐색 범위가 제한적이에요.</b> 다른 학습 레시피에서도 순위가 같다고 보장할 수 없어요. 그래도 모든 선택은 valid로만 했고 test 점수로 고른 것은 없어요.</li>
+  </ul>
+  <div class="stage">
+    <p class="small">발표용 한 문장</p>
+    <p class="oneliner">"같은 15만 명 시험에서 XSimGCL이 가장 정확했지만 비인기 상품은 거의 추천하지 않았고, 비인기 노출이 가장 높았던 건 LightGCN이었습니다. 정확도와 비인기 노출은 따로 측정해야 합니다."</p>
+  </div>
+</section>
+
+<footer>
+  <p>근거: <code>docs/RESULTS_FINAL.md</code>, <code>docs/results/final/*.csv</code>(model_comparison, all_seed_results, depth_results, paired_differences). 실측 수치는 CSV 그대로이고, 채점 연습의 진열대와 점 배치는 설명용 예시예요.</p>
+  <p>평가: 사용자 158,805명 · 정답 333,797개 · 후보 248,186개 전체 순위 · seed 42/43/44 · Popularity는 seed 없이 한 번 계산 · 2026-11-07 06:58 KST 32/32 완료.</p>
+</footer>
+</div>
+
+<script>
+const DATA = __DATA__;
+const TEX = __TEX__;
+</script>
+<script>
+__JS__
+</script>

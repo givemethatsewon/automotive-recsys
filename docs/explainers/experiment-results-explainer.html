@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:">
+<title>10칸 진열대 실험</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: one reading column; each section = claim → big figure you can poke → why. */
+:root{
+  --paper:#fbfcfe; --ink:#14243a; --soft:#5b6b80; --line:#dbe2ec; --panel:#f1f5fa;
+  --accent:#2457d6; --tail:#c76a12; --tail-bg:#fdf1e4; --hit:#13784a; --hit-bg:#e5f4ec;
+  --c-pop:#7d8796; --c-bpr:#1f8f84; --c-lgcn:#2457d6; --c-xsim:#b0336b; --c-cl0:#b0336b;
+  --font: -apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;
+  --mono: ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0f1724; --ink:#e6edf6; --soft:#9aabc0; --line:#27354a; --panel:#172234;
+  --accent:#7aa2ff; --tail:#f0a050; --tail-bg:#3a2a17; --hit:#4fd08f; --hit-bg:#14332a;
+  --c-pop:#9aa4b2; --c-bpr:#4cc3b6; --c-lgcn:#7aa2ff; --c-xsim:#f074aa; --c-cl0:#f074aa; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0f1724; --ink:#e6edf6; --soft:#9aabc0; --line:#27354a; --panel:#172234;
+  --accent:#7aa2ff; --tail:#f0a050; --tail-bg:#3a2a17; --hit:#4fd08f; --hit-bg:#14332a;
+  --c-pop:#9aa4b2; --c-bpr:#4cc3b6; --c-lgcn:#7aa2ff; --c-xsim:#f074aa; --c-cl0:#f074aa; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.7;word-break:keep-all;overflow-wrap:break-word;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1040px;margin:0 auto;padding-block:0}
+.wrap>*{min-width:0}
+h1,h2,h3{text-wrap:balance;letter-spacing:-.035em;margin:0}
+h1{font-size:clamp(34px,5vw,60px);line-height:1.18;font-weight:760}
+h2{font-size:clamp(25px,3.2vw,36px);line-height:1.3;font-weight:720}
+h3{font-size:19px;line-height:1.4;font-weight:700}
+p{margin:0}
+.eyebrow{font-size:13px;letter-spacing:.14em;font-weight:700;color:var(--accent)}
+.lead{color:var(--soft);font-size:19px;max-width:680px}
+.small{font-size:14px;color:var(--soft)}
+.prose{display:grid;gap:14px;max-width:700px}
+header.hero{padding-block:64px 26px;display:grid;gap:18px}
+header .lead b{color:var(--ink)}
+section{border-top:1px solid var(--line);padding-block:56px;display:grid;gap:24px;scroll-margin-top:16px}
+.head{display:grid;gap:10px}
+.stage{background:var(--panel);border-radius:10px;padding:clamp(16px,3vw,30px);display:grid;gap:18px;min-width:0}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.controls .label{font-size:13px;color:var(--soft);margin-right:4px}
+.pill{font:inherit;font-size:15px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:8px 16px;min-height:40px;cursor:pointer}
+.pill[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.pill:hover{border-color:var(--soft)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #e4a63f;outline-offset:3px}
+select,input[type=range]{font:inherit;font-size:15px;accent-color:var(--accent)}
+select{padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);min-height:40px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+@media(max-width:820px){.grid2,.grid4{grid-template-columns:minmax(0,1fr)}}
+.scroll{overflow-x:auto;max-width:100%}
+svg.fig{display:block;width:100%;height:auto}
+svg text{fill:var(--ink);font-family:var(--font)}
+svg .muted{fill:var(--soft)}
+.callout{border-left:3px solid var(--accent);padding:4px 0 4px 16px;max-width:720px}
+.callout.warn{border-color:var(--tail)}
+.tnum{font-variant-numeric:tabular-nums}
+math{font-family:'STIX Two Math','Cambria Math','STIXGeneral',serif;font-size:1.08em}
+.formula{overflow-x:auto;max-width:100%;padding:4px 0}
+.formula math[display=block]{margin:6px 0}
+/* hero */
+.detail{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 18px}
+.detail div{display:grid}
+.detail .k{font-size:12.5px;color:var(--soft);letter-spacing:.02em}
+.detail .v{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+@media(max-width:600px){.detail{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.legendnote{font-size:13.5px;color:var(--soft)}
+/* timeline */
+.steps{display:flex;gap:8px;flex-wrap:wrap}
+.stepnote{min-height:5.2em;max-width:720px}
+/* shelf */
+.shelf{display:grid;grid-template-columns:repeat(10,minmax(54px,1fr));gap:8px;min-width:580px}
+.slot{font:inherit;border:2px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:10px 4px 8px;display:grid;gap:4px;justify-items:center;cursor:pointer;min-height:96px}
+.slot .r{font-size:13px;color:var(--soft)}
+.slot .ico{width:30px;height:30px;border-radius:6px;background:var(--line)}
+.slot .tag{font-size:11.5px;line-height:1.25;min-height:2.5em;text-align:center}
+.slot.hit{border-color:var(--hit);background:var(--hit-bg)}
+.slot.hit .ico{background:var(--hit)}
+.slot.tail .ico{box-shadow:inset 0 0 0 4px var(--tail);}
+.slot.tail{outline:2px dashed var(--tail);outline-offset:2px}
+.results{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.results div{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:grid}
+.results .k{font-size:12.5px;color:var(--soft)}
+.results .v{font-size:24px;font-weight:720;font-variant-numeric:tabular-nums}
+@media(max-width:600px){.results{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stepper{display:inline-flex;align-items:center;gap:6px}
+.stepper button{width:40px;height:40px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font:inherit;font-size:20px;cursor:pointer}
+.stepper output{min-width:2ch;text-align:center;font-weight:700;font-size:20px}
+.why{background:var(--paper);border-radius:8px;padding:14px 16px;border:1px solid var(--line)}
+canvas{display:block;max-width:100%;height:auto;image-rendering:pixelated}
+.dotrow{display:grid;grid-template-columns:minmax(0,auto) minmax(0,1fr);gap:22px;align-items:center}
+@media(max-width:700px){.dotrow{grid-template-columns:minmax(0,1fr)}}
+.bignum{font-size:clamp(40px,6vw,64px);font-weight:780;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+/* model cards */
+.card{background:var(--panel);border-radius:10px;padding:16px;display:grid;gap:10px;align-content:start}
+.card .sw{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:1px}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:15px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-size:13px;color:var(--soft);font-weight:600}
+.limits{display:grid;gap:12px;max-width:760px;padding-left:20px;margin:0}
+.oneliner{font-size:clamp(21px,2.8vw,30px);font-weight:680;letter-spacing:-.03em;line-height:1.5;max-width:820px}
+footer{border-top:1px solid var(--line);padding-block:28px 48px;font-size:13px;color:var(--soft);display:grid;gap:6px}
+code{font-family:var(--mono);font-size:.88em}
+@media(prefers-reduced-motion:no-preference){svg .pt{transition:transform .35s ease}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header class="hero">
+  <p class="eyebrow">자동차용품 추천 · 최종 실험 32/32 · 2026-11-07 완료</p>
+  <h1>정확도 1등은 XSimGCL,<br>비인기 상품을 가장 많이 보여준 건 LightGCN</h1>
+  <p class="lead">상품 <b>248,186개</b> 중 한 사람에게 <b>10개</b>만 추천하는 시험을 네 모델에게 똑같이 치르게 했어요. 정답을 가장 잘 맞힌 모델과 덜 알려진 상품을 보여준 모델이 서로 달랐습니다. 아래 그림이 결과 전체예요. 점을 눌러 보세요.</p>
+</header>
+
+<section id="map" aria-labelledby="map-h">
+  <div class="head"><h2 id="map-h">한 장으로 보는 결과</h2>
+  <p class="small">위로 갈수록 정답을 잘 맞힘(NDCG@10), 오른쪽으로 갈수록 비인기 상품을 많이 보여줌(APLT@10). 학습 모델은 seed 3개 평균이고, 막대는 seed 간 표준편차예요.</p></div>
+  <div class="stage">
+    <div class="controls" role="group" aria-label="사용자 그룹">
+      <span class="label">사용자</span>
+      <button class="pill" data-group="all" aria-pressed="true">전체 158,805명</button>
+      <button class="pill" data-group="1-5" aria-pressed="false">과거 리뷰 1–5개</button>
+      <button class="pill" data-group="6+" aria-pressed="false">과거 리뷰 6개 이상</button>
+      <span class="label" style="margin-left:12px">보조 실험</span>
+      <button class="pill" id="toggle-cl0" aria-pressed="false">XSimGCL 대조학습 끔(CL=0)</button>
+    </div>
+    <div class="scroll"><svg id="scatter" class="fig" viewBox="0 0 760 420" role="img" aria-label="모델별 NDCG와 APLT 산점도"></svg></div>
+    <div id="detail" class="detail" aria-live="polite"></div>
+    <p id="detail-note" class="legendnote"></p>
+  </div>
+</section>
+
+<section id="rules" aria-labelledby="rules-h">
+  <div class="head"><p class="eyebrow">1 · 시험 규칙</p>
+  <h2 id="rules-h">미래 리뷰를 맞히는 시험, 답안지는 마지막에 한 번만 열어요</h2>
+  <p class="lead">데이터는 아마존 자동차용품 리뷰예요. 누가 어떤 상품에 리뷰를 남겼는지(남겼다=1)만 씁니다. 별점은 쓰지 않아요. 날짜로 세 구간을 나눠 각 구간에 역할을 하나씩 줬어요.</p></div>
+  <div class="stage">
+    <div class="scroll"><svg id="timeline" class="fig" viewBox="0 0 760 170" role="img" aria-label="train, valid, test 기간과 역할"></svg></div>
+    <div class="steps" role="group" aria-label="시험 단계">
+      <button class="pill" data-step="0" aria-pressed="true">① 공부</button>
+      <button class="pill" data-step="1" aria-pressed="false">② 모의고사</button>
+      <button class="pill" data-step="2" aria-pressed="false">③ 설정 고정</button>
+      <button class="pill" data-step="3" aria-pressed="false">④ 본시험</button>
+    </div>
+    <div id="stepnote" class="stepnote" aria-live="polite"></div>
+  </div>
+  <p class="callout small">본시험(test) 사용자는 train에 리뷰가 1개 이상 있는 <b>158,805명</b>이고 정답은 <b>333,797개</b>예요. 처음 보는 사용자(cold-start)는 시험에 없어요. 원래 test 리뷰의 약 55.2%만 남았는데, 이 비율은 사용자 유지율이 아닙니다.</p>
+</section>
+
+<section id="score" aria-labelledby="score-h">
+  <div class="head"><p class="eyebrow">2 · 채점 방법</p>
+  <h2 id="score-h">10칸 진열대에 점수 매기기</h2>
+  <p class="lead">모델은 사용자마다 상품 10개를 순서대로 고릅니다. 칸을 눌러 어느 칸이 정답인지, 어느 칸이 비인기 상품인지 바꿔 보세요. 아래 계산이 따라 바뀝니다.</p></div>
+  <div class="stage">
+    <div class="controls" role="group" aria-label="연필 선택">
+      <span class="label">칸을 누르면</span>
+      <button class="pill" id="mode-hit" aria-pressed="true">정답 표시/해제</button>
+      <button class="pill" id="mode-tail" aria-pressed="false">비인기 표시/해제</button>
+      <span class="label" style="margin-left:12px">예시</span>
+      <button class="pill" data-preset="a">정답 1개가 3위</button>
+      <button class="pill" data-preset="b">정답 2개 중 1위만</button>
+      <button class="pill" data-preset="c">정답이 10칸 밖</button>
+      <button class="pill" data-preset="d">비인기 2칸</button>
+    </div>
+    <div class="scroll"><div class="shelf" id="shelf"></div></div>
+    <div class="controls">
+      <span class="label">이 사용자의 test 정답 수 <span id="gsym"></span></span>
+      <span class="stepper"><button id="g-minus" aria-label="정답 수 줄이기">−</button><output id="g-out" aria-live="polite">1</output><button id="g-plus" aria-label="정답 수 늘리기">+</button></span>
+      <span class="small" id="g-hint"></span>
+    </div>
+    <div class="results tnum" id="results"></div>
+    <div class="why">
+      <div class="formula" id="calc"></div>
+      <p id="calc-why" class="small" style="color:var(--ink)"></p>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="prose">
+      <h3>왜 위 칸일수록 점수가 큰가</h3>
+      <p>사람은 진열대 왼쪽부터 봐요. 그래서 NDCG는 r번째 칸의 정답에 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><msub><mi>log</mi><mn>2</mn></msub><mo stretchy="false">&#x00028;</mo><mi>r</mi><mo>&#x0002B;</mo><mn>1</mn><mo stretchy="false">&#x00029;</mo></mrow></mfrac></mrow></math>점을 줍니다. 1위는 1점, 3위는 0.5점, 10위는 약 0.289점이에요. 이 합이 DCG예요.</p>
+      <p>정답이 많은 사람은 점수를 받기 쉬우니, 정답을 가장 좋게 배치했을 때의 점수(IDCG)로 나눠 0~1로 맞춥니다. 진열대가 10칸이라 IDCG는 정답이 10개를 넘어도 10칸까지만 더해요.</p>
+    </div>
+    <div class="formula" style="font-size:1.05em">
+      <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mrow><mi mathvariant="normal">D</mi><mi mathvariant="normal">C</mi><mi mathvariant="normal">G</mi></mrow><mo>&#x0003D;</mo><munderover><mo>&#x02211;</mo><mrow><mi>r</mi><mo>&#x0003D;</mo><mn>1</mn></mrow><mrow><mn>10</mn></mrow></munderover><mfrac><mrow><msub><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">l</mi></mrow><mi>r</mi></msub></mrow><mrow><msub><mi>log</mi><mn>2</mn></msub><mo stretchy="false">&#x00028;</mo><mi>r</mi><mo>&#x0002B;</mo><mn>1</mn><mo stretchy="false">&#x00029;</mo></mrow></mfrac><mo>&#x0002C;</mo><mspace width="2em" /><mrow><mi mathvariant="normal">I</mi><mi mathvariant="normal">D</mi><mi mathvariant="normal">C</mi><mi mathvariant="normal">G</mi></mrow><mo>&#x0003D;</mo><munderover><mo>&#x02211;</mo><mrow><mi>r</mi><mo>&#x0003D;</mo><mn>1</mn></mrow><mrow><mo>min</mo><mo stretchy="false">&#x00028;</mo><mo stretchy="false">&#x0007C;</mo><mi>G</mi><mo stretchy="false">&#x0007C;</mo><mo>&#x0002C;</mo><mn>10</mn><mo stretchy="false">&#x00029;</mo></mrow></munderover><mfrac><mrow><mn>1</mn></mrow><mrow><msub><mi>log</mi><mn>2</mn></msub><mo stretchy="false">&#x00028;</mo><mi>r</mi><mo>&#x0002B;</mo><mn>1</mn><mo stretchy="false">&#x00029;</mo></mrow></mfrac></mrow></math>
+      <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mrow><mi mathvariant="normal">N</mi><mi mathvariant="normal">D</mi><mi mathvariant="normal">C</mi><mi mathvariant="normal">G</mi><mi mathvariant="normal">@</mi><mn>10</mn></mrow><mo>&#x0003D;</mo><mfrac><mrow><mrow><mi mathvariant="normal">D</mi><mi mathvariant="normal">C</mi><mi mathvariant="normal">G</mi></mrow></mrow><mrow><mrow><mi mathvariant="normal">I</mi><mi mathvariant="normal">D</mi><mi mathvariant="normal">C</mi><mi mathvariant="normal">G</mi></mrow></mrow></mfrac><mo>&#x0002C;</mo><mspace width="2em" /><mrow><mi mathvariant="normal">R</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">@</mi><mn>10</mn></mrow><mo>&#x0003D;</mo><mfrac><mrow><mtext>맞힌&#x000A0;정답&#x000A0;수</mtext></mrow><mrow><mo stretchy="false">&#x0007C;</mo><mi>G</mi><mo stretchy="false">&#x0007C;</mo></mrow></mfrac></mrow></math>
+      <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mrow><mi mathvariant="normal">A</mi><mi mathvariant="normal">P</mi><mi mathvariant="normal">L</mi><mi mathvariant="normal">T</mi><mi mathvariant="normal">@</mi><mn>10</mn></mrow><mo>&#x0003D;</mo><mfrac><mrow><mtext>비인기&#x000A0;칸&#x000A0;수</mtext></mrow><mrow><mn>10</mn></mrow></mfrac></mrow></math>
+      <p class="small"><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">l</mi></mrow><mi>r</mi></msub></mrow></math>은 r번째 칸이 정답이면 1, 아니면 0. <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mo stretchy="false">&#x0007C;</mo><mi>G</mi><mo stretchy="false">&#x0007C;</mo></mrow></math>는 그 사용자의 test 정답 수. 마지막에 이 값들을 158,805명 모두에 대해 평균 냅니다.</p>
+    </div>
+  </div>
+  <p class="callout small"><b>비인기 상품</b>은 train 리뷰가 10개 이하인 상품이에요. 리뷰 11개 이상을 인기 상품으로 정했고, 이 인기 상품들이 train 리뷰의 81.48%를 차지해요. 기준은 train으로만 정했고 test를 보고 다시 정하지 않았어요.</p>
+</section>
+
+<section id="tiny" aria-labelledby="tiny-h">
+  <div class="head"><p class="eyebrow">3 · 점수 읽는 법</p>
+  <h2 id="tiny-h">0.0044는 거의 0처럼 보이지만, 이 시험에서는 원래 그래요</h2>
+  <p class="lead">대부분의 사용자는 10칸 안에 정답이 하나도 없어서 0점을 받아요. 그래서 평균이 작아집니다. 10,000명을 한 칸에 한 명씩 그려 보면 감이 와요.</p></div>
+  <div class="stage">
+    <div class="controls" role="group" aria-label="모델 선택">
+      <span class="label">모델</span>
+      <button class="pill" data-dot="popularity" aria-pressed="false">Popularity</button>
+      <button class="pill" data-dot="bpr_mf" aria-pressed="false">BPR-MF</button>
+      <button class="pill" data-dot="lightgcn" aria-pressed="false">LightGCN</button>
+      <button class="pill" data-dot="xsimgcl" aria-pressed="true">XSimGCL</button>
+    </div>
+    <div class="dotrow">
+      <canvas id="dots" width="400" height="400" aria-label="10,000명 중 10칸 안에 정답이 하나라도 있는 사용자" role="img"></canvas>
+      <div class="prose">
+        <div><div class="bignum" id="dot-n">142</div><p class="small">10,000명 중 10칸 안에 정답이 1개라도 있는 사람 (Hit rate@10)</p></div>
+        <p id="dot-text"></p>
+        <p class="small">칠해진 위치는 설명용 배치예요. 실제 어떤 사용자가 맞혔는지가 아니라 비율만 실제 값입니다.</p>
+      </div>
+    </div>
+  </div>
+  <p class="callout small">절대 점수가 낮은 건 이 실험의 조건 때문이에요. 후보가 25만 개이고, 리뷰는 구매의 일부만 기록하고, 과거에 리뷰한 상품은 다시 추천하지 않아요. 그러니 이 숫자는 모델끼리 비교하는 데 쓰고, 실제 서비스에서 얼마나 잘 맞힐지를 보여 주는 값으로 읽지는 마세요.</p>
+</section>
+
+<section id="models" aria-labelledby="models-h">
+  <div class="head"><p class="eyebrow">4 · 선수 소개</p>
+  <h2 id="models-h">네 모델은 서로 다른 단서로 10칸을 채워요</h2></div>
+  <div class="grid4" id="modelcards"></div>
+  <p class="callout small">세 학습 모델은 모두 64차원 취향 벡터를 배우고, 사용자 벡터와 상품 벡터의 내적이 큰 순서로 10개를 고릅니다. 다른 건 벡터를 만드는 방법이에요. 비교를 공정하게 하려고 세 모델에 같은 L2 정규화를 걸었어요. 그래서 이 XSimGCL은 원 논문 저장소의 설정과 조금 다른 변형입니다.</p>
+</section>
+
+<section id="why" aria-labelledby="why-h">
+  <div class="head"><p class="eyebrow">5 · 의외의 결과</p>
+  <h2 id="why-h">대조학습은 정확도를 올렸지만, 비인기 상품 노출은 늘리지 않았어요</h2>
+  <p class="lead">처음 가설은 XSimGCL의 대조학습이 인기 쏠림을 풀어 비인기 상품을 더 보여줄 거라는 것이었어요. 같은 XSimGCL에서 대조학습만 끄고(CL=0) seed 3개로 다시 돌려 비교했습니다.</p></div>
+  <div class="stage">
+    <div class="controls" role="group" aria-label="대조학습 비교">
+      <span class="label">대조학습</span>
+      <button class="pill" data-cl="cl0" aria-pressed="false">끔 (CL=0)</button>
+      <button class="pill" data-cl="cl1" aria-pressed="true">켬 (CL=0.1, 본실험)</button>
+    </div>
+    <div class="scroll"><svg id="clbars" class="fig" viewBox="0 0 760 300" role="img" aria-label="대조학습 켬/끔 지표 비교"></svg></div>
+    <p id="cl-text" aria-live="polite"></p>
+    <div class="formula"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mn>0.00441927</mn><mo>&#x02212;</mo><mn>0.00414158</mn></mrow><mrow><mn>0.00414158</mn></mrow></mfrac><mo>&#x02248;</mo><mo>&#x0002B;</mo><mn>6.70</mn><mi>&#x00025;</mi><mspace width="1em" /><mo stretchy="false">&#x00028;</mo><mtext>NDCG@10,&#x000A0;켬&#x000A0;대비&#x000A0;끔</mtext><mo stretchy="false">&#x00029;</mo></mrow></math></div>
+  </div>
+  <div class="grid2">
+    <div class="prose">
+      <h3>XSimGCL은 무엇을 추천했나</h3>
+      <p>XSimGCL이 추천한 상품의 평균 train 리뷰 수(ARP)는 약 1,101개로 LightGCN(약 1,598개)보다 낮아요. 그런데 비인기 비율은 거의 0이고, 10칸에 한 번이라도 등장한 상품 종류는 LightGCN의 약 1/4이에요.</p>
+      <p>즉 "가장 유명한 상품만"은 아니지만, 리뷰 11개 기준선 아래로는 거의 내려가지 않고 좁은 상품군 안에서 골랐어요. 평균 인기도(ARP)가 낮아진 것과 비인기 노출이 늘어난 것은 서로 다른 이야기입니다.</p>
+    </div>
+    <div class="scroll"><table id="exposure"></table></div>
+  </div>
+  <p class="callout warn small">이 비교는 이번 학습 설정 하나에서 나온 관측이에요. 대조학습이 원래 비인기 노출을 줄인다고 일반화할 수는 없어요. CL=0 세 실행은 모두 100 epoch 상한까지 돌았고(best epoch 75/60/75), 충분히 수렴했다는 보장은 없습니다.</p>
+</section>
+
+<section id="depth" aria-labelledby="depth-h">
+  <div class="head"><p class="eyebrow">6 · 그래프를 몇 칸 건너 볼까</p>
+  <h2 id="depth-h">LightGCN은 층을 늘릴수록 정답을 더 맞혔어요</h2>
+  <p class="lead">층 1개는 "내가 산 상품"까지, 2개는 "그 상품을 산 다른 사람"까지, 3개는 "그 사람이 산 다른 상품"까지 신호가 퍼진다는 뜻이에요.</p></div>
+  <div class="stage">
+    <label class="controls" for="depth-range"><span class="label">층 수</span>
+      <input type="range" id="depth-range" min="1" max="3" step="1" value="3" style="width:200px">
+      <output id="depth-out" style="font-weight:700">3층</output></label>
+    <div class="scroll"><svg id="depthfig" class="fig" viewBox="0 0 760 250" role="img" aria-label="LightGCN 층 수별 NDCG와 APLT"></svg></div>
+    <p id="depth-text" aria-live="polite"></p>
+  </div>
+</section>
+
+<section id="trust" aria-labelledby="trust-h">
+  <div class="head"><p class="eyebrow">7 · 우연은 아닐까</p>
+  <h2 id="trust-h">흔들림을 두 가지 방법으로 쟀어요</h2>
+  <p class="lead"><b>seed 표준편차</b>는 같은 모델을 초기값만 바꿔 세 번 학습했을 때 점수가 얼마나 흔들리는지예요. <b>paired 신뢰구간</b>은 학습을 고정해 두고, "같은 사용자"에게 두 모델 점수 차이를 잰 뒤 사용자 158,805명을 500번 다시 뽑아(bootstrap) 그 차이가 얼마나 흔들리는지예요.</p></div>
+  <div class="stage">
+    <div class="controls">
+      <label for="pair" class="label">비교</label>
+      <select id="pair"></select>
+      <span class="label" style="margin-left:8px">지표</span>
+      <button class="pill" data-metric="ndcg" aria-pressed="true">NDCG@10</button>
+      <button class="pill" data-metric="aplt" aria-pressed="false">APLT@10</button>
+    </div>
+    <div class="formula"><span id="pair-formula"></span></div>
+    <div class="scroll"><svg id="cifig" class="fig" viewBox="0 0 760 210" role="img" aria-label="seed별 사용자 paired 95% 신뢰구간"></svg></div>
+    <p id="ci-text" aria-live="polite"></p>
+  </div>
+  <p class="callout small">seed마다 따로 구간을 냈어요. seed 3개 × 15만 명을 서로 독립된 47만 명처럼 합치면 구간이 실제보다 좁아지기 때문이에요. 그래서 이 구간은 "seed까지 통틀어 95%"라는 뜻이 아닙니다.</p>
+</section>
+
+<section id="limits" aria-labelledby="limits-h">
+  <div class="head"><p class="eyebrow">8 · 이 결과가 말하지 않는 것</p>
+  <h2 id="limits-h">해석 범위</h2></div>
+  <ul class="limits">
+    <li><b>차종·텍스트 재정렬은 아직 안 했어요.</b> 특징 파일이 아직 오지 않았어요. 제안서의 "차종 정보로 비인기 용품 추천" 부분은 이번 32개 실험 범위 밖이에요.</li>
+    <li><b>기존 사용자만 평가했어요.</b> train 이력이 0인 사용자에 대한 결과가 아니에요. 그룹 "1–5개"도 이력이 적은 사용자일 뿐 신규 사용자는 아니에요.</li>
+    <li><b>리뷰는 구매의 일부예요.</b> 리뷰가 없다고 싫어했다는 뜻이 아니고, 점수가 실제 구매 전환을 뜻하지도 않아요.</li>
+    <li><b>설정 탐색 범위가 제한적이에요.</b> 다른 학습 레시피에서도 순위가 같다고 보장할 수 없어요. 그래도 모든 선택은 valid로만 했고 test 점수로 고른 것은 없어요.</li>
+  </ul>
+  <div class="stage">
+    <p class="small">발표용 한 문장</p>
+    <p class="oneliner">"같은 15만 명 시험에서 XSimGCL이 가장 정확했지만 비인기 상품은 거의 추천하지 않았고, 비인기 노출이 가장 높았던 건 LightGCN이었습니다. 정확도와 비인기 노출은 따로 측정해야 합니다."</p>
+  </div>
+</section>
+
+<footer>
+  <p>근거: <code>docs/RESULTS_FINAL.md</code>, <code>docs/results/final/*.csv</code>(model_comparison, all_seed_results, depth_results, paired_differences). 실측 수치는 CSV 그대로이고, 채점 연습의 진열대와 점 배치는 설명용 예시예요.</p>
+  <p>평가: 사용자 158,805명 · 정답 333,797개 · 후보 248,186개 전체 순위 · seed 42/43/44 · Popularity는 seed 없이 한 번 계산 · 2026-11-07 06:58 KST 32/32 완료.</p>
+</footer>
+</div>
+
+<script>
+const DATA = {"models": {"popularity": {"all": {"n": 1, "ndcg": 0.002041495285418402, "ndcg_sd": null, "recall": 0.0036968742366988855, "recall_sd": null, "hit": 0.007172318251944208, "hit_sd": null, "aplt": 0.0, "aplt_sd": null, "cov": 5.640930592378297e-05, "cov_sd": null, "arp": 3088.7984635244475, "arp_sd": null}, "1-5": {"n": 1, "ndcg": 0.002027634337234804, "ndcg_sd": null, "recall": 0.003643824887717751, "recall_sd": null, "hit": 0.007231617731194361, "hit_sd": null, "aplt": 0.0, "aplt_sd": null, "cov": 5.23800697863699e-05, "cov_sd": null, "arp": 3091.5990754514028, "arp_sd": null}, "6+": {"n": 1, "ndcg": 0.002058458550259356, "ndcg_sd": null, "recall": 0.0037617969349506577, "recall_sd": null, "hit": 0.0070997465376482615, "hit_sd": null, "aplt": 0.0, "aplt_sd": null, "cov": 5.640930592378297e-05, "cov_sd": null, "arp": 3085.37102687261, "arp_sd": null}}, "bpr_mf": {"all": {"n": 3, "ndcg": 0.001178407442213998, "ndcg_sd": 4.268100921282581e-05, "recall": 0.0020295297629064346, "recall_sd": 6.041557002932064e-05, "hit": 0.004172832509471784, "hit_sd": 0.00010429779288061775, "aplt": 0.0015524280301837685, "aplt_sd": 0.00016733325515487147, "cov": 0.1291303028105265, "cov_sd": 0.003035361158737144, "arp": 1008.7721287113126, "arp_sd": 8.136037501642093}, "1-5": {"n": 3, "ndcg": 0.0009838522114627645, "ndcg_sd": 5.17302216572539e-05, "recall": 0.00170510633768567, "recall_sd": 5.898239214376076e-05, "hit": 0.0033984026363365906, "hit_sd": 6.370877134391405e-05, "aplt": 0.0026245127430563502, "aplt_sd": 0.00029960899158519897, "cov": 0.12194483169880654, "cov_sd": 0.0028542040608972932, "arp": 872.8980791968938, "arp_sd": 4.941783070993306}, "6+": {"n": 3, "ndcg": 0.0014165074525243607, "ndcg_sd": 4.603148533742273e-05, "recall": 0.0024265646850296853, "recall_sd": 8.99185000025754e-05, "hit": 0.005120592999211139, "hit_sd": 0.00015424992080452897, "aplt": 0.00024039246988092404, "aplt_sd": 1.0510360447921362e-05, "cov": 0.06096502891648468, "cov_sd": 0.0008998497073931422, "arp": 1175.0571083819955, "arp_sd": 12.357615091619483}}, "lightgcn": {"all": {"n": 3, "ndcg": 0.0036964187439186918, "ndcg_sd": 4.7053608334889277e-05, "recall": 0.006201720579805104, "recall_sd": 6.1004689679662475e-05, "hit": 0.012109190516671389, "hit_sd": 0.00019823149445794734, "aplt": 0.007301197485385639, "aplt_sd": 0.0005477654474213009, "cov": 0.06484115408067605, "cov_sd": 0.0020049745150559537, "arp": 1597.5166291993326, "arp_sd": 6.132781602703114}, "1-5": {"n": 3, "ndcg": 0.0038442055247193004, "ndcg_sd": 4.285656788069552e-05, "recall": 0.006358647458499576, "recall_sd": 9.608792358235304e-05, "hit": 0.012056510363030262, "hit_sd": 0.00014533842051138256, "aplt": 0.012943680344188389, "aplt_sd": 0.00095529515603315, "cov": 0.062282589133418755, "cov_sd": 0.001937561305981973, "arp": 1478.6097291194667, "arp_sd": 7.451285277321902}, "6+": {"n": 3, "ndcg": 0.0035155547604807298, "ndcg_sd": 0.00010196049429906439, "recall": 0.006009670788643731, "recall_sd": 0.0001714277187496084, "hit": 0.01217366138736796, "hit_sd": 0.00043259842299170234, "aplt": 0.0003958307076874244, "aplt_sd": 4.903872294022038e-05, "cov": 0.018322279795529698, "cov_sd": 0.000163237943630863, "arp": 1743.0369219494662, "arp_sd": 6.069518646223088}}, "xsimgcl": {"all": {"n": 3, "ndcg": 0.004419269860899014, "ndcg_sd": 0.00011744004312988354, "recall": 0.007245023369189708, "recall_sd": 0.0002510616972024665, "hit": 0.014208200833307096, "hit_sd": 0.0003161920604120457, "aplt": 4.198020633271413e-07, "aplt_sd": 3.6355925140242804e-07, "cov": 0.015942344317031044, "cov_sd": 0.00010700890615394336, "arp": 1101.2570785974413, "arp_sd": 0.8641856918689584}, "1-5": {"n": 3, "ndcg": 0.004528567548760618, "ndcg_sd": 0.00012403289394299192, "recall": 0.00734547713421252, "recall_sd": 0.00028374059467710833, "hit": 0.013875857228947831, "hit_sd": 0.0003503203882251274, "aplt": 7.628288745985614e-07, "aplt_sd": 6.60629184142648e-07, "cov": 0.015153957112810553, "cov_sd": 6.596143837180546e-05, "arp": 1092.0963002799583, "arp_sd": 0.6995398558232429}, "6+": {"n": 3, "ndcg": 0.004285509485985108, "ndcg_sd": 0.00017826316193583707, "recall": 0.007122086337914362, "recall_sd": 0.0002546444064590411, "hit": 0.014614928605770353, "hit_sd": 0.0003863868234412978, "aplt": 0.0, "aplt_sd": 0.0, "cov": 0.012756561611049776, "cov_sd": 0.00014119584076406638, "arp": 1112.4681953760626, "arp_sd": 1.6129620982779458}}, "xsimgcl_cl0": {"all": {"n": 3, "ndcg": 0.004141579800899101, "ndcg_sd": 5.255642353307262e-05, "recall": 0.006835403302433318, "recall_sd": 9.908511793887379e-05, "hit": 0.01357010169704984, "hit_sd": 8.518465576316056e-05, "aplt": 0.0006876357797298573, "aplt_sd": 0.00011757755755281066, "cov": 0.031124506082803486, "cov_sd": 0.005496746986795156, "arp": 1199.4354774723718, "arp_sd": 45.723406326144406}, "1-5": {"n": 3, "ndcg": 0.004199290719648008, "ndcg_sd": 2.3112671528079222e-05, "recall": 0.006867377016714692, "recall_sd": 0.00010056657974784459, "hit": 0.013063444477500363, "hit_sd": 0.00012235023710510591, "aplt": 0.0012128979106117124, "aplt_sd": 0.00020612900946838633, "cov": 0.02956116246148722, "cov_sd": 0.005135991826090632, "arp": 1138.437694807424, "arp_sd": 46.74777110332133}, "6+": {"n": 3, "ndcg": 0.004070952194043825, "ndcg_sd": 0.00010068895949252713, "recall": 0.006796273325456292, "recall_sd": 0.00011888545308145815, "hit": 0.014190157445398234, "hit_sd": 5.830099002859933e-05, "aplt": 4.48110235117839e-05, "aplt_sd": 1.4552806774044984e-05, "cov": 0.017649397360581714, "cov_sd": 0.0029725178150804073, "arp": 1274.0856044586967, "arp_sd": 44.470735651734486}}}, "depth": [{"layers": 1, "ndcg": 0.002973722265940844, "ndcg_sd": 0.00010307115777288306, "aplt": 0.012477986629304284, "aplt_sd": 0.0007593222839475434}, {"layers": 2, "ndcg": 0.003450639490952498, "ndcg_sd": 0.00013362151783923306, "aplt": 0.0072212251923218194, "aplt_sd": 0.0005926015797859581}, {"layers": 3, "ndcg": 0.0036964187439186918, "ndcg_sd": 4.7053608334889277e-05, "aplt": 0.007301197485385639, "aplt_sd": 0.0005477654474213014}], "paired": [{"seed": 42, "left": "popularity", "right": "bpr_mf", "metric": "ndcg", "mean": -0.0008789092695834298, "lo": -0.0010293462519751406, "hi": -0.0007086597385040708}, {"seed": 42, "left": "popularity", "right": "bpr_mf", "metric": "aplt", "mean": 0.0014615408834734425, "lo": 0.001378089480809798, "hi": 0.0015509587229621234}, {"seed": 42, "left": "popularity", "right": "lightgcn", "metric": "ndcg", "mean": 0.001629470535928119, "lo": 0.0014291302721536035, "hi": 0.0018614235942768207}, {"seed": 42, "left": "popularity", "right": "lightgcn", "metric": "aplt", "mean": 0.007932999590692987, "lo": 0.0075881584332987, "hi": 0.008271512231982619}, {"seed": 42, "left": "popularity", "right": "xsimgcl", "metric": "ndcg", "mean": 0.0022522485825866596, "lo": 0.002020671292343721, "hi": 0.0025127561167469226}, {"seed": 42, "left": "popularity", "right": "xsimgcl", "metric": "aplt", "mean": 0.0, "lo": 0.0, "hi": 0.0}, {"seed": 42, "left": "bpr_mf", "right": "lightgcn", "metric": "ndcg", "mean": 0.002508379805511549, "lo": 0.0023269430872848943, "hi": 0.0027317608129834806}, {"seed": 42, "left": "bpr_mf", "right": "lightgcn", "metric": "aplt", "mean": 0.006471458707219546, "lo": 0.006112464972765341, "hi": 0.006815134913888102}, {"seed": 42, "left": "bpr_mf", "right": "xsimgcl", "metric": "ndcg", "mean": 0.003131157852170089, "lo": 0.0029136768837575294, "hi": 0.0033843152332202783}, {"seed": 42, "left": "bpr_mf", "right": "xsimgcl", "metric": "aplt", "mean": -0.0014615408834734425, "lo": -0.0015509587229621234, "hi": -0.001378089480809798}, {"seed": 42, "left": "lightgcn", "right": "xsimgcl", "metric": "ndcg", "mean": 0.00062277804665854, "lo": 0.00044111627043066004, "hi": 0.0008151829057350076}, {"seed": 42, "left": "lightgcn", "right": "xsimgcl", "metric": "aplt", "mean": -0.007932999590692987, "lo": -0.008271512231982619, "hi": -0.0075881584332987}, {"seed": 43, "left": "popularity", "right": "bpr_mf", "metric": "ndcg", "mean": -0.0008147552250879195, "lo": -0.0009820024576554299, "hi": -0.0006377473992219411}, {"seed": 43, "left": "popularity", "right": "bpr_mf", "metric": "aplt", "mean": 0.0014502062277636095, "lo": 0.0013560498724851232, "hi": 0.001540883473442272}, {"seed": 43, "left": "popularity", "right": "lightgcn", "metric": "ndcg", "mean": 0.0017092209867288354, "lo": 0.0015130727276508424, "hi": 0.0019373350786982707}, {"seed": 43, "left": "popularity", "right": "lightgcn", "metric": "aplt", "mean": 0.006959478605837346, "lo": 0.006649302603822299, "hi": 0.007267734013412676}, {"seed": 43, "left": "popularity", "right": "xsimgcl", "metric": "ndcg", "mean": 0.002484973847214107, "lo": 0.002239013997245034, "hi": 0.0027421804505287474}, {"seed": 43, "left": "popularity", "right": "xsimgcl", "metric": "aplt", "mean": 6.29703094990712e-07, "lo": 0.0, "hi": 1.889109284972136e-06}, {"seed": 43, "left": "bpr_mf", "right": "lightgcn", "metric": "ndcg", "mean": 0.002523976211816755, "lo": 0.0023290737575730907, "hi": 0.0027344139539093753}, {"seed": 43, "left": "bpr_mf", "right": "lightgcn", "metric": "aplt", "mean": 0.005509272378073739, "lo": 0.005198435187808948, "hi": 0.005805091149523}, {"seed": 43, "left": "bpr_mf", "right": "xsimgcl", "metric": "ndcg", "mean": 0.0032997290723020263, "lo": 0.003053642529058405, "hi": 0.003546361498624827}, {"seed": 43, "left": "bpr_mf", "right": "xsimgcl", "metric": "aplt", "mean": -0.0014495765246686186, "lo": -0.0015402537703472813, "hi": -0.0013554201693901325}, {"seed": 43, "left": "lightgcn", "right": "xsimgcl", "metric": "ndcg", "mean": 0.0007757528604852716, "lo": 0.0005751407912437997, "hi": 0.0009599799615734294}, {"seed": 43, "left": "lightgcn", "right": "xsimgcl", "metric": "aplt", "mean": -0.006958848902742357, "lo": -0.007267104310317685, "hi": -0.006648972009697428}, {"seed": 44, "left": "popularity", "right": "bpr_mf", "metric": "ndcg", "mean": -0.0008955990349418627, "lo": -0.0010807758744520806, "hi": -0.0007362872116133672}, {"seed": 44, "left": "popularity", "right": "bpr_mf", "metric": "aplt", "mean": 0.0017455369793142536, "lo": 0.0016397153742010644, "hi": 0.0018554359119675073}, {"seed": 44, "left": "popularity", "right": "lightgcn", "metric": "ndcg", "mean": 0.001626078852843915, "lo": 0.001422796445539582, "hi": 0.0018390521440253232}, {"seed": 44, "left": "popularity", "right": "lightgcn", "metric": "aplt", "mean": 0.007011114259626586, "lo": 0.006711281130946759, "hi": 0.007331790560750606}, {"seed": 44, "left": "popularity", "right": "xsimgcl", "metric": "ndcg", "mean": 0.0023961012966410692, "lo": 0.0021501718134915716, "hi": 0.0026717477779838977}, {"seed": 44, "left": "popularity", "right": "xsimgcl", "metric": "aplt", "mean": 6.29703094990712e-07, "lo": 0.0, "hi": 1.889109284972136e-06}, {"seed": 44, "left": "bpr_mf", "right": "lightgcn", "metric": "ndcg", "mean": 0.002521677887785778, "lo": 0.002306425820736064, "hi": 0.0027600919458973332}, {"seed": 44, "left": "bpr_mf", "right": "lightgcn", "metric": "aplt", "mean": 0.005265577280312333, "lo": 0.004939595730613015, "hi": 0.005570511004061585}, {"seed": 44, "left": "bpr_mf", "right": "xsimgcl", "metric": "ndcg", "mean": 0.0032917003315829324, "lo": 0.0030563165627756662, "hi": 0.003530155159617743}, {"seed": 44, "left": "bpr_mf", "right": "xsimgcl", "metric": "aplt", "mean": -0.0017449072762192627, "lo": -0.0018554359119675073, "hi": -0.001639054185951324}, {"seed": 44, "left": "lightgcn", "right": "xsimgcl", "metric": "ndcg", "mean": 0.0007700224437971545, "lo": 0.0005840669023326918, "hi": 0.000966252857360743}, {"seed": 44, "left": "lightgcn", "right": "xsimgcl", "metric": "aplt", "mean": -0.007010484556531595, "lo": -0.007330861748685494, "hi": -0.0067106199426970195}], "n_items": 248186};
+const TEX = {"term1": "<mrow><mfrac><mrow><mn>1</mn></mrow><mrow><msub><mi>log</mi><mn>2</mn></msub><mo stretchy=\"false\">&#x00028;</mo><mn>1</mn><mo>&#x0002B;</mo><mn>1</mn><mo stretchy=\"false\">&#x00029;</mo></mrow></mfrac></mrow>", "term2": "<mrow><mfrac><mrow><mn>1</mn></mrow><mrow><msub><mi>log</mi><mn>2</mn></msub><mo stretchy=\"false\">&#x00028;</mo><mn>2</mn><mo>&#x0002B;</mo><mn>1</mn><mo stretchy=\"false\">&#x00029;</mo></mrow></mfrac></mrow>", "term3": "<mrow><mfrac><mrow><mn>1</mn></mrow><mrow><msub><mi>log</mi><mn>2</mn></msub><mo stretchy=\"false\">&#x00028;</mo><mn>3</mn><mo>&#x0002B;</mo><mn>1</mn><mo stretchy=\"false\">&#x00029;</mo></mrow></mfrac></mrow>", "term4": "<mrow><mfrac><mrow><mn>1</mn></mrow><mrow><msub><mi>log</mi><mn>2</mn></msub><mo stretchy=\"false\">&#x00028;</mo><mn>4</mn><mo>&#x0002B;</mo><mn>1</mn><mo stretchy=\"false\">&#x00029;</mo></mrow></mfrac></mrow>", "term5": "<mrow><mfrac><mrow><mn>1</mn></mrow><mrow><msub><mi>log</mi><mn>2</mn></msub><mo stretchy=\"false\">&#x00028;</mo><mn>5</mn><mo>&#x0002B;</mo><mn>1</mn><mo stretchy=\"false\">&#x00029;</mo></mrow></mfrac></mrow>", "term6": "<mrow><mfrac><mrow><mn>1</mn></mrow><mrow><msub><mi>log</mi><mn>2</mn></msub><mo stretchy=\"false\">&#x00028;</mo><mn>6</mn><mo>&#x0002B;</mo><mn>1</mn><mo stretchy=\"false\">&#x00029;</mo></mrow></mfrac></mrow>", "term7": "<mrow><mfrac><mrow><mn>1</mn></mrow><mrow><msub><mi>log</mi><mn>2</mn></msub><mo stretchy=\"false\">&#x00028;</mo><mn>7</mn><mo>&#x0002B;</mo><mn>1</mn><mo stretchy=\"false\">&#x00029;</mo></mrow></mfrac></mrow>", "term8": "<mrow><mfrac><mrow><mn>1</mn></mrow><mrow><msub><mi>log</mi><mn>2</mn></msub><mo stretchy=\"false\">&#x00028;</mo><mn>8</mn><mo>&#x0002B;</mo><mn>1</mn><mo stretchy=\"false\">&#x00029;</mo></mrow></mfrac></mrow>", "term9": "<mrow><mfrac><mrow><mn>1</mn></mrow><mrow><msub><mi>log</mi><mn>2</mn></msub><mo stretchy=\"false\">&#x00028;</mo><mn>9</mn><mo>&#x0002B;</mo><mn>1</mn><mo stretchy=\"false\">&#x00029;</mo></mrow></mfrac></mrow>", "term10": "<mrow><mfrac><mrow><mn>1</mn></mrow><mrow><msub><mi>log</mi><mn>2</mn></msub><mo stretchy=\"false\">&#x00028;</mo><mn>10</mn><mo>&#x0002B;</mo><mn>1</mn><mo stretchy=\"false\">&#x00029;</mo></mrow></mfrac></mrow>", "dcgL": "<mrow><mrow><mi mathvariant=\"normal\">D</mi><mi mathvariant=\"normal\">C</mi><mi mathvariant=\"normal\">G</mi></mrow><mo>&#x0003D;</mo></mrow>", "idcgL": "<mrow><mrow><mi mathvariant=\"normal\">I</mi><mi mathvariant=\"normal\">D</mi><mi mathvariant=\"normal\">C</mi><mi mathvariant=\"normal\">G</mi></mrow><mo>&#x0003D;</mo></mrow>", "approx": "<mrow><mo>&#x02248;</mo><mn>9000001</mn></mrow>", "ndcgL": "<mrow><mrow><mi mathvariant=\"normal\">N</mi><mi mathvariant=\"normal\">D</mi><mi mathvariant=\"normal\">C</mi><mi mathvariant=\"normal\">G</mi><mi mathvariant=\"normal\">@</mi><mn>10</mn></mrow><mo>&#x0003D;</mo><mfrac><mrow><mn>9000001</mn></mrow><mrow><mn>9000002</mn></mrow></mfrac><mo>&#x02248;</mo><mn>9000003</mn></mrow>", "recallL": "<mrow><mrow><mi mathvariant=\"normal\">R</mi><mi mathvariant=\"normal\">e</mi><mi mathvariant=\"normal\">c</mi><mi mathvariant=\"normal\">a</mi><mi mathvariant=\"normal\">l</mi><mi mathvariant=\"normal\">l</mi><mi mathvariant=\"normal\">@</mi><mn>10</mn></mrow><mo>&#x0003D;</mo><mfrac><mrow><mn>9000001</mn></mrow><mrow><mn>9000002</mn></mrow></mfrac><mo>&#x02248;</mo><mn>9000003</mn></mrow>", "apltL": "<mrow><mrow><mi mathvariant=\"normal\">A</mi><mi mathvariant=\"normal\">P</mi><mi mathvariant=\"normal\">L</mi><mi mathvariant=\"normal\">T</mi><mi mathvariant=\"normal\">@</mi><mn>10</mn></mrow><mo>&#x0003D;</mo><mfrac><mrow><mn>9000001</mn></mrow><mrow><mn>10</mn></mrow></mfrac><mo>&#x0003D;</mo><mn>9000003</mn></mrow>", "sep": "<mrow><mspace width=\"2em\" /></mrow>", "G": "<mrow><mo stretchy=\"false\">&#x0007C;</mo><mi>G</mi><mo stretchy=\"false\">&#x0007C;</mo></mrow>", "pair_ndcg": "<mrow><mover><mi>d</mi><mo stretchy=\"true\">&#x000AF;</mo></mover><mo>&#x0003D;</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>158805</mn></mrow></mfrac><msub><mo>&#x02211;</mo><mrow><mi>u</mi></mrow></msub><mrow><mo stretchy=\"true\" fence=\"true\" form=\"prefix\">&#x00028;</mo><msubsup><mrow><mi mathvariant=\"normal\">N</mi><mi mathvariant=\"normal\">D</mi><mi mathvariant=\"normal\">C</mi><mi mathvariant=\"normal\">G</mi></mrow><mi>u</mi><mrow><mtext>B</mtext></mrow></msubsup><mo>&#x02212;</mo><msubsup><mrow><mi mathvariant=\"normal\">N</mi><mi mathvariant=\"normal\">D</mi><mi mathvariant=\"normal\">C</mi><mi mathvariant=\"normal\">G</mi></mrow><mi>u</mi><mrow><mtext>A</mtext></mrow></msubsup><mo stretchy=\"true\" fence=\"true\" form=\"postfix\">&#x00029;</mo></mrow></mrow>", "pair_aplt": "<mrow><mover><mi>d</mi><mo stretchy=\"true\">&#x000AF;</mo></mover><mo>&#x0003D;</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>158805</mn></mrow></mfrac><msub><mo>&#x02211;</mo><mrow><mi>u</mi></mrow></msub><mrow><mo stretchy=\"true\" fence=\"true\" form=\"prefix\">&#x00028;</mo><msubsup><mrow><mi mathvariant=\"normal\">A</mi><mi mathvariant=\"normal\">P</mi><mi mathvariant=\"normal\">L</mi><mi mathvariant=\"normal\">T</mi></mrow><mi>u</mi><mrow><mtext>B</mtext></mrow></msubsup><mo>&#x02212;</mo><msubsup><mrow><mi mathvariant=\"normal\">A</mi><mi mathvariant=\"normal\">P</mi><mi mathvariant=\"normal\">L</mi><mi mathvariant=\"normal\">T</mi></mrow><mi>u</mi><mrow><mtext>A</mtext></mrow></msubsup><mo stretchy=\"true\" fence=\"true\" form=\"postfix\">&#x00029;</mo></mrow></mrow>"};
+</script>
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const SVGNS = 'http://www.w3.org/2000/svg';
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+function el(tag, attrs = {}, text) {
+  const n = document.createElementNS(SVGNS, tag);
+  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+  if (text !== undefined) n.textContent = text;
+  return n;
+}
+// TEX templates: MathML generated from LaTeX at build time; numeric placeholders 9000001.. are replaced here.
+function tex(name, vals = {}) {
+  let s = TEX[name];
+  for (const [k, v] of Object.entries(vals)) s = s.split('<mn>' + k + '</mn>').join('<mn>' + v + '</mn>');
+  return s;
+}
+const mathWrap = (inner, block) => `<math xmlns="http://www.w3.org/1998/Math/MathML"${block ? ' display="block"' : ''}><mrow>${inner}</mrow></math>`;
+function pressGroup(buttons, active) { buttons.forEach(b => b.setAttribute('aria-pressed', String(b === active))); }
+
+const M = DATA.models; // variant -> group -> stats
+const NAMES = {popularity: 'Popularity', bpr_mf: 'BPR-MF', lightgcn: 'LightGCN', xsimgcl: 'XSimGCL', xsimgcl_cl0: 'XSimGCL (CL=0)'};
+const COLOR = {popularity: '--c-pop', bpr_mf: '--c-bpr', lightgcn: '--c-lgcn', xsimgcl: '--c-xsim', xsimgcl_cl0: '--c-cl0'};
+const f4 = x => x.toFixed(4);
+const f5 = x => x.toFixed(5);
+const pct = (x, d = 3) => (x * 100).toFixed(d) + '%';
+const comma = x => Math.round(x).toLocaleString('ko-KR');
+
+/* ---------- hero scatter ---------- */
+let group = 'all', showCL0 = false, selected = 'xsimgcl';
+function niceMax(v) { const p = Math.pow(10, Math.floor(Math.log10(v))); for (const m of [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]) if (m * p >= v) return m * p; return 10 * p; }
+function drawScatter() {
+  const svg = $('#scatter'); svg.textContent = '';
+  const W = 760, H = 420, L = 78, R = 30, T = 24, B = 58;
+  const keys = ['popularity', 'bpr_mf', 'lightgcn', 'xsimgcl'].concat(showCL0 ? ['xsimgcl_cl0'] : []);
+  const pts = keys.map(k => ({k, s: M[k][group]}));
+  const xMax = niceMax(Math.max(...pts.map(p => (p.s.aplt + (p.s.aplt_sd || 0)) * 100)) * 1.12);
+  const yMax = niceMax(Math.max(...pts.map(p => p.s.ndcg + (p.s.ndcg_sd || 0))) * 1.1);
+  const X = v => L + (v / xMax) * (W - L - R), Y = v => H - B - (v / yMax) * (H - T - B);
+  const line = css('--line'), soft = css('--soft');
+  for (let i = 0; i <= 5; i++) {
+    const yv = yMax * i / 5, xv = xMax * i / 5;
+    svg.append(el('line', {x1: L, x2: W - R, y1: Y(yv), y2: Y(yv), stroke: line, 'stroke-width': 1}));
+    svg.append(el('text', {x: L - 10, y: Y(yv) + 4, 'text-anchor': 'end', 'font-size': 12, class: 'muted'}, yv.toFixed(4)));
+    svg.append(el('line', {x1: X(xv), x2: X(xv), y1: T, y2: H - B, stroke: line, 'stroke-width': 1, 'stroke-dasharray': i ? '2 4' : ''}));
+    svg.append(el('text', {x: X(xv), y: H - B + 20, 'text-anchor': 'middle', 'font-size': 12, class: 'muted'}, (+xv.toPrecision(3)) + '%'));
+  }
+  svg.append(el('text', {x: (L + W - R) / 2, y: H - 12, 'text-anchor': 'middle', 'font-size': 13}, '→ 추천 10칸 중 비인기 상품 비율 (APLT@10)'));
+  const yl = el('text', {x: 18, y: (T + H - B) / 2, 'text-anchor': 'middle', 'font-size': 13, transform: `rotate(-90 18 ${(T + H - B) / 2})`}, '정답을 잘 맞힘 (NDCG@10) →');
+  svg.append(yl);
+  for (const p of pts) {
+    const c = css(COLOR[p.k]), cx = X(p.s.aplt * 100), cy = Y(p.s.ndcg);
+    const g = el('g', {tabindex: 0, role: 'button', 'aria-label': `${NAMES[p.k]} 자세히 보기`, style: 'cursor:pointer'});
+    if (p.s.ndcg_sd) g.append(el('line', {x1: cx, x2: cx, y1: Y(p.s.ndcg - p.s.ndcg_sd), y2: Y(p.s.ndcg + p.s.ndcg_sd), stroke: c, 'stroke-width': 2}));
+    if (p.s.aplt_sd) g.append(el('line', {x1: X(Math.max(0, p.s.aplt - p.s.aplt_sd) * 100), x2: X((p.s.aplt + p.s.aplt_sd) * 100), y1: cy, y2: cy, stroke: c, 'stroke-width': 2}));
+    const hollow = p.k === 'xsimgcl_cl0';
+    g.append(el('circle', {cx, cy, r: selected === p.k ? 11 : 8, fill: hollow ? css('--paper') : c, stroke: c, 'stroke-width': hollow ? 3 : (selected === p.k ? 3 : 0)}));
+    if (selected === p.k && !hollow) g.append(el('circle', {cx, cy, r: 15, fill: 'none', stroke: c, 'stroke-width': 1.5, opacity: .5}));
+    const right = cx < W - 200;
+    let ly = cy + 4;
+    if (p.k === 'xsimgcl_cl0') ly = cy + 22; if (p.k === 'xsimgcl' && showCL0) ly = cy - 12;
+    g.append(el('text', {x: right ? cx + 16 : cx - 16, y: ly, 'text-anchor': right ? 'start' : 'end', 'font-size': 14, 'font-weight': 700}, NAMES[p.k]));
+    const pick = () => { selected = p.k; drawScatter(); };
+    g.addEventListener('click', pick);
+    g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
+    svg.append(g);
+  }
+  drawDetail();
+}
+function drawDetail() {
+  if (selected === 'xsimgcl_cl0' && !showCL0) selected = 'xsimgcl';
+  const s = M[selected][group];
+  const sd = (v, d) => v == null ? '' : ` ± ${v.toFixed(d)}`;
+  const items = [
+    ['모델', NAMES[selected]],
+    ['NDCG@10', f5(s.ndcg) + (s.ndcg_sd ? `<span class="small"> ±${s.ndcg_sd.toFixed(5)}</span>` : '')],
+    ['Recall@10', f5(s.recall)],
+    ['Hit rate@10', pct(s.hit, 2)],
+    ['APLT@10 (비인기 비율)', pct(s.aplt, s.aplt < 1e-5 ? 5 : 3)],
+    ['Coverage@10 (등장 상품 종류)', `${pct(s.cov, 2)} <span class="small">≈${comma(s.cov * DATA.n_items)}종</span>`],
+  ];
+  $('#detail').innerHTML = items.map(([k, v]) => `<div><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
+  const note = {
+    popularity: '학습 없이 train 리뷰가 많은 순서로 모두에게 같은 10개를 보여줘요. 이미 본 상품을 빼면 몇 개가 바뀌어서 전체 등장 상품은 14종뿐이에요. 비인기 비율은 정확히 0이에요.',
+    bpr_mf: '취향 벡터만 배운 기본 모델이에요. 인기순보다도 NDCG가 낮았어요. 이번 탐색 설정에서는 best epoch가 5로 일찍 멈췄어요.',
+    lightgcn: '비인기 상품을 가장 많이 보여줬어요. 그래도 10칸 중 비인기는 평균 0.07칸 정도예요(0.73%). 특히 과거 리뷰가 1–5개인 사용자에게서 높았어요.',
+    xsimgcl: '정확도 1위예요. 하지만 비인기 비율은 0.00004%, 즉 사실상 0이고 등장 상품 종류도 가장 적은 축이에요.',
+    xsimgcl_cl0: '본실험 XSimGCL에서 대조학습 가중치만 0으로 바꾼 보조 실험이에요. 정확도는 조금 낮고 비인기 비율은 조금 높아요.',
+  }[selected];
+  const g = group === 'all' ? '전체 158,805명' : group === '1-5' ? '과거 리뷰 1–5개 87,394명' : '과거 리뷰 6개 이상 71,411명';
+  $('#detail-note').textContent = `${g} 기준. ${note}`;
+}
+$$('[data-group]').forEach(b => b.addEventListener('click', () => { group = b.dataset.group; pressGroup($$('[data-group]'), b); drawScatter(); }));
+$('#toggle-cl0').addEventListener('click', e => { showCL0 = !showCL0; e.currentTarget.setAttribute('aria-pressed', String(showCL0)); if (showCL0) selected = 'xsimgcl_cl0'; drawScatter(); });
+
+/* ---------- timeline ---------- */
+const STEPS = [
+  {hl: 0, t: '<b>train 구간으로만 학습해요.</b> 그래프, 음성 샘플(사용자가 리뷰하지 않은 상품), 인기도와 사용자 그룹도 모두 train으로만 만들어요. 이 구간 리뷰는 4,818,321개, 사용자 599,742명, 상품 248,186개예요.'},
+  {hl: 1, t: '<b>valid 구간으로 설정을 골라요.</b> 학습률, 층 수, 몇 번째 epoch의 모델을 쓸지(best checkpoint), 언제 멈출지(early stopping)를 valid 점수만 보고 정해요. 이미 train에서 본 상품은 채점에서 빼요.'},
+  {hl: 2, t: '<b>설정을 얼려요.</b> 고른 설정으로 seed 42·43·44를 따로 학습해요. train+valid를 합쳐 다시 학습하지 않았어요. 이후 test 점수를 보고 바꾼 설정은 하나도 없어요.'},
+  {hl: 3, t: '<b>test로 딱 한 번 채점해요.</b> 모든 모델이 같은 158,805명, 같은 정답, 같은 후보 248,186개 전체로 채점받아요. train과 valid에서 이미 리뷰한 상품은 10칸에 넣지 않아요.'},
+];
+let step = 0;
+function drawTimeline() {
+  const svg = $('#timeline'); svg.textContent = '';
+  const segs = [{x: 20, w: 470, name: 'train', sub: '공부하는 기간'}, {x: 500, w: 115, name: 'valid', sub: '모의고사'}, {x: 625, w: 115, name: 'test', sub: '본시험'}];
+  const acc = css('--accent'), panel = css('--paper'), line = css('--line');
+  const active = STEPS[step].hl;
+  const lit = active === 2 ? [0, 1] : [active];
+  segs.forEach((s, i) => {
+    const on = lit.includes(i);
+    svg.append(el('rect', {x: s.x, y: 30, width: s.w, height: 62, rx: 8, fill: on ? acc : panel, stroke: on ? acc : line, 'stroke-width': 2}));
+    svg.append(el('text', {x: s.x + s.w / 2, y: 58, 'text-anchor': 'middle', 'font-size': 18, 'font-weight': 700, style: on ? `fill:${panel}` : ''}, s.name));
+    svg.append(el('text', {x: s.x + s.w / 2, y: 80, 'text-anchor': 'middle', 'font-size': 13, style: on ? `fill:${panel}` : '', class: on ? '' : 'muted'}, s.sub));
+  });
+  svg.append(el('line', {x1: 20, x2: 740, y1: 112, y2: 112, stroke: line, 'stroke-width': 2}));
+  svg.append(el('text', {x: 20, y: 134, 'font-size': 13, class: 'muted'}, '과거'));
+  svg.append(el('text', {x: 740, y: 134, 'font-size': 13, 'text-anchor': 'end', class: 'muted'}, '미래 →'));
+  const lab = ['학습에 사용', '설정·best epoch 선택', '설정 동결', '최종 평가 1회'][step];
+  svg.append(el('text', {x: 380, y: 160, 'font-size': 14, 'text-anchor': 'middle', 'font-weight': 700}, `지금 단계: ${lab}`));
+  $('#stepnote').innerHTML = STEPS[step].t;
+}
+$$('[data-step]').forEach(b => b.addEventListener('click', () => { step = +b.dataset.step; pressGroup($$('[data-step]'), b); drawTimeline(); }));
+
+/* ---------- shelf calculator ---------- */
+const shelf = Array.from({length: 10}, () => ({hit: false, tail: false}));
+let G = 1, mode = 'hit';
+const disc = r => 1 / Math.log2(r + 1);
+const PRESETS = {
+  a: {G: 1, hits: [3], tails: []},
+  b: {G: 2, hits: [1], tails: []},
+  c: {G: 1, hits: [], tails: []},
+  d: {G: 1, hits: [3], tails: [5, 9]},
+};
+function applyPreset(p) { shelf.forEach((s, i) => { s.hit = p.hits.includes(i + 1); s.tail = p.tails.includes(i + 1); }); G = p.G; drawShelf(); }
+function hitsCount() { return shelf.filter(s => s.hit).length; }
+function drawShelf() {
+  const box = $('#shelf'); box.textContent = '';
+  shelf.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.className = 'slot' + (s.hit ? ' hit' : '') + (s.tail ? ' tail' : '');
+    b.setAttribute('aria-label', `${i + 1}위 칸: ${s.hit ? '정답' : '정답 아님'}, ${s.tail ? '비인기' : '인기'} 상품`);
+    b.innerHTML = `<span class="r">${i + 1}위</span><span class="ico"></span><span class="tag">${s.hit ? '정답' : '오답'}<br>${s.tail ? '<span style="color:var(--tail)">비인기</span>' : '인기'}</span>`;
+    b.addEventListener('click', () => {
+      if (mode === 'hit') { s.hit = !s.hit; if (hitsCount() > G) G = hitsCount(); } else s.tail = !s.tail;
+      drawShelf(); box.children[i].focus();
+    });
+    box.append(b);
+  });
+  compute();
+}
+function compute() {
+  const hits = hitsCount(), tails = shelf.filter(s => s.tail).length;
+  const hitRanks = shelf.map((s, i) => s.hit ? i + 1 : 0).filter(Boolean);
+  const dcg = hitRanks.reduce((a, r) => a + disc(r), 0);
+  const kIdeal = Math.min(G, 10);
+  let idcg = 0; for (let r = 1; r <= kIdeal; r++) idcg += disc(r);
+  const ndcg = dcg / idcg, recall = hits / G, aplt = tails / 10;
+  $('#g-out').textContent = G;
+  $('#g-hint').textContent = G > hits ? `${G - hits}개는 10칸 밖에 있어요.` : '정답이 모두 10칸 안에 있어요.';
+  $('#results').innerHTML = [['NDCG@10', f4(ndcg)], ['Recall@10', f4(recall)], ['Hit@10', hits > 0 ? '1' : '0'], ['APLT@10', aplt.toFixed(1)]]
+    .map(([k, v]) => `<div><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
+  // Build the worked calculation from LaTeX-derived fragments.
+  const plus = '<mo>+</mo>';
+  const dcgTerms = hitRanks.length ? hitRanks.map(r => TEX['term' + r]).join(plus) : '<mn>0</mn>';
+  const idTerms = Array.from({length: kIdeal}, (_, i) => TEX['term' + (i + 1)]).join(plus);
+  const lines = [
+    TEX.dcgL + dcgTerms + tex('approx', {9000001: f4(dcg)}),
+    TEX.idcgL + idTerms + tex('approx', {9000001: f4(idcg)}),
+    tex('ndcgL', {9000001: f4(dcg), 9000002: f4(idcg), 9000003: f4(ndcg)}),
+    tex('recallL', {9000001: hits, 9000002: G, 9000003: f4(recall)}) + TEX.sep + tex('apltL', {9000001: tails, 9000003: aplt.toFixed(1)}),
+  ];
+  $('#calc').innerHTML = lines.map(l => mathWrap(l, true)).join('');
+  let why;
+  if (!hits) why = `10칸 안에 정답이 없으면 DCG가 0이라 NDCG와 Recall이 모두 0이에요. 실제 사용자 대부분이 이 경우예요. 그래도 IDCG는 정답 ${G}개 기준으로 ${f4(idcg)}이에요.`;
+  else {
+    const first = hitRanks[0];
+    why = `정답이 ${hitRanks.map(r => r + '위').join(', ')}에 있어서 각 칸 점수를 더해 DCG ${f4(dcg)}가 됐어요. ${first}위 칸 점수는 1/log₂(${first + 1}) = ${f4(disc(first))}예요. ` +
+      `가장 좋은 배치는 정답 ${kIdeal}개를 1위부터 채우는 것이고 그 점수(IDCG)가 ${f4(idcg)}예요. 나누면 NDCG ${f4(ndcg)}.` +
+      (G > hits ? ` 정답 ${G - hits}개는 놓쳐서 Recall은 ${hits}/${G}예요.` : '');
+  }
+  why += ` 비인기 칸은 ${tails}개라 APLT는 ${aplt.toFixed(1)}이에요. APLT는 정답 여부와 상관없이 무엇을 보여줬는지만 셉니다.`;
+  $('#calc-why').textContent = why;
+}
+$('#mode-hit').addEventListener('click', e => { mode = 'hit'; pressGroup([$('#mode-hit'), $('#mode-tail')], e.currentTarget); });
+$('#mode-tail').addEventListener('click', e => { mode = 'tail'; pressGroup([$('#mode-hit'), $('#mode-tail')], e.currentTarget); });
+$('#g-minus').addEventListener('click', () => { G = Math.max(Math.max(1, hitsCount()), G - 1); compute(); });
+$('#g-plus').addEventListener('click', () => { G = Math.min(12, G + 1); compute(); });
+$$('[data-preset]').forEach(b => b.addEventListener('click', () => applyPreset(PRESETS[b.dataset.preset])));
+
+/* ---------- dots ---------- */
+const perm = (() => { const a = Array.from({length: 10000}, (_, i) => i); let s = 12345; for (let i = a.length - 1; i > 0; i--) { s = (s * 1103515245 + 12345) & 0x7fffffff; const j = s % (i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; })();
+function drawDots(k) {
+  const cv = $('#dots'), ctx = cv.getContext('2d');
+  const s = M[k].all, n = Math.round(s.hit * 10000);
+  ctx.fillStyle = css('--line'); ctx.fillRect(0, 0, 400, 400);
+  ctx.fillStyle = css('--paper');
+  for (let i = 0; i < 10000; i++) { const x = i % 100, y = Math.floor(i / 100); ctx.fillRect(x * 4, y * 4, 3, 3); }
+  ctx.fillStyle = css(COLOR[k]);
+  for (let i = 0; i < n; i++) { const p = perm[i], x = p % 100, y = Math.floor(p / 100); ctx.fillRect(x * 4 - 1, y * 4 - 1, 5, 5); }
+  $('#dot-n').textContent = n;
+  $('#dot-n').style.color = css(COLOR[k]);
+  $('#dot-text').innerHTML = `${NAMES[k]}는 Hit rate ${pct(s.hit, 2)}, NDCG 평균 <b>${f5(s.ndcg)}</b>예요. 칠해지지 않은 ${comma(10000 - n)}명은 NDCG 0점이고, 칠해진 사람도 정답 순위에 따라 1점 이하를 받아요. 158,805명 평균이라 숫자가 작아지지만 모델 간 차이는 같은 시험에서 잰 것이라 비교할 수 있어요.`;
+}
+$$('[data-dot]').forEach(b => b.addEventListener('click', () => { pressGroup($$('[data-dot]'), b); drawDots(b.dataset.dot); }));
+
+/* ---------- model cards ---------- */
+const CARDS = [
+  {k: 'popularity', what: '많이 팔린 순', how: 'train 리뷰 수가 많은 상품부터 모두에게 똑같이 보여줘요. 학습이 없는 기준선이라 한 번만 계산했어요.', draw: 'bars'},
+  {k: 'bpr_mf', what: '취향 벡터 맞추기', how: '사용자와 상품을 각각 벡터 하나로 표현해요. 리뷰한 상품이 리뷰 안 한 상품보다 점수가 높아지도록 벡터를 조정해요.', draw: 'vec'},
+  {k: 'lightgcn', what: '이웃 따라가기', how: '사용자–상품 연결 그래프를 따라 벡터를 평균 내며 퍼뜨려요. 비슷한 사람이 산 상품이 내 벡터에 섞여 들어와요.', draw: 'graph'},
+  {k: 'xsimgcl', what: '흔들어도 같은 나', how: 'LightGCN처럼 퍼뜨리되, 벡터에 작은 잡음을 섞은 두 버전이 "같은 사용자"로 인식되도록 대조학습 손실을 더해요.', draw: 'noise'},
+];
+function miniSVG(kind, color) {
+  const s = el('svg', {viewBox: '0 0 220 110', class: 'fig', 'aria-hidden': 'true'});
+  const line = css('--line'), soft = css('--soft');
+  if (kind === 'bars') { [90, 70, 52, 30, 18, 10, 6].forEach((h, i) => s.append(el('rect', {x: 14 + i * 28, y: 100 - h, width: 20, height: h, rx: 3, fill: i < 3 ? color : line}))); s.append(el('text', {x: 14, y: 12, 'font-size': 11, class: 'muted'}, '리뷰 수 →')); }
+  if (kind === 'vec') {
+    s.append(el('line', {x1: 110, y1: 90, x2: 40, y2: 25, stroke: color, 'stroke-width': 4, 'stroke-linecap': 'round'}));
+    s.append(el('line', {x1: 110, y1: 90, x2: 70, y2: 15, stroke: soft, 'stroke-width': 4, 'stroke-linecap': 'round'}));
+    s.append(el('line', {x1: 110, y1: 90, x2: 200, y2: 70, stroke: line, 'stroke-width': 4, 'stroke-linecap': 'round'}));
+    s.append(el('text', {x: 20, y: 22, 'font-size': 11}, '나'));
+    s.append(el('text', {x: 72, y: 12, 'font-size': 11, class: 'muted'}, '추천'));
+    s.append(el('text', {x: 168, y: 88, 'font-size': 11, class: 'muted'}, '안 맞음'));
+  }
+  if (kind === 'graph' || kind === 'noise') {
+    const U = [[30, 25], [30, 85]], I = [[110, 15], [110, 55], [110, 95]], I2 = [[190, 35], [190, 80]];
+    const E = [[U[0], I[0]], [U[0], I[1]], [U[1], I[1]], [U[1], I[2]], [I[1], I2[0]], [I[2], I2[1]]];
+    E.forEach(([a, b], j) => s.append(el('line', {x1: a[0], y1: a[1], x2: b[0], y2: b[1], stroke: j < 2 ? color : line, 'stroke-width': j < 2 ? 3 : 2})));
+    U.forEach(([x, y], j) => s.append(el('circle', {cx: x, cy: y, r: 9, fill: j === 0 ? color : soft})));
+    I.concat(I2).forEach(([x, y]) => s.append(el('rect', {x: x - 8, y: y - 8, width: 16, height: 16, rx: 3, fill: css('--paper'), stroke: soft, 'stroke-width': 2})));
+    if (kind === 'noise') { s.append(el('circle', {cx: 30, cy: 25, r: 16, fill: 'none', stroke: color, 'stroke-dasharray': '3 3', 'stroke-width': 2})); s.append(el('text', {x: 52, y: 12, 'font-size': 10, class: 'muted'}, '+잡음 두 버전')); }
+  }
+  return s;
+}
+const box = $('#modelcards');
+CARDS.forEach(c => {
+  const s = M[c.k].all;
+  const d = document.createElement('div'); d.className = 'card';
+  d.innerHTML = `<h3><span class="sw" style="background:var(${COLOR[c.k]})"></span>${NAMES[c.k]}</h3><p class="small" style="color:var(--ink);font-weight:600">${c.what}</p>`;
+  d.append(miniSVG(c.draw, css(COLOR[c.k])));
+  const p = document.createElement('p'); p.className = 'small'; p.textContent = c.how; d.append(p);
+  const r = document.createElement('p'); r.className = 'small tnum'; r.innerHTML = `NDCG <b style="color:var(--ink)">${f5(s.ndcg)}</b> · 비인기 <b style="color:var(--ink)">${pct(s.aplt, s.aplt < 1e-5 ? 5 : 3)}</b>`; d.append(r);
+  box.append(d);
+});
+
+/* ---------- CL bars ---------- */
+let cl = 'cl1';
+function drawCL() {
+  const svg = $('#clbars'); svg.textContent = '';
+  const a = M.xsimgcl_cl0.all, b = M.xsimgcl.all;
+  const rows = [
+    {name: 'NDCG@10', v0: a.ndcg, v1: b.ndcg, fmt: f5},
+    {name: 'APLT@10 (비인기)', v0: a.aplt, v1: b.aplt, fmt: v => pct(v, v < 1e-5 ? 5 : 3)},
+    {name: 'Coverage@10', v0: a.cov, v1: b.cov, fmt: v => pct(v, 2)},
+    {name: 'ARP (평균 리뷰 수)', v0: a.arp, v1: b.arp, fmt: v => comma(v)},
+  ];
+  const L = 170, W = 760, maxW = W - L - 150;
+  rows.forEach((r, i) => {
+    const y = 20 + i * 70, mx = Math.max(r.v0, r.v1);
+    svg.append(el('text', {x: 0, y: y + 30, 'font-size': 14, 'font-weight': 700}, r.name));
+    [['v0', 'CL=0', 0], ['v1', 'CL=0.1', 1]].forEach(([key, lab, j]) => {
+      const on = (cl === 'cl0') === (j === 0);
+      const w = Math.max(2, r[key] / mx * maxW), yy = y + j * 24;
+      svg.append(el('rect', {x: L, y: yy + 6, width: w, height: 18, rx: 3, fill: on ? css('--c-xsim') : css('--line')}));
+      svg.append(el('text', {x: L + w + 8, y: yy + 20, 'font-size': 13, 'font-weight': on ? 700 : 400, class: on ? '' : 'muted'}, `${lab}  ${r.fmt(r[key])}`));
+    });
+  });
+  const rel = (b.ndcg - a.ndcg) / a.ndcg * 100;
+  $('#cl-text').innerHTML = cl === 'cl1'
+    ? `대조학습을 켜면 NDCG가 <b>${rel.toFixed(2)}%</b> 올라요. 대신 비인기 비율은 ${pct(a.aplt)} → ${pct(b.aplt, 5)}로 떨어지고, 등장하는 상품 종류도 ${pct(a.cov, 2)} → ${pct(b.cov, 2)}로 줄어요.`
+    : `대조학습을 끄면 정확도는 조금 내려가지만(NDCG ${f5(a.ndcg)}), 비인기 비율 ${pct(a.aplt)}, 등장 상품 ${pct(a.cov, 2)}로 켰을 때보다 다양해져요. 그래도 LightGCN(비인기 ${pct(M.lightgcn.all.aplt)})보다는 낮아요.`;
+}
+$$('[data-cl]').forEach(b => b.addEventListener('click', () => { cl = b.dataset.cl; pressGroup($$('[data-cl]'), b); drawCL(); }));
+// exposure table
+(() => {
+  const ks = ['popularity', 'bpr_mf', 'lightgcn', 'xsimgcl_cl0', 'xsimgcl'];
+  $('#exposure').innerHTML = '<thead><tr><th>모델</th><th>비인기 비율</th><th>등장 상품</th><th>ARP</th></tr></thead><tbody>' +
+    ks.map(k => { const s = M[k].all; return `<tr><td>${NAMES[k]}</td><td>${pct(s.aplt, s.aplt < 1e-5 ? 5 : 3)}</td><td>≈${comma(s.cov * DATA.n_items)}종</td><td>${comma(s.arp)}</td></tr>`; }).join('') + '</tbody>';
+})();
+
+/* ---------- depth ---------- */
+function drawDepth(L) {
+  const svg = $('#depthfig'); svg.textContent = '';
+  const D = DATA.depth; // [{layers, ndcg, ndcg_sd, aplt, aplt_sd}]
+  const panels = [{key: 'ndcg', sd: 'ndcg_sd', name: 'NDCG@10', x0: 40, fmt: f5, max: 0.004}, {key: 'aplt', sd: 'aplt_sd', name: 'APLT@10 (비인기)', x0: 420, fmt: v => pct(v), max: 0.014}];
+  panels.forEach(p => {
+    svg.append(el('text', {x: p.x0, y: 18, 'font-size': 14, 'font-weight': 700}, p.name));
+    svg.append(el('line', {x1: p.x0, x2: p.x0 + 300, y1: 210, y2: 210, stroke: css('--line'), 'stroke-width': 2}));
+    D.forEach((d, i) => {
+      const h = d[p.key] / p.max * 160, x = p.x0 + 20 + i * 95, on = d.layers === L;
+      svg.append(el('rect', {x, y: 210 - h, width: 60, height: h, rx: 4, fill: on ? css('--c-lgcn') : css('--line')}));
+      const e = d[p.sd] / p.max * 160;
+      svg.append(el('line', {x1: x + 30, x2: x + 30, y1: 210 - h - e, y2: 210 - h + e, stroke: css('--ink'), 'stroke-width': 1.5}));
+      svg.append(el('text', {x: x + 30, y: 210 - h - e - 8, 'text-anchor': 'middle', 'font-size': 12, 'font-weight': on ? 700 : 400}, p.fmt(d[p.key])));
+      svg.append(el('text', {x: x + 30, y: 230, 'text-anchor': 'middle', 'font-size': 13, class: on ? '' : 'muted'}, d.layers + '층'));
+    });
+  });
+  const d = D.find(x => x.layers === L);
+  $('#depth-out').textContent = L + '층';
+  $('#depth-text').innerHTML = {
+    1: `1층은 내가 리뷰한 상품과 바로 연결된 신호만 써요. NDCG ${f5(d.ndcg)}로 가장 낮지만 비인기 비율은 ${pct(d.aplt)}로 가장 높아요.`,
+    2: `2층부터 "나와 같은 상품을 리뷰한 사람" 신호가 들어와요. NDCG가 ${f5(d.ndcg)}로 올랐고, 비인기 비율은 ${pct(d.aplt)}로 1층보다 낮아요.`,
+    3: `3층(본실험 설정)이 NDCG ${f5(d.ndcg)}로 가장 높아요. 비인기 비율 ${pct(d.aplt)}는 2층과 거의 같아요. 층을 늘려서 정확도가 오를 때 비인기 노출은 1층보다 낮아졌어요.`,
+  }[L] + ' 막대 위 가는 선은 seed 3개의 표준편차예요.';
+}
+$('#depth-range').addEventListener('input', e => drawDepth(+e.target.value));
+
+/* ---------- paired CI ---------- */
+const P = DATA.paired; // {seed,left,right,metric,mean,lo,hi}
+const pairs = [];
+P.forEach(r => { const id = r.left + '|' + r.right; if (!pairs.includes(id)) pairs.push(id); });
+const sel = $('#pair');
+pairs.forEach(id => { const [l, r] = id.split('|'); const o = document.createElement('option'); o.value = id; o.textContent = `${NAMES[r]} − ${NAMES[l]}`; sel.append(o); });
+sel.value = 'lightgcn|xsimgcl';
+let metric = 'ndcg';
+function drawCI() {
+  const [l, r] = sel.value.split('|');
+  const rows = P.filter(x => x.left === l && x.right === r && x.metric === metric).sort((a, b) => a.seed - b.seed);
+  $('#pair-formula').innerHTML = mathWrap(TEX['pair_' + metric], true);
+  const svg = $('#cifig'); svg.textContent = '';
+  const lo = Math.min(0, ...rows.map(x => x.lo)), hi = Math.max(0, ...rows.map(x => x.hi));
+  const pad = (hi - lo) * 0.12 || 1e-6, a = lo - pad, b = hi + pad;
+  const L = 90, W = 740, X = v => L + (v - a) / (b - a) * (W - L);
+  const scale = metric === 'aplt' ? 100 : 1, unit = metric === 'aplt' ? '%p' : '';
+  const fmt = v => (v * scale).toFixed(metric === 'aplt' ? 3 : 5) + unit;
+  svg.append(el('line', {x1: X(0), x2: X(0), y1: 10, y2: 170, stroke: css('--soft'), 'stroke-width': 1.5, 'stroke-dasharray': '4 4'}));
+  svg.append(el('text', {x: X(0), y: 192, 'text-anchor': 'middle', 'font-size': 12, class: 'muted'}, '0 (차이 없음)'));
+  const c = css(COLOR[r]);
+  rows.forEach((x, i) => {
+    const y = 35 + i * 50;
+    svg.append(el('text', {x: 0, y: y + 5, 'font-size': 14, 'font-weight': 700}, `seed ${x.seed}`));
+    svg.append(el('line', {x1: X(x.lo), x2: X(x.hi), y1: y, y2: y, stroke: c, 'stroke-width': 6, 'stroke-linecap': 'round'}));
+    svg.append(el('circle', {cx: X(x.mean), cy: y, r: 7, fill: css('--paper'), stroke: c, 'stroke-width': 3}));
+    svg.append(el('text', {x: X(x.mean), y: y - 14, 'text-anchor': 'middle', 'font-size': 12}, `${fmt(x.mean)}  [${fmt(x.lo)}, ${fmt(x.hi)}]`));
+  });
+  const allPos = rows.every(x => x.lo > 0), allNeg = rows.every(x => x.hi < 0), allZero = rows.every(x => x.lo === 0 && x.hi === 0);
+  const mName = metric === 'ndcg' ? 'NDCG' : '비인기 비율';
+  let t;
+  if (allZero) t = `두 모델 모두 비인기 상품을 사실상 하나도 추천하지 않아서 차이가 0이에요.`;
+  else if (allPos) t = `세 seed 모두 구간 전체가 0보다 오른쪽이에요. 같은 사용자에게서 ${NAMES[r]}의 ${mName}가 ${NAMES[l]}보다 높다는 결과가 seed마다 반복됐어요.`;
+  else if (allNeg) t = `세 seed 모두 구간 전체가 0보다 왼쪽이에요. 같은 사용자에게서 ${NAMES[r]}의 ${mName}가 ${NAMES[l]}보다 낮다는 결과가 seed마다 반복됐어요.`;
+  else t = `구간이 0에 걸치거나 seed마다 방향이 달라요. 이 비교만으로 어느 쪽이 높다고 말하기 어려워요.`;
+  $('#ci-text').textContent = t + ' 점은 평균 차이, 굵은 선은 사용자 bootstrap 95% 구간이에요.';
+}
+sel.addEventListener('change', drawCI);
+$$('[data-metric]').forEach(b => b.addEventListener('click', () => { metric = b.dataset.metric; pressGroup($$('[data-metric]'), b); drawCI(); }));
+
+/* ---------- boot & theme ---------- */
+function drawAll() {
+  drawScatter(); drawTimeline(); drawDepth(+$('#depth-range').value); drawCI(); drawCL();
+  const k = ($$('[data-dot]').find(b => b.getAttribute('aria-pressed') === 'true') || {}).dataset?.dot || 'xsimgcl'; drawDots(k);
+}
+$('#gsym').innerHTML = mathWrap(TEX.G, false);
+applyPreset(PRESETS.a);
+drawAll();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', drawAll);
+new MutationObserver(drawAll).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
+})();
+
+</script>
+</body>
+</html>

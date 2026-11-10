@@ -35,3 +35,18 @@ UV_CACHE_DIR="$PWD/.uv-cache" uv run --no-project --python .venv/bin/python \
 - 외부 런타임 리소스 태그·미해결 템플릿이 없고 브라우저의 외부 리소스 요청 0개를 확인했다. 문서 CSP도 외부 연결을 금지한다.
 
 검증에 쓴 로컬 서버는 임시 미리보기용이며, 완성 파일을 사용하기 위해 켜 둘 필요가 없다.
+
+## 두 번째 설명서: 10칸 진열대
+
+**[experiment-results-explainer.html](experiment-results-explainer.html)** 은 같은 결과를 다른 순서로 설명한다. 첫 화면의 정확도(NDCG@10)–비인기 노출(APLT@10) 산점도에서 시작해 시험 규칙, 10칸 채점 계산기, Hit rate 점 그림(10,000명), 모델 소개, CL on/off, LightGCN 층 수, seed별 paired CI, 해석 범위 순서로 진행한다. 2026-11-10 claude.ai Artifact(비공개)로도 게시했다.
+
+```bash
+cd ~/git/automotive-recsys
+UV_CACHE_DIR="$PWD/.uv-cache" uv run --no-project --python .venv/bin/python \
+  --with latex2mathml==3.78.1 scripts/build_results_explainer.py            # 오프라인 단일 HTML
+# Artifact 게시용 본문만: ... scripts/build_results_explainer.py --fragment <경로>
+```
+
+템플릿은 `scripts/templates/results_explainer.html`, `results_explainer.js`다. 빌드는 `all_seed_results.csv`에서 평균/SD를 다시 계산하고 `model_comparison.csv`의 NDCG·APLT 평균과 1e-12 이내로 일치하는지 검사한다. 진열대 예시와 점 배치는 설명용이고 비율만 실측이다.
+
+실제 수행한 확인(2026-11-10): JS 구문 검사, 1280px 데스크톱 headless Chromium 렌더에서 가로 넘침 없음·노출된 LaTeX 없음·JS 오류 없음, "정답 2개 중 1위만" 예시 NDCG 0.6131(=1/1.6309), 그룹 전환과 CL=0 토글 동작. 모바일 폭과 다크 모드는 별도로 확인하지 않았다.
