@@ -1,0 +1,153 @@
+{
+  "checked_at": "2026-11-13T12:49:17.649616+00:00",
+  "git_head": "96b13379dae5a1f4a7293561db378feedce6eec0",
+  "scope": "local stored files; no live server/Drive/Colab query",
+  "base_report_hashes_verified": 13,
+  "vehicle_summary_copies_verified": 12,
+  "candidate_artifacts_verified": 15,
+  "lineage": [
+    {
+      "summary": "docs/results/vehicle-pilot-2026-11-11/summary.json",
+      "sha256": "f9c6b2bacc95494ce84488b6244c32b94f41f480948d9ddff7ba2fe205d73dc8",
+      "raw_copy_identical": true,
+      "seed_from_baseline": 42,
+      "raw_seed_label_correct": true,
+      "baseline_manifest_hash_verified": true
+    },
+    {
+      "summary": "docs/results/vehicle-pilot-models-2026-11-11/final_lightgcn_seed42/summary.json",
+      "sha256": "a8b0a06a4d990447e37499fda05b10ac2e9da17f6f2fac2ebdeefec0a136c401",
+      "raw_copy_identical": true,
+      "seed_from_baseline": 42,
+      "raw_seed_label_correct": true,
+      "baseline_manifest_hash_verified": true
+    },
+    {
+      "summary": "docs/results/vehicle-pilot-models-2026-11-11/final_xsimgcl_seed42/summary.json",
+      "sha256": "8e5de37d0f7c9e9acdf0e1d49d1208fc9cb3d21eaf98d499cc2ac66f9715b6f9",
+      "raw_copy_identical": true,
+      "seed_from_baseline": 42,
+      "raw_seed_label_correct": true,
+      "baseline_manifest_hash_verified": true
+    },
+    {
+      "summary": "docs/results/vehicle-pilot-seeds-2026-11-11/final_bpr_mf_seed43/summary.json",
+      "sha256": "3048efc22c61fb35c513ccc502ed70ddd8a576cebee13c358ff2c8fc9a686100",
+      "raw_copy_identical": true,
+      "seed_from_baseline": 43,
+      "raw_seed_label_correct": false,
+      "baseline_manifest_hash_verified": true
+    },
+    {
+      "summary": "docs/results/vehicle-pilot-seeds-2026-11-11/final_bpr_mf_seed44/summary.json",
+      "sha256": "e85b8e4257316e7a3729614abc54fab633275c798d1367d78d17f43dc1684c9e",
+      "raw_copy_identical": true,
+      "seed_from_baseline": 44,
+      "raw_seed_label_correct": false,
+      "baseline_manifest_hash_verified": true
+    },
+    {
+      "summary": "docs/results/vehicle-pilot-seeds-2026-11-11/final_lightgcn_seed43/summary.json",
+      "sha256": "2801a85c7ce4868a4d4fecba2f4efd8e2916ed8835af7887caa81b51f41d9c1c",
+      "raw_copy_identical": true,
+      "seed_from_baseline": 43,
+      "raw_seed_label_correct": false,
+      "baseline_manifest_hash_verified": true
+    },
+    {
+      "summary": "docs/results/vehicle-pilot-seeds-2026-11-11/final_lightgcn_seed44/summary.json",
+      "sha256": "1ea42d56a4508b42202ce028ba5776604307959f90965a5f09602ea039f5eaf8",
+      "raw_copy_identical": true,
+      "seed_from_baseline": 44,
+      "raw_seed_label_correct": false,
+      "baseline_manifest_hash_verified": true
+    },
+    {
+      "summary": "docs/results/vehicle-pilot-seeds-2026-11-11/final_xsimgcl_seed43/summary.json",
+      "sha256": "7bbe33ca70cd21754271edf0a70aadf2bf62d9d20534e4ecba4f9d074c65f5c9",
+      "raw_copy_identical": true,
+      "seed_from_baseline": 43,
+      "raw_seed_label_correct": false,
+      "baseline_manifest_hash_verified": true
+    },
+    {
+      "summary": "docs/results/vehicle-pilot-seeds-2026-11-11/final_xsimgcl_seed44/summary.json",
+      "sha256": "f6f0cd1b46b320d5f9feef97d3fea03d7881c5f4dee49704202c48b58c0b14b6",
+      "raw_copy_identical": true,
+      "seed_from_baseline": 44,
+      "raw_seed_label_correct": false,
+      "baseline_manifest_hash_verified": true
+    },
+    {
+      "summary": "docs/results/vehicle-pilot-pool500-2026-11-11/final_bpr_mf_seed42/summary.json",
+      "sha256": "6f33941e798b1ce9554f8ae13b344c03cf5694c9f02df6d7ca0fa613092ca237",
+      "raw_copy_identical": true,
+      "seed_from_baseline": 42,
+      "raw_seed_label_correct": true,
+      "baseline_manifest_hash_verified": null
+    },
+    {
+      "summary": "docs/results/vehicle-pilot-pool500-2026-11-11/final_lightgcn_seed42/summary.json",
+      "sha256": "c60ede6bb085949fcdf4a8f7d5bb1e166bbd2b196d04c82acc43a0e3054089e4",
+      "raw_copy_identical": true,
+      "seed_from_baseline": 42,
+      "raw_seed_label_correct": true,
+      "baseline_manifest_hash_verified": true
+    },
+    {
+      "summary": "docs/results/vehicle-pilot-pool500-2026-11-11/final_xsimgcl_seed42/summary.json",
+      "sha256": "f3fb71a267974663392058ca48d6a6c0131a4944c9144f7133a7b387f062c697",
+      "raw_copy_identical": true,
+      "seed_from_baseline": 42,
+      "raw_seed_label_correct": true,
+      "baseline_manifest_hash_verified": true
+    }
+  ],
+  "local_markdown_links_missing": [],
+  "current_source_sha256": {
+    "src/automotive_recsys/controller_policy.py": "b431d6a20d186667d9f8797a10770917e30208ba483d76b518352a137e843554",
+    "src/automotive_recsys/audit.py": "0a561a81007180e77b0b57749c3546926a577906c5110d3eb69ccc1719a929d7",
+    "src/automotive_recsys/experiment_plan.py": "ac3d59347039c429a1d00eaede6f51588376de7bbe7a76aaa41eb36f4d7d9a65",
+    "src/automotive_recsys/campaign_io.py": "0a086be2c8e79851f36b9a8946c3628f305b0b1b1d211d96350dafdeb2066750",
+    "src/automotive_recsys/train_gpu.py": "a416242adbb352eb5a5463a40ad853fa82ca0d3bbd1cb7120c10ea045bc1e4bb",
+    "src/automotive_recsys/evaluation.py": "6f85d3e8bde0d32d6f98ca950874a09cda65ada72f69ce38303c3721d6a89f53",
+    "src/automotive_recsys/__init__.py": "d961e2f236632eac47ddd442523c5331a6e4117a440d5bc1d28a98f0b8f67320",
+    "src/automotive_recsys/drive_store.py": "74155bfa468b144c4cdfce9c461099763b1ab213d45ae18af5d65c68192f6654",
+    "src/automotive_recsys/evaluate_run.py": "edd773439738ac15374842d64ec6fa6f8c5fc9b4281b0fc61fd13f313e08a006",
+    "src/automotive_recsys/campaign.py": "78dc371dcd2a18fe1f25e6a10180adc5ed973da3b70902523a0288d8375dde0f",
+    "src/automotive_recsys/cli.py": "01b6d503fcd1b85511f49492111c862f4f26ab5fb31009d9769e589bc71b9526",
+    "src/automotive_recsys/experiment_report.py": "07318f21d7bfc97b541c4092f02b8322cd4ccedd3f96db55ec592237f83d4d04",
+    "src/automotive_recsys/gpu_kernels.py": "57450f0a7dbb4efc65e9b739ed7dc7b42c754f2c759388e85a157ba1e5e541a6",
+    "src/automotive_recsys/popularity.py": "8e15fd2789517b7268d27c3e1622405d82acb751d729756339dd23238a936dca",
+    "src/automotive_recsys/vehicle_rerank.py": "892b8d96890c7a60231cf25716b81aec0a7e9765e7be02867763c20f66685eca",
+    "scripts/benchmark_local.py": "1421d9915c77130659aa6dd5b1e67c2fea83a8f08f0ee13faf2d855cfd3c9cf4",
+    "scripts/colab_safe.py": "616bebcc00f87e8763f7111ab26c4b18ddbc642580bc2b231ba5258fc15bc99a",
+    "scripts/colab_remote_trainpilot.py": "ea6530e1b272e5c8fc898762a7ed402f94fa3aa8ef576d7d80232663d169eab0",
+    "scripts/build_vehicle_pilot_report.py": "5759300dd59d0113b116e7e125b4c57609f999251aca94abab1b6414be831979",
+    "scripts/colab_remote_setup.py": "3a85ef04235a4c8bc542a13811d24ad88b16c3223a560d1bc0420499fca813d9",
+    "scripts/colab_campaign_env.py": "98c7da129e295b83af98ed47a521faf5f8b7dff6a70a996b23c036c3278198b2",
+    "scripts/colab_perf.py": "c2e7fb6638b53efd2bed943f263460d31338f680c72ae09b98ceb715aa24badb",
+    "scripts/colab_campaign_launcher.py": "a6427d370becd65f6f903902d750f899dfd3989dfd471c5a9941c31a54aec14b",
+    "scripts/colab_remote_perf.py": "b127964aca3c981c61164fe90f3445445cec4979074307a3e8774ff187682f99",
+    "scripts/operational_io.py": "834632f0df37af26982ea49c26a4d970468a6fae2608577ccbb7daa9e23c0355",
+    "scripts/summarize_completed_results.py": "429a94b3eed9a70faf24b3ca4445f9c42b0721b300b5638d75ddab1a6f29b347",
+    "scripts/colab_bundle.py": "2eeaaafcb0a49d3d83449465670ac5ca285f79c573c3790d8cea799e3624c912",
+    "scripts/experiment.py": "6150bd6a54c65a11c0a7543c216f294ccd4dbc8e6b273eb19ad369ddcdb1aecd",
+    "scripts/colab_smoke.py": "4e67b41bb579eae58faacf82d128b7b9e9974fa49faf2c6a09f36b16acd2473f",
+    "scripts/build_results_explainer.py": "4dd6a6159db2f7cdc43d70939af70c713cb2fb1c69dc795efa7c4ecc6e7822d5",
+    "scripts/colab_login.py": "f264ee0a5e60be0c1e98c3debba1b94bdbd9439c8a420d63d13c904bea80d762",
+    "scripts/colab_campaign_init.py": "b0092cc0cd0fbbffa8d6d9084acfc71f0ed2be45314d3de0965f80425a314877",
+    "scripts/candidate_diagnostic.py": "4382c39509b4bb04b7b500bcd0159649ba7a2f51d0e1f424f57b13fe767420f6",
+    "scripts/colab_campaign_entry.py": "e66d3feb163f6102c1e503b4ff56d5300943b80d69a2fb1e613e67b851876297",
+    "scripts/candidate_pool.py": "db68557bf5226d3a1ec93236b616947f1b7761cda9510022e2518b1c66b19034",
+    "scripts/drive_preflight.py": "93fee5d4b5c1571ceb6951a718b93141c23b3173c41350293120fe3a81d25ac1",
+    "scripts/build_candidate_diagnostic_report.py": "1a152e9a872a587eb3ebe1e31256ec6d84fe0c699f24c51f2b64c88eb97aa06b",
+    "scripts/colab_campaign.py": "c46eb0657676adc9b0483602a36b3476f0ecf164b1487eb8b0e77edfd85c2243",
+    "scripts/colab_vehicle_pilot.py": "8db7e8b52b0e45a26e6c02ed18e39544223e170b346e1af71eb3f4f18230236e",
+    "scripts/vehicle_pilot.py": "7c1443bae4677205185f589a0dfe4590ed4bd35f822e220151876302f59c61c7",
+    "scripts/colab_remote_init.py": "812a5eb38b0a62b4e901d6880be4a53f46e79c3ebe54be40ccd8c7f04fcd0291",
+    "scripts/build_results_eli5.py": "568dea1dcfdee4d640a1f25014b166402df1b046fc8af07fe682e080ecf4446c",
+    "scripts/audit_handoff.py": "f739878a01bc526ff9d9a79ed9e67d377b08e89ce2cfaea02b5e6f02cf9f25e5"
+  },
+  "publication": "Pre-publication audit: git_head is the parent checkout revision, not the commit containing this report. Consult Git history for publication; this audit does not verify Drive permissions."
+}

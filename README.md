@@ -1,103 +1,43 @@
 # Automotive 추천 실험
 
-Amazon Reviews 2023 Automotive의 전처리된 5-core 데이터를 사용한다.
-목표는 **추천 정확도와 인기 편향을 같은 평가 조건에서 비교하고, 이후 차종 정보를 추가했을 때의 효과를 확인하는 것**이다.
+Amazon Reviews 2023 Automotive의 processed 5-core에서 **정확도를 유지하면서 사용자 차종에 맞는 비인기 상품을 더 추천할 수 있는지** 연구한다. 모델은 Popularity + BPR-MF + LightGCN + XSimGCL이다.
 
-프로젝트 위치: `/Users/givemethatsewon/git/automotive-recsys`
+## 처음 보는 팀원은 여기부터
 
-## 다른 채팅에서 이어가기
+1. **[PROJECT_BRIEF — 현재 상태 SSOT](PROJECT_BRIEF.md)**: RQ1–4, 역할, 확정 평가 조건, 완료 범위와 다음 작업.
+2. **[HANDOFF — 팀원 인수인계](docs/HANDOFF.md)**: 결과 한 행에서 실행 ID·manifest·epoch 로그·checkpoint까지 추적하는 방법, 코드/최적화 변경, 외부 파일 준비와 재현 절차.
+3. [기본 모델 최종 결과](docs/RESULTS_FINAL.md) → [차종 후속 실행 색인](docs/EXPERIMENT_INDEX.md) → [후보 병목 진단](docs/CANDIDATE_DIAGNOSTIC_2026-11-11.md).
+4. [쉽게 읽는 오프라인 설명서](docs/explainers/README.md), [원문 출처](docs/sources/README.md), [회의 결정](docs/MEETING_NOTES.md).
 
-**[PROJECT_BRIEF.md](PROJECT_BRIEF.md)부터 읽으면 과제 설명·팀 역할·세원 담당 범위·확정 결정·완료 상태·다음 작업을 파악할 수 있다.**
-[AGENTS.md](AGENTS.md)의 읽기 순서와 실행 규칙을 함께 따른다.
+## 현재 상태를 읽는 법
 
-- [원문 보관함](docs/sources/README.md): 회의록 원본, Notion 제안서·팀 역할 개요 사본, 강의계획서 PDF, 사용자 후속 요구.
-- [회의 결정 정리](docs/MEETING_NOTES.md): 논의 중 제안과 확정 결정을 녹음 시각으로 구분.
-- [최종 결과와 파일](docs/RESULTS_FINAL.md): 32/32개 완료 보고서·CSV·그림·paired CI.
-- [처음부터 이해하는 ELI5 설명서](docs/explainers/experiment-results-eli5.html): 모델·지표 조작, 실제 결과, seed/CI, 발표 연습. HTML 하나로 오프라인에서 작동한다.
-- [10칸 진열대 결과 설명서](docs/explainers/experiment-results-explainer.html): 정확도–비인기 노출 산점도에서 출발해 채점 계산기, Hit rate 점 그림, CL on/off, 층 수, seed별 paired CI를 조작한다. 오프라인 단일 HTML이며 claude.ai Artifact로도 게시했다.
+11/13 로컬 보관 파일 점검 기준으로 기본 모델 32개 학습 작업, 차종 재정렬의 다른 모델/seed 확장, 후보100/500/1000 valid 진단 산출물이 있다. **재정렬은 기존 checkpoint의 후보 순서를 조정한 것이며 차종을 넣어 재학습한 결과가 아니다.** 인기 감점·텍스트 조건을 포함한 RQ3/RQ4 전체는 완료되지 않았다. 상세 상태와 다음 실험은 PROJECT_BRIEF 한 곳에서 관리한다.
 
-## 최종 결과: 2026-11-10 재확인
+차종 후속 결과에는 주 조건 차이와 seed 메타데이터 오류가 있으므로 색인의 정정/제약을 먼저 읽는다. `docs/RESULTS_2026-11-07.md`는 31/32 시점의 과거 기록이고, `docs/results/final/`이 기본 모델 최종 집계다.
 
-**주 모델 3개 × seed 42·43·44의 학습·test 평가와 Popularity test 평가는 완료됐다.**
-전체 캠페인 **32/32개는 2026-11-07 06:58 KST에 완료**됐다. CL=0 3-seed 보조 실험·paired CI·최종 자동 보고서도 생성됐다.
-2026-11-10 확인 시 제어기는 정상 종료돼 있고 Colab 활성 할당 0개·소모율 0이다. 완료한 학습을 다시 실행할 필요가 없다.
-**Spark 원본 분석과 인기 감점·텍스트·차종 재정렬을 포함한 팀 과제 전체의 완료는 아니다.** 범위는 PROJECT_BRIEF의 RQ별 표에 있다.
+## 결과·구현 찾아보기
 
-| 모델 | test NDCG@10 평균 | seed SD | 비인기 노출 APLT@10 (%) |
-|---|---:|---:|---:|
-| Popularity | 0.00204150 | 해당 없음(결정적 1회) | 0 |
-| BPR-MF | 0.00117841 | 0.00004268 | 0.15524280 |
-| LightGCN | 0.00369642 | 0.00004705 | 0.73011975 |
-| XSimGCL | 0.00441927 | 0.00011744 | 0.00004198 |
+|찾는 내용|위치|
+|---|---|
+|기본 모델 평균/SD·그룹·paired CI·곡선|[최종 집계 폴더](docs/results/final/)|
+|차종별 run·family·pool·β·CI|[색인 CSV](docs/handoff/vehicle_results_index.csv)|
+|후보 내 정답·비인기·차종 일치 및 valid sweep|[후보 진단 집계](docs/results/candidate-diagnostic-2026-11-11/)|
+|입력 검사·모델·평가|[src/automotive_recsys](src/automotive_recsys/)|
+|GPU 최적화 수식·실측·정확성 검증|[GPU_REVIEW](docs/GPU_REVIEW.md)|
+|Drive 저장·로그 계약·운영 복구|[DURABLE_EXPERIMENTS](docs/DURABLE_EXPERIMENTS.md), [CONTROLLER_RELIABILITY](docs/CONTROLLER_RELIABILITY.md)|
+|이번 문서·산출물 점검|[audit.json](docs/handoff/audit.json)|
 
-XSimGCL의 정확도가 가장 높지만 비인기 노출은 거의 0이다. 이번 조건에서 대조학습이 비인기 노출도 개선했다는 결론은 지지되지 않는다.
-사용자 158,805명, 전체 학습 상품 후보 248,186개의 동일 warm-start test 평가이며 valid 점수나 pilot 점수를 섞지 않았다.
-seed SD와 사용자별 CI는 다르다. 최종 paired CI는 seed별 사용자 bootstrap이며 학습 seed까지 통합한 CI가 아니다.
-[최종 CSV](docs/results/final/model_comparison.csv)와 [결과 해설](docs/RESULTS_FINAL.md)을 사용한다.
-[11월 7일 04:57의 31/32 스냅샷](docs/RESULTS_2026-11-07.md)은 당시 기록으로 보존한다.
+## 읽기와 재현
 
-실제 GPU 학습은 Colab L4, 자동 제어기는 기존 Ubuntu 서버에서 운영한다. Mac이 꺼져도 Drive 저장·복구를 수행한다.
-재현용 입력 hash, frozen valid 선택과 완료된 test/그룹 집계를 대조했으며 모델 수식과 선택 plan은 변경하지 않았다.
-운용 절차는 [Drive 본실험 안내](docs/DURABLE_EXPERIMENTS.md), 연결 장애·재개 검증은 [제어기 기록](docs/CONTROLLER_RELIABILITY.md)에 있다.
-
-환경·입력 계약(39개 검사), 전체 train 한 epoch GPU pilot와 optimizer/RNG 재현 검증도 보관했다.
-CUDA 프로파일링 기반 최적화 근거는 [GPU 점검 결과](docs/GPU_REVIEW.md)를 참고한다.
-
-## 실행
+문서·CSV·오프라인 HTML을 읽는 데 GPU나 실행 환경은 필요하지 않다. 작은 fixture 검사는 아래처럼 실행한다.
 
 ```bash
-cd ~/git/automotive-recsys
-uv sync --locked
-uv run automotive-recsys audit
-uv run automotive-recsys popularity --split valid
+uv sync --locked --extra training --group colab
 uv run --locked --extra training --group colab python -m unittest discover -s tests -v
 ```
 
-`data`는 `/Users/givemethatsewon/Downloads/processed`를 가리키는 로컬 심볼릭 링크다.
-다른 컴퓨터에서는 전처리 파일들을 원하는 폴더에 두고 `--data-dir`로 지정한다.
+실제 입력은 Git 제외다. 소유자 환경의 `data`는 개인 Downloads의 processed를 가리키는 링크이므로 팀원은 입력을 따로 받고 `--data-dir /path/to/processed`를 지정한다. checkpoint·추천 NPZ·사용자별 Parquet·원본 로그의 접근 방법과 hash 검증은 HANDOFF에 있다. 무거운 학습/전체 평가는 Colab CUDA에서 수행한다.
 
-```bash
-uv run automotive-recsys --data-dir /path/to/processed audit
-uv run automotive-recsys --data-dir /path/to/processed popularity --split valid
-```
+[AGENTS.md](AGENTS.md)는 에이전트 실행 규칙이다. 문서 확인을 위해 완료 캠페인을 재개하거나 새 GPU를 할당하지 않는다. 새 결과가 나오면 실험별 근거를 보존한 뒤 PROJECT_BRIEF와 README 링크를 갱신한다.
 
-입력 데이터, 가상환경, 추천 목록, 체크포인트는 `.gitignore`로 제외한다.
-공유할 코드는 이 폴더 안에서 관리하며 SecondBrain에는 쓰지 않는다.
-
-## 모델 구성
-
-| 구분 | 모델 | 비교하려는 차이 |
-|---|---|---|
-| 비개인화 기준선 | Popularity | 많이 리뷰된 상품만 추천하면 어느 정도인가? |
-| 학습 기준선 | BPR-MF | 사용자와 상품의 잠재 취향만 학습하면 개선되는가? |
-| 그래프 추천 | LightGCN | 사용자-상품 그래프 전파가 정확도와 인기 편향에 어떤 영향을 주는가? |
-| 그래프 대조학습 | XSimGCL | 그래프에 대조학습을 더하면 정확도와 비인기 상품 노출이 달라지는가? |
-
-**학습 모델 3개 + 인기순 기준선 1개**로 진행한다.
-모델 선택 근거, 강의와의 연결, 실험 순서는 [실험 계획](docs/EXPERIMENT_PLAN.md)에 기록했다.
-로컬 속도 실측과 Colab 전환 기준은 [학습 환경 점검](docs/HARDWARE.md)에 기록했다.
-현재 기본 실행 환경은 [Colab GPU](docs/COLAB.md)다.
-이후 작업 규칙과 최적화 적용 조건은 [AGENTS.md](AGENTS.md), 본실험의 수집 항목과 미구현 항목은 [결과 수집 계약](docs/EXPERIMENT_OUTPUTS.md)을 따른다.
-
-## 파일
-
-- `src/automotive_recsys/audit.py`: 결측·중복·ID·시간 분할·평가 제외 목록 점검, 입력 SHA-256 기록.
-- `src/automotive_recsys/evaluation.py`: 공통 사용자별 NDCG·Recall·Hit Rate·APLT·ARP 및 집계.
-- `src/automotive_recsys/popularity.py`: 전체 상품 인기도 순위에서 이미 본 상품을 제외하고 추천.
-- `src/automotive_recsys/gpu_kernels.py`: CSR·대칭 그래프 역전파·BPR/InfoNCE·GPU 음성 추출·전체 상품 top-k.
-- `src/automotive_recsys/train_gpu.py`: CUDA 전용 train/valid 학습기, best/last checkpoint, early stopping, 재시작.
-- `results/colab/train_pilot/summary.json`: 실제 모델별 한 epoch와 전체 검증·재시작 검사 결과.
-- `results/audit.json`: 원본 크기·날짜·검사 결과·입력 해시.
-- `results/popularity_valid/metrics.json`: 검증 지표와 정확한 평가 조건.
-- `results/popularity_valid/per_user.parquet`: 사용자별 지표. 이후 동일 사용자의 모델 간 차이 비교에 사용.
-- `results/popularity_valid/recommendations.npz`: `uid` 배열과 상위 100개 `iid` 배열.
-
-## 해석할 때의 범위
-
-이 실험에서 리뷰는 상호작용의 대용 지표이며 실제 구매 전체를 뜻하지 않는다.
-학습에 없는 사용자·상품이 제거된 warm-start 평가다. 전달받은 통계 기준으로
-원래 테스트 상호작용의 약 55.2%가 남아 있으므로 모든 사용자에 대한 성능으로 일반화하지 않는다.
-차종·상품 설명 파일은 아직 전달받은 폴더에 없으며, Mismatch@10과 텍스트/차종 재정렬은 아직 계산하지 않는다.
-
-인기도만으로 추천한 결과 APLT가 0인 것은 기준선의 예상 가능한 특성이다.
-NDCG가 작다는 이유만으로 전처리 오류나 학습 실패라고 판단하지 않는다.
+**공유 범위:** 코드·문서·집계 결과를 Git으로 전달한다. 원본 데이터·개인 결과·credential은 별도 접근이 필요하며 Git에 넣지 않는다. 원격 반영 revision은 이 문서가 포함된 Git 이력으로 확인한다. 팀원 Drive 권한은 별도 확인이 필요하다.

@@ -46,4 +46,4 @@ XSimGCL의 정확도가 가장 높지만 비인기 노출은 거의 0이다. APL
 - [32개 완료 marker](results/final/completion.json), [서버와 로컬 사본 해시·할당 종료 검증](results/final/verification.json). 13개 원본 보고서 파일의 SHA-256을 서버 사본과 대조했다.
 - 종료 후 계정 CU 감소 74.79, 잔액 100.14, 활성 할당 0개, 소모율 0.0 CU/h. 계정 관측값이므로 모델별 정확한 비용으로 쓰지 않는다.
 - timing_cost.csv의 training_seconds는 기록된 epoch 학습 시간의 합이다. 재개 시 elapsed_seconds가 구간 기준일 수 있으므로 이를 캠페인 전체 시간으로 단순 합산하지 않는다.
-- 텍스트/차종 특징이 없어 재정렬·Mismatch는 미실시다. warm-start test는 원래 test 상호작용의 약 55.2%이며 사용자 유지율이 아니다. 절대 정확도·tail 정답 회수는 낮아 실제 서비스 성능을 입증한 결과로 일반화하지 않는다.
+- 이 32개 기본 모델 캠페인에서는 텍스트/차종 재정렬·Mismatch를 수행하지 않았다. 11/11 이후 차종 재정렬·후보 진단은 [후속 색인](EXPERIMENT_INDEX.md)에 별도 보관한다. warm-start test는 원래 test 상호작용의 약 55.2%이며 사용자 유지율이 아니다. 절대 정확도·tail 정답 회수는 낮아 실제 서비스 성능을 입증한 결과로 일반화하지 않는다.

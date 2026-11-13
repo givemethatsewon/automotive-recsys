@@ -1,0 +1,18 @@
+{
+  "users": 158805,
+  "ground_truth_interactions": 333797,
+  "ndcg": 0.0036709658213465207,
+  "recall": 0.0061708350813475315,
+  "hit_rate": 0.011945467711973804,
+  "aplt": 0.007932999590692989,
+  "arp": 1604.5646169830925,
+  "candidate_recall500": 0.07516890035643628,
+  "matches_archived_metrics": false,
+  "archived_metric_diff": {
+    "ndcg": -8.673617379884035e-19,
+    "recall": -8.673617379884035e-19,
+    "hit_rate": 0.0,
+    "aplt": 1.734723475976807e-18,
+    "arp": -0.0029835332641141576
+  }
+}

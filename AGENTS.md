@@ -2,7 +2,7 @@
 
 ## 새 채팅에서 먼저 읽을 문서
 
-1. [PROJECT_BRIEF.md](PROJECT_BRIEF.md): 과제 전체 RQ, 팀 역할, 민세원 담당 범위, 확정 결정, 현재 완료 상태, 다음 작업과 데이터 의존성.
+1. [PROJECT_BRIEF.md](PROJECT_BRIEF.md) (현재 상태 SSOT), [팀원 인수인계](docs/HANDOFF.md), [차종 실행 색인](docs/EXPERIMENT_INDEX.md): 과제 전체 RQ, 팀 역할, 민세원 담당 범위, 확정 결정, 현재 완료 상태, 다음 작업과 데이터 의존성.
 2. [원문 출처](docs/sources/README.md), [회의 결정 정리](docs/MEETING_NOTES.md): 회의록·Notion 제안서·팀 역할 사본과 사용자 후속 요구.
 3. [최종 결과](docs/RESULTS_FINAL.md): 32/32개 완료, 3-seed 보조 실험·paired CI·수집 파일. `RESULTS_2026-11-07.md`는 31/32개 당시의 과거 스냅샷이다.
 
@@ -111,7 +111,7 @@ scripts/colab.sh new -s automotive-pilot --gpu L4
 - 작은 pilot·성능 benchmark·실패/중단 실행은 최종 모델 성능표에서 분리한다. 가설과 반대인 결과도 보존한다.
 - 50 epoch는 시작 예산이다. valid 수렴 곡선에 근거해 조정하며, 수렴했다고 미리 단정하지 않는다.
 - `evaluate_run.py`의 독립 test evaluator, seed 집계/paired bootstrap, 추천 score·item exposure·Tail Recall, 불변 세대 기반 Drive 회수를 구현했다. 실제 운용 상태는 [DURABLE_EXPERIMENTS](docs/DURABLE_EXPERIMENTS.md)와 Drive `progress.json`에서 확인한다. 구현 완료와 실제 본실험 완료를 구분한다.
-- 차종·상품 텍스트는 아직 제공 폴더에 없다. 이 정보가 필요 없는 모델 비교를 먼저 수행할 수 있다. 특징 파일이 오면 원래 ID로 join하고 출처·시점·unknown 처리를 기록한다.
+- 11/11 사용자 차종 A1/A2와 상품 fitment를 수령해 재정렬·후보 진단을 수행했다. 텍스트 유사도 특징은 별도다. 현재 완료 범위는 PROJECT_BRIEF와 EXPERIMENT_INDEX를 따른다. 원래 ID join·출처/시점·unknown 처리를 유지한다.
 - 사용자 차종 추출에 valid/test 리뷰를 사용하지 않는다. unknown을 호환/불일치로 단정하지 않고 coverage와 함께 보고한다.
 - 차종 가점에 쓴 정보로 측정한 mismatch 감소는 독립적인 효과 검증이 아니다. 같은 사용자 집합에서 NDCG 변화와 추출 품질을 함께 확인한다.
 - 데이터·사용자별 추천·checkpoint·실행 token·개인 자료는 Git에 넣지 않는다. 버전 관리에는 코드·설정·문서와 필요한 집계표만 포함한다.

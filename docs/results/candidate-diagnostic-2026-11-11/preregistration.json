@@ -1,0 +1,25 @@
+{
+  "created_at": "2026-11-11T09:40:08.777582+00:00",
+  "question": "Candidate bottleneck in valid: tail/match/truth availability and fixed-scale reranking at 100/500/1000",
+  "runs": [
+    "final_bpr_mf_seed42",
+    "final_lightgcn_seed42",
+    "final_xsimgcl_seed42"
+  ],
+  "split": "valid only; no test evaluation",
+  "fit": false,
+  "family": "A1+A2 model match, train only",
+  "beta_grid": [
+    0,
+    0.02,
+    0.05,
+    0.1,
+    0.2,
+    0.5,
+    1,
+    2
+  ],
+  "scale": "top100 score range, fixed across candidate sizes",
+  "prior_results_seen": "Archived seed42 top100/pool500 summaries; not an independent confirmation",
+  "report": "All users, has_vehicle, unknown_vehicle, train activity 1-5 and 6+; mean/median/p90/zero fraction; oracle NDCG and candidate recall"
+}

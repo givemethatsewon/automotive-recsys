@@ -1,0 +1,44 @@
+{
+  "selection_data": "valid only",
+  "test_used_for_selection": false,
+  "choices": {
+    "text_make": {
+      "source": "text",
+      "level": "make",
+      "beta": 0.2,
+      "valid_ndcg": 0.004230519607372841
+    },
+    "text_model": {
+      "source": "text",
+      "level": "model",
+      "beta": 0.5,
+      "valid_ndcg": 0.004266111390433326
+    },
+    "items_make": {
+      "source": "items",
+      "level": "make",
+      "beta": 0.2,
+      "valid_ndcg": 0.004233049667125614
+    },
+    "items_model": {
+      "source": "items",
+      "level": "model",
+      "beta": 0.5,
+      "valid_ndcg": 0.004261118073733375
+    },
+    "both_make": {
+      "source": "both",
+      "level": "make",
+      "beta": 0.2,
+      "valid_ndcg": 0.004239321894089973
+    },
+    "both_model": {
+      "source": "both",
+      "level": "model",
+      "beta": 0.5,
+      "valid_ndcg": 0.004279101788617086
+    }
+  },
+  "design_sha256": "ea5f089739ca7928138c137c8b929a2a32b19396f580b6bab18649b9ca3d229b",
+  "created_at": "2026-11-11T08:35:01.213310+00:00"
+}

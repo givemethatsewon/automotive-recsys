@@ -1,0 +1,197 @@
+{
+  "status": "completed",
+  "created_at": "2026-11-11T04:24:02.793845+00:00",
+  "design": {
+    "model": "bpr_mf",
+    "seed": 42,
+    "fit": "reuse trained seed42 best checkpoint rankings; no retraining",
+    "candidates": "same stored full-catalog top100 per user; reranking cannot retrieve outside these 100",
+    "sources": [
+      "text",
+      "items",
+      "both"
+    ],
+    "levels": [
+      "make",
+      "model"
+    ],
+    "beta_grid": [
+      0,
+      0.02,
+      0.05,
+      0.1,
+      0.2,
+      0.5,
+      1,
+      2
+    ],
+    "score": "float64 original score + beta * per-user top100 score range * match_indicator; zero range replaced by 1",
+    "tie": "score descending then iid ascending",
+    "selection": "highest all-user valid NDCG per source/level, smallest beta on ties",
+    "primary_family": {
+      "source": "both",
+      "level": "model"
+    },
+    "test_used_for_selection": false,
+    "profiles": "train only; A2 n_items >= 2; any vehicle can match; universal and unknown get zero bonus",
+    "mismatch": "known inferred mismatches / judged top10 pairs; unknown excluded; pair counts and coverage given",
+    "bootstrap": "2000 paired user resamples; fixed training seed; not uncertainty across model seeds",
+    "created_at": "2026-11-11T04:23:38.558821+00:00"
+  },
+  "primary_result": {
+    "split": "test",
+    "source": "both",
+    "level": "model",
+    "beta": 1,
+    "users": 158805,
+    "ndcg": 0.0011850226839083481,
+    "recall": 0.002038090294948311,
+    "hit_rate": 0.004206416674537955,
+    "aplt": 0.0015704795189068355,
+    "arp": 992.8701930039986,
+    "catalog_coverage": 0.13076482960360375,
+    "judged_pairs": 150781,
+    "inferred_mismatch_pairs": 90265,
+    "judged_pair_coverage": 0.09494726236579452,
+    "inferred_mismatch_rate": 0.5986496972430213,
+    "match_share": 0.038107112496457915,
+    "selected_on_valid": true,
+    "ndcg_delta": 2.2436668073376066e-05,
+    "ndcg_relative_change": 0.019298931664219265,
+    "ndcg_paired_ci95": [
+      -1.2013123813767763e-05,
+      5.8451189853298996e-05
+    ],
+    "profile_coverage": 0.5851390069582192,
+    "changed_top10_users": 25624,
+    "groups": {
+      "1-5": {
+        "users": 87394,
+        "ndcg": 0.0009645840144323739,
+        "recall": 0.0017716419281564857,
+        "hit_rate": 0.003444172368812504,
+        "aplt": 0.002591711101448612,
+        "arp": 866.8944607181271,
+        "catalog_coverage": 0.12241222309074645,
+        "judged_pairs": 65438,
+        "inferred_mismatch_pairs": 44787,
+        "judged_pair_coverage": 0.07487699384397098,
+        "inferred_mismatch_rate": 0.6844188392065772,
+        "match_share": 0.023629768634002332,
+        "ndcg_delta": 2.1967650321648093e-05
+      },
+      "6+": {
+        "users": 71411,
+        "ndcg": 0.0014547992880755392,
+        "recall": 0.002364174351569907,
+        "hit_rate": 0.005139264259007716,
+        "aplt": 0.00032067888700620354,
+        "arp": 1147.041443195026,
+        "catalog_coverage": 0.0632025980514614,
+        "judged_pairs": 85343,
+        "inferred_mismatch_pairs": 45478,
+        "judged_pair_coverage": 0.11950959936144291,
+        "inferred_mismatch_rate": 0.5328849466271399,
+        "match_share": 0.05582473288428953,
+        "ndcg_delta": 2.301065999891296e-05
+      },
+      "has_vehicle": {
+        "users": 92923,
+        "ndcg": 0.0012463457009015636,
+        "recall": 0.0021303790750741886,
+        "hit_rate": 0.004293877726719973,
+        "aplt": 0.0011783950152276616,
+        "arp": 1029.766549723965,
+        "catalog_coverage": 0.09721740952350254,
+        "judged_pairs": 150781,
+        "inferred_mismatch_pairs": 90265,
+        "judged_pair_coverage": 0.1622644555169334,
+        "inferred_mismatch_rate": 0.5986496972430213,
+        "match_share": 0.06512488834841751,
+        "ndcg_delta": 3.834416746545512e-05
+      },
+      "unknown_vehicle": {
+        "users": 65882,
+        "ndcg": 0.0010985298830209955,
+        "recall": 0.001907921958898451,
+        "hit_rate": 0.004083057587808506,
+        "aplt": 0.002123493518715279,
+        "arp": 940.8298761421937,
+        "catalog_coverage": 0.10000564093059237,
+        "judged_pairs": 0,
+        "inferred_mismatch_pairs": 0,
+        "judged_pair_coverage": 0.0,
+        "inferred_mismatch_rate": null,
+        "match_share": 0.0,
+        "ndcg_delta": 0.0
+      }
+    }
+  },
+  "choices": {
+    "text_make": {
+      "source": "text",
+      "level": "make",
+      "beta": 0.5,
+      "valid_ndcg": 0.0013992134919254499
+    },
+    "text_model": {
+      "source": "text",
+      "level": "model",
+      "beta": 1,
+      "valid_ndcg": 0.0014083038878212977
+    },
+    "items_make": {
+      "source": "items",
+      "level": "make",
+      "beta": 0.5,
+      "valid_ndcg": 0.0014090965088561867
+    },
+    "items_model": {
+      "source": "items",
+      "level": "model",
+      "beta": 1,
+      "valid_ndcg": 0.0014352105377015915
+    },
+    "both_make": {
+      "source": "both",
+      "level": "make",
+      "beta": 0.5,
+      "valid_ndcg": 0.0014175664196197865
+    },
+    "both_model": {
+      "source": "both",
+      "level": "model",
+      "beta": 1,
+      "valid_ndcg": 0.001440152612583312
+    }
+  },
+  "gpu": "NVIDIA L4",
+  "cuda": "13.0",
+  "torch": "2.14.1+cu130",
+  "packages": {
+    "numpy": "2.4.6",
+    "polars": "1.35.2",
+    "numba": "0.64.0",
+    "torch": "2.14.1+cu130"
+  },
+  "elapsed_seconds": 30.248622134000016,
+  "peak_rss_MiB": 2997.0234375,
+  "cuda_peak_allocated_MiB": 1965.4248046875,
+  "verification": {
+    "input_hashes": true,
+    "beta0_matches_baseline": true,
+    "cpu_cuda_order": true,
+    "full_eligible_cohorts": true,
+    "seen_masking": true,
+    "train_only_profile_timestamps": true
+  },
+  "limitations": [
+    "Year ignored in make/model comparisons; no new alias mapping.",
+    "Product title observation time is not supplied; historical point-in-time correctness unverified.",
+    "A2 uses train-history item-derived features, not independent vehicle ownership labels.",
+    "Mismatch is a proxy derived from the same rules used for the bonus; coverage is reported.",
+    "Single training seed; validation sweep may overfit valid.",
+    "Reranking uses original top100; candidate retrieval is unchanged.",
+    "Not retraining with vehicle features; cannot claim encoder/training improvements."
+  ]
+}

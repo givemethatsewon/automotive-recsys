@@ -1,0 +1,7 @@
+{"created_at":"2026-11-11T07:57:45Z",
+ "purpose":"confirmatory check of A2 (items, n_items>=2) model-level vehicle rerank on seeds not yet examined",
+ "primary_family":"items-model",
+ "runs":["final_bpr_mf_seed43","final_bpr_mf_seed44","final_lightgcn_seed43","final_lightgcn_seed44","final_xsimgcl_seed43","final_xsimgcl_seed44"],
+ "unchanged":"same inputs, beta grid, valid-only selection per run, paired user bootstrap 2000; no retraining",
+ "decision_rule":"report primary per run with paired CI; claim consistency only if all six point estimates are positive; per-seed CIs are not pooled across seeds",
+ "chosen_after":"seed42 results for BPR-MF, LightGCN, XSimGCL were seen; seeds 43/44 vehicle results not yet computed"}

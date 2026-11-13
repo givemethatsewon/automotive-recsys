@@ -1,0 +1,218 @@
+[
+  {
+    "status": "completed",
+    "run": "final_bpr_mf_seed42",
+    "split": "valid only",
+    "test_answers_read": false,
+    "fit": false,
+    "family": "A1+A2 model match; train-only profiles; year ignored",
+    "pools": [
+      100,
+      500,
+      1000
+    ],
+    "beta_grid": [
+      0,
+      0.02,
+      0.05,
+      0.1,
+      0.2,
+      0.5,
+      1,
+      2
+    ],
+    "scale": "same top100 score range for all pools",
+    "integrity": {
+      "positions_identical": 1.0,
+      "users_top10_identical": 1.0,
+      "score_max_abs_diff": 0.0
+    },
+    "users": 220516,
+    "truth_interactions": 515201,
+    "checkpoint_sha256": "9a931d5908ea4d48e1068ffd8d534dfdf006904b392ea191a1a0f9b1072c6373",
+    "torch": "2.11.0+cu130",
+    "cuda": "13.0",
+    "gpu": "NVIDIA L4",
+    "selected_on_valid": {
+      "100": {
+        "pool": 100,
+        "beta": 1,
+        "ndcg": 0.001440152612583312,
+        "recall": 0.0023957766344776094,
+        "aplt": 0.0014996644234431958
+      },
+      "500": {
+        "pool": 500,
+        "beta": 2,
+        "ndcg": 0.0015285963479973585,
+        "recall": 0.0026123875041347455,
+        "aplt": 0.003053746666908525
+      },
+      "1000": {
+        "pool": 1000,
+        "beta": 1,
+        "ndcg": 0.0015015441250008433,
+        "recall": 0.002563486867966335,
+        "aplt": 0.0038101543652161317
+      }
+    },
+    "elapsed_seconds": 53.110824413000046,
+    "cuda_peak_MiB": 2164.6640625,
+    "verification": {
+      "nested_pool_monotonicity": true,
+      "beta0_pool_invariance": true,
+      "train_only_profile_timestamps": true,
+      "seen_exclusion": true,
+      "candidate_uniqueness": true
+    },
+    "limitations": [
+      "Unknown and universal get no vehicle bonus; inferred matching is not verified fitment.",
+      "Valid-only exploration; no new independent test claim.",
+      "Prior pool500 used pool-specific score ranges and may not isolate pool size."
+    ]
+  },
+  {
+    "status": "completed",
+    "run": "final_lightgcn_seed42",
+    "split": "valid only",
+    "test_answers_read": false,
+    "fit": false,
+    "family": "A1+A2 model match; train-only profiles; year ignored",
+    "pools": [
+      100,
+      500,
+      1000
+    ],
+    "beta_grid": [
+      0,
+      0.02,
+      0.05,
+      0.1,
+      0.2,
+      0.5,
+      1,
+      2
+    ],
+    "scale": "same top100 score range for all pools",
+    "integrity": {
+      "positions_identical": 0.9999766003373904,
+      "users_top10_identical": 0.9999863955449945,
+      "score_max_abs_diff": 1.1444091796875e-05
+    },
+    "users": 220516,
+    "truth_interactions": 515201,
+    "checkpoint_sha256": "b0251aaeb2c3a4bfaeeffe65fd214784ee39b6c4b800feb087d66a1904c14ee7",
+    "torch": "2.11.0+cu130",
+    "cuda": "13.0",
+    "gpu": "NVIDIA L4",
+    "selected_on_valid": {
+      "100": {
+        "pool": 100,
+        "beta": 0.5,
+        "ndcg": 0.004286980371678213,
+        "recall": 0.007106721659997905,
+        "aplt": 0.00745660178853235
+      },
+      "500": {
+        "pool": 500,
+        "beta": 0.5,
+        "ndcg": 0.004283259275405961,
+        "recall": 0.007091245856202982,
+        "aplt": 0.00794545520506448
+      },
+      "1000": {
+        "pool": 1000,
+        "beta": 0.5,
+        "ndcg": 0.004281695950730288,
+        "recall": 0.007086711037867804,
+        "aplt": 0.008110069110631429
+      }
+    },
+    "elapsed_seconds": 54.461821668000084,
+    "cuda_peak_MiB": 2771.42578125,
+    "verification": {
+      "nested_pool_monotonicity": true,
+      "beta0_pool_invariance": true,
+      "train_only_profile_timestamps": true,
+      "seen_exclusion": true,
+      "candidate_uniqueness": true
+    },
+    "limitations": [
+      "Unknown and universal get no vehicle bonus; inferred matching is not verified fitment.",
+      "Valid-only exploration; no new independent test claim.",
+      "Prior pool500 used pool-specific score ranges and may not isolate pool size."
+    ]
+  },
+  {
+    "status": "completed",
+    "run": "final_xsimgcl_seed42",
+    "split": "valid only",
+    "test_answers_read": false,
+    "fit": false,
+    "family": "A1+A2 model match; train-only profiles; year ignored",
+    "pools": [
+      100,
+      500,
+      1000
+    ],
+    "beta_grid": [
+      0,
+      0.02,
+      0.05,
+      0.1,
+      0.2,
+      0.5,
+      1,
+      2
+    ],
+    "scale": "same top100 score range for all pools",
+    "integrity": {
+      "positions_identical": 0.9999817246821092,
+      "users_top10_identical": 0.9999909303633296,
+      "score_max_abs_diff": 1.1444091796875e-05
+    },
+    "users": 220516,
+    "truth_interactions": 515201,
+    "checkpoint_sha256": "cdcf9407bd8bc1d2c65df27b1935bdc8a19f9ba13e30f839c3518c278114d480",
+    "torch": "2.11.0+cu130",
+    "cuda": "13.0",
+    "gpu": "NVIDIA L4",
+    "selected_on_valid": {
+      "100": {
+        "pool": 100,
+        "beta": 0.2,
+        "ndcg": 0.005247789532334917,
+        "recall": 0.008267134237668167,
+        "aplt": 4.534818335177493e-07
+      },
+      "500": {
+        "pool": 500,
+        "beta": 0.2,
+        "ndcg": 0.005247789532334917,
+        "recall": 0.008267134237668167,
+        "aplt": 4.534818335177493e-07
+      },
+      "1000": {
+        "pool": 1000,
+        "beta": 0.2,
+        "ndcg": 0.005247789532334917,
+        "recall": 0.008267134237668167,
+        "aplt": 4.534818335177493e-07
+      }
+    },
+    "elapsed_seconds": 54.34226006300014,
+    "cuda_peak_MiB": 2771.42578125,
+    "verification": {
+      "nested_pool_monotonicity": true,
+      "beta0_pool_invariance": true,
+      "train_only_profile_timestamps": true,
+      "seen_exclusion": true,
+      "candidate_uniqueness": true
+    },
+    "limitations": [
+      "Unknown and universal get no vehicle bonus; inferred matching is not verified fitment.",
+      "Valid-only exploration; no new independent test claim.",
+      "Prior pool500 used pool-specific score ranges and may not isolate pool size."
+    ]
+  }
+]

@@ -1,0 +1,33 @@
+{
+  "status": "completed",
+  "checked_at": "2026-11-11T04:31:54.019529+00:00",
+  "artifact_sha256": "99d167806b5180d5b72cdf7c0613ca19e0f9f161bf8132bff99f3bf3ea0ef58a",
+  "parts_verified": 17,
+  "bytes": 67879781,
+  "worker_returncode": 0,
+  "prepared": {
+    "ready": true,
+    "credential_removed": true
+  },
+  "scientific_checks": {
+    "input_hashes": true,
+    "beta0_matches_baseline": true,
+    "cpu_cuda_order": true,
+    "full_eligible_cohorts": true,
+    "seen_masking": true,
+    "train_only_profile_timestamps": true
+  },
+  "local_unit_tests": {
+    "count": 29,
+    "result": "passed"
+  },
+  "operational_recovery": [
+    "Initial session websocket failure; released",
+    "venv created without pip; installed via host pip --python into isolated environment",
+    "Full archive transfer interrupted; 17 parts and full SHA-256 verified"
+  ],
+  "operational_source_sha256": {
+    "scripts/colab_vehicle_pilot.py": "d6729cb73c6909955312d87bdcf8aec38c863d9a3434eb9ea24a571bd385b6f4",
+    "scripts/vehicle_pilot.py": "6745d3f43e586f5909f58f696a0670d2f2cbbe041eaac05d1b91758d5e7e993a"
+  }
+}

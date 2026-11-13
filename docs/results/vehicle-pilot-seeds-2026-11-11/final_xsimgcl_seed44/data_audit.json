@@ -1,0 +1,63 @@
+{
+  "valid_boundary_ms": 1628643426821,
+  "profile_period": "train only for both valid and test",
+  "raw_rows": {
+    "text": 482827,
+    "items": 2343729,
+    "fitment": 1668927
+  },
+  "schemas": {
+    "text": {
+      "user_id": "String",
+      "make": "String",
+      "model": "String",
+      "year": "Float64",
+      "n_mentions": "Int64",
+      "best_pattern": "String",
+      "segment": "String",
+      "first_seen": "Int64",
+      "last_seen": "Int64"
+    },
+    "items": {
+      "user_id": "String",
+      "make": "String",
+      "model": "String",
+      "year": "Float64",
+      "n_items": "Int64",
+      "segment": "String",
+      "last_seen": "Int64"
+    },
+    "fitment": {
+      "parent_asin": "String",
+      "make": "String",
+      "model": "String",
+      "segment": "String",
+      "matched": "String",
+      "n_makes": "Int64",
+      "universal": "Boolean",
+      "year_from": "Float64",
+      "year_to": "Float64",
+      "open_end": "Boolean"
+    }
+  },
+  "text_last_seen_max_ms": 1628643280716,
+  "items_last_seen_max_ms": 1628643202280,
+  "joined_rows": {
+    "text": 482827,
+    "items_min2": 549855,
+    "fitment": 207632
+  },
+  "profile_users": {
+    "text": 294275,
+    "items": 220119,
+    "both": 379912
+  },
+  "fitment_items": 97958,
+  "universal_items": 9734,
+  "notes": [
+    "Year ignored in make/model comparisons; no new alias mapping.",
+    "Product title observation time is not supplied; historical point-in-time correctness unverified.",
+    "A2 uses train-history item-derived features, not independent vehicle ownership labels.",
+    "Mismatch is a proxy derived from the same rules used for the bonus; coverage is reported."
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "model": "final_bpr_mf_seed44",
+  "seed": 42,
+  "fit": "reuse trained seed42 best checkpoint rankings; no retraining",
+  "candidates": "same stored full-catalog top100 per user; reranking cannot retrieve outside these 100",
+  "sources": [
+    "text",
+    "items",
+    "both"
+  ],
+  "levels": [
+    "make",
+    "model"
+  ],
+  "beta_grid": [
+    0,
+    0.02,
+    0.05,
+    0.1,
+    0.2,
+    0.5,
+    1,
+    2
+  ],
+  "score": "float64 original score + beta * per-user top100 score range * match_indicator; zero range replaced by 1",
+  "tie": "score descending then iid ascending",
+  "selection": "highest all-user valid NDCG per source/level, smallest beta on ties",
+  "primary_family": {
+    "source": "items",
+    "level": "model"
+  },
+  "test_used_for_selection": false,
+  "profiles": "train only; A2 n_items >= 2; any vehicle can match; universal and unknown get zero bonus",
+  "mismatch": "known inferred mismatches / judged top10 pairs; unknown excluded; pair counts and coverage given",
+  "bootstrap": "2000 paired user resamples; fixed training seed; not uncertainty across model seeds",
+  "created_at": "2026-11-11T08:02:18.049769+00:00"
+}

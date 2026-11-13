@@ -1,0 +1,17 @@
+{
+  "verified_at": "2026-11-11T09:50:30.720388+00:00",
+  "archive_sha256": "a86de809b915a224d645172c8d4df970e8ba3d7092f395fa046ccfaf89df908d",
+  "parts_sha256_verified": true,
+  "worker_exit": 0,
+  "credential_removed": true,
+  "balance_before": 98.45,
+  "balance_after": 98.3,
+  "account_CU_difference": 0.15,
+  "active_assignments": 0,
+  "usage_CU_per_hour": 0,
+  "local_vehicle_unit_tests_passed": 4,
+  "source_notions": [
+    "https://app.notion.com/p/40de3a7d940880d5acb2f73f3bb48b1e",
+    "https://app.notion.com/p/40de3a7d9408803eb856e3efecedf8a1"
+  ]
+}

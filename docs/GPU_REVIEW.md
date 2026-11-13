@@ -1,5 +1,7 @@
 # GPU 코드 점검과 시간 예산
 
+> **과거 기록 안내(11/13):** 아래의 “현재/미실시/미제공”은 문서 작성일인 11/5 기준이다. 현재 상태는 [PROJECT_BRIEF](../PROJECT_BRIEF.md), 차종 후속 결과는 [실험 색인](EXPERIMENT_INDEX.md)을 따른다. 기존 측정값·계획은 보존한다.
+
 2026-11-05. NVIDIA Skills의 live catalog를 확인했고, 일반 PyTorch 협업 필터링에 직접 맞는
 전용 skill은 찾지 못했다. NVIDIA CUDA Best Practices의 실제 workload 프로파일링,
 전송 최소화, CUDA event 타이밍 원칙에 따라 Colab에서 직접 점검했다.

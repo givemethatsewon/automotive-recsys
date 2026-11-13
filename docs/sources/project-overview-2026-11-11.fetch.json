@@ -1,0 +1,16 @@
+{
+  "id": "https://app.notion.com/p/40de3a7d9408803eb856e3efecedf8a1",
+  "title": "빅데이터 팀플(차량용품 추천)",
+  "text": "Here is the result of \"fetch\" for the Page with URL https://app.notion.com/p/40de3a7d9408803eb856e3efecedf8a1 as of 2026-11-11T04:08:44.722Z:\n<page url=\"https://app.notion.com/p/40de3a7d9408803eb856e3efecedf8a1\">\n<ancestor-path></ancestor-path>\n<properties>\n{\"title\":\"빅데이터 팀플(차량용품 추천)\"}\n</properties>\n<iconMetadata>null</iconMetadata>\n<content>\n# 깃허브\n\n<unknown url=\"https://app.notion.com/p/40de3a7d9408803eb856e3efecedf8a1#414e3a7d940880d5affae6d2d52e4397\" alt=\"external_object_instance\" />\n\n[10칸 진열대 실험](https://claude.ai/artifact/HJPVpnSdXoRmB6XHXjvASW)\n\n# 문서\n\n<page url=\"https://app.notion.com/p/40de3a7d940880d5acb2f73f3bb48b1e\">\nproposal 문서\n</page>\n\n[빅데이터 팀플 - Google Drive](https://drive.google.com/drive/folders/1WaZBTxYqEdEozh2FIZQQIGz8O1IVCkKt)\n\n# 역할\n\n- 박신빈\n  - Spark 데이터 전처리 담당\n  - [Claude Artifact](https://claude.ai/artifact/BiTrq58peUmuksTWcBL6FN)\n  - <b>참고 문서</b>: 차종 추출 v1 안내.md\n  - <b>차종 추출 데이터셋</b>: vehicles 폴더\n  - <b>코드</b>: code/vehicle\\_fit.py : 학습 후 재정렬 및 평가에 사용\n- 민세원\n  - 모델 학습 및 평가 담당\n  - 모델은 3개 정도 선정(baseline 및 특성 다른걸로, GNN 모델도 포함)\n  - 원본데이터로 모델 학습 및 평가\n  - 데이터 전처리 및 차종 추출 완료된거 포함\n  - 5-core를 원본으로\n\n<image source=\"notion-file-block://414e3a7d-9408-8058-8302-ff49c3c099cf/405b8e78-b197-44a3-9e97-b835fb05cb9e?space_id=58d6f136-aeb3-4ee0-962c-3463061d52e7&name=loss_curves.png\" />\n\n<image source=\"notion-file-block://414e3a7d-9408-8031-bf5a-ecd4f56c68e7/5d1334eb-aac5-4485-ae6f-89a1a0b419b5?space_id=58d6f136-aeb3-4ee0-962c-3463061d52e7&name=CleanShot_2026-11-10_at_10.52.42_PM2x.png\" />\n\n# 액션아이템\n\n- 세원\n  <todo checked=\"false\">\n  차종 추출된 중간 데이터로 탐색적 학습(기존 데이터 대비해서 어떻게 변하는지) → 결과 전달 → 뭐때문에 생각대로 성능이 올라가지 않는지 분석 → 데이터 처리 방향 추가 탐색 제안 \n  </todo>\n- 신빈\n  - [x] 차종 추줄된 중간 데이터 올리기\n  - [ ] 데이터 클리닝(오탐 잡기)\n\n<p />\n</content>\n</page>",
+  "url": "https://app.notion.com/p/40de3a7d9408803eb856e3efecedf8a1?pvs=204",
+  "metadata": {
+    "type": "page"
+  },
+  "cover": null,
+  "icon": null,
+  "full_width": false,
+  "verification": {
+    "state": "unverified"
+  },
+  "page_last_edited_at": "2026-11-10T14:32:02.891Z"
+}

@@ -1,0 +1,230 @@
+{
+  "created_at": "2026-11-11T04:17:03.714309+00:00",
+  "revision": "96b13379dae5a1f4a7293561db378feedce6eec0",
+  "working_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source_sha256": {
+    "src/automotive_recsys/__init__.py": "d961e2f236632eac47ddd442523c5331a6e4117a440d5bc1d28a98f0b8f67320",
+    "src/automotive_recsys/audit.py": "0a561a81007180e77b0b57749c3546926a577906c5110d3eb69ccc1719a929d7",
+    "src/automotive_recsys/campaign.py": "78dc371dcd2a18fe1f25e6a10180adc5ed973da3b70902523a0288d8375dde0f",
+    "src/automotive_recsys/campaign_io.py": "0a086be2c8e79851f36b9a8946c3628f305b0b1b1d211d96350dafdeb2066750",
+    "src/automotive_recsys/cli.py": "01b6d503fcd1b85511f49492111c862f4f26ab5fb31009d9769e589bc71b9526",
+    "src/automotive_recsys/controller_policy.py": "b431d6a20d186667d9f8797a10770917e30208ba483d76b518352a137e843554",
+    "src/automotive_recsys/drive_store.py": "74155bfa468b144c4cdfce9c461099763b1ab213d45ae18af5d65c68192f6654",
+    "src/automotive_recsys/evaluate_run.py": "edd773439738ac15374842d64ec6fa6f8c5fc9b4281b0fc61fd13f313e08a006",
+    "src/automotive_recsys/evaluation.py": "6f85d3e8bde0d32d6f98ca950874a09cda65ada72f69ce38303c3721d6a89f53",
+    "src/automotive_recsys/experiment_plan.py": "ac3d59347039c429a1d00eaede6f51588376de7bbe7a76aaa41eb36f4d7d9a65",
+    "src/automotive_recsys/experiment_report.py": "07318f21d7bfc97b541c4092f02b8322cd4ccedd3f96db55ec592237f83d4d04",
+    "src/automotive_recsys/gpu_kernels.py": "57450f0a7dbb4efc65e9b739ed7dc7b42c754f2c759388e85a157ba1e5e541a6",
+    "src/automotive_recsys/popularity.py": "8e15fd2789517b7268d27c3e1622405d82acb751d729756339dd23238a936dca",
+    "src/automotive_recsys/train_gpu.py": "a416242adbb352eb5a5463a40ad853fa82ca0d3bbd1cb7120c10ea045bc1e4bb",
+    "src/automotive_recsys/vehicle_rerank.py": "892b8d96890c7a60231cf25716b81aec0a7e9765e7be02867763c20f66685eca",
+    "scripts/vehicle_pilot.py": "6745d3f43e586f5909f58f696a0670d2f2cbbe041eaac05d1b91758d5e7e993a"
+  },
+  "files": {
+    "inputs/product_fitment.parquet": {
+      "sha256": "20fb4382a7f3049b04094a57e9c8472837cc9af56fcbc6b9a8e1471b38216511",
+      "bytes": 17084780
+    },
+    "inputs/user_vehicles.parquet": {
+      "sha256": "55fb0241784d662ad4048c31dc5e5719ff6136314d0e7afb31fa1720c7b3a237",
+      "bytes": 21586648
+    },
+    "inputs/user_vehicles_items.parquet": {
+      "sha256": "8c3fc467d990f372c9801131bcb885cef0bb4fefe847a99b979330f3b73ded10",
+      "bytes": 41670655
+    },
+    "src/automotive_recsys/__init__.py": {
+      "sha256": "d961e2f236632eac47ddd442523c5331a6e4117a440d5bc1d28a98f0b8f67320",
+      "bytes": 65
+    },
+    "src/automotive_recsys/audit.py": {
+      "sha256": "0a561a81007180e77b0b57749c3546926a577906c5110d3eb69ccc1719a929d7",
+      "bytes": 6979
+    },
+    "src/automotive_recsys/campaign.py": {
+      "sha256": "78dc371dcd2a18fe1f25e6a10180adc5ed973da3b70902523a0288d8375dde0f",
+      "bytes": 7507
+    },
+    "src/automotive_recsys/campaign_io.py": {
+      "sha256": "0a086be2c8e79851f36b9a8946c3628f305b0b1b1d211d96350dafdeb2066750",
+      "bytes": 9756
+    },
+    "src/automotive_recsys/cli.py": {
+      "sha256": "01b6d503fcd1b85511f49492111c862f4f26ab5fb31009d9769e589bc71b9526",
+      "bytes": 1857
+    },
+    "src/automotive_recsys/controller_policy.py": {
+      "sha256": "b431d6a20d186667d9f8797a10770917e30208ba483d76b518352a137e843554",
+      "bytes": 1734
+    },
+    "src/automotive_recsys/drive_store.py": {
+      "sha256": "74155bfa468b144c4cdfce9c461099763b1ab213d45ae18af5d65c68192f6654",
+      "bytes": 7216
+    },
+    "src/automotive_recsys/evaluate_run.py": {
+      "sha256": "edd773439738ac15374842d64ec6fa6f8c5fc9b4281b0fc61fd13f313e08a006",
+      "bytes": 7369
+    },
+    "src/automotive_recsys/evaluation.py": {
+      "sha256": "6f85d3e8bde0d32d6f98ca950874a09cda65ada72f69ce38303c3721d6a89f53",
+      "bytes": 2938
+    },
+    "src/automotive_recsys/experiment_plan.py": {
+      "sha256": "ac3d59347039c429a1d00eaede6f51588376de7bbe7a76aaa41eb36f4d7d9a65",
+      "bytes": 3059
+    },
+    "src/automotive_recsys/experiment_report.py": {
+      "sha256": "07318f21d7bfc97b541c4092f02b8322cd4ccedd3f96db55ec592237f83d4d04",
+      "bytes": 12271
+    },
+    "src/automotive_recsys/gpu_kernels.py": {
+      "sha256": "57450f0a7dbb4efc65e9b739ed7dc7b42c754f2c759388e85a157ba1e5e541a6",
+      "bytes": 8861
+    },
+    "src/automotive_recsys/popularity.py": {
+      "sha256": "8e15fd2789517b7268d27c3e1622405d82acb751d729756339dd23238a936dca",
+      "bytes": 5439
+    },
+    "src/automotive_recsys/train_gpu.py": {
+      "sha256": "a416242adbb352eb5a5463a40ad853fa82ca0d3bbd1cb7120c10ea045bc1e4bb",
+      "bytes": 14801
+    },
+    "src/automotive_recsys/vehicle_rerank.py": {
+      "sha256": "892b8d96890c7a60231cf25716b81aec0a7e9765e7be02867763c20f66685eca",
+      "bytes": 2548
+    },
+    "scripts/vehicle_pilot.py": {
+      "sha256": "6745d3f43e586f5909f58f696a0670d2f2cbbe041eaac05d1b91758d5e7e993a",
+      "bytes": 16831
+    },
+    "data/README.txt": {
+      "bytes": 4904,
+      "sha256": "2991289d4fbf62b7100b9cef0a38918f7e2ecf86900f35dfe1fc1fa738eab514"
+    },
+    "data/item_map.parquet": {
+      "bytes": 3897174,
+      "sha256": "43cd477044166d83e2aea5cc5c79b63827b595e58abae17309a5502b8b969a0f"
+    },
+    "data/seen_for_test.parquet": {
+      "bytes": 25438406,
+      "sha256": "46f26be5c2a847a49fc3947ffe4b19bd3d06e1e56c7c87312313f847b5dd5fe9"
+    },
+    "data/seen_for_valid.parquet": {
+      "bytes": 22052100,
+      "sha256": "e132b3df80675de556b957ae2067f0382361bdf7a81d956a295e35aba8639cf8"
+    },
+    "data/stats.json": {
+      "bytes": 1010,
+      "sha256": "5dce45eb52ef08e33825de7d7950513ec2ef695c7f9ca00c43fb37cae7552fca"
+    },
+    "data/test.parquet": {
+      "bytes": 4831733,
+      "sha256": "3154abedec703f4baacb698e1a2441d91bed4c54374fc40dc124b065c1f4e9ca"
+    },
+    "data/train.parquet": {
+      "bytes": 55413311,
+      "sha256": "cff9ff66db1fa0b14f1f83b19e17b65f268ceaa5d80c96ebad2cb02b56f47834"
+    },
+    "data/user_map.parquet": {
+      "bytes": 19168952,
+      "sha256": "95c01cf8a9356e88c42b56d1f037064ef31589f5b7f6e7583c730bc651aef81e"
+    },
+    "data/valid.parquet": {
+      "bytes": 7144891,
+      "sha256": "f5de04360613aa511d8d92b61bc5dcd61e1c56943ab8df4cda52b4d3696f0cd3"
+    },
+    "baseline/test/metrics.json": {
+      "sha256": "059987f15af8edc3256e1c2125e6c2e15984976452f48e0cfed8f92a296fc01c"
+    },
+    "baseline/test/recommendations.npz": {
+      "sha256": "b898e2a328ad015b5cc3400c279f60e0324641bbeeddd0b31a5c19fd9571625c"
+    },
+    "baseline/valid/metrics.json": {
+      "sha256": "5771eee7c96e691af9d6e65457bcc25c57e771809148347acdfb2b4c9e3014e0"
+    },
+    "baseline/valid/recommendations.npz": {
+      "sha256": "2fdfa5da9ad8635125faa40184cb629459153fee9fb2f3d1c40e97232c6eb729"
+    }
+  },
+  "added_data_folder": "https://drive.google.com/drive/folders/1mYYDiornIreYYatRbICYNKmlPFhjPYRn",
+  "baseline_run": "final_bpr_mf_seed42",
+  "baseline_campaign": "automotive-20261104T204146Z",
+  "baseline": [
+    {
+      "relative": "baseline/test/metrics.json",
+      "id": "1JpbTvySJGlHJSM36Kg8gIOoYkk6Bc-d1",
+      "sha256": "059987f15af8edc3256e1c2125e6c2e15984976452f48e0cfed8f92a296fc01c"
+    },
+    {
+      "relative": "baseline/test/recommendations.npz",
+      "id": "1s-TTbl5hKTHLjYrm2-wogr-MazSFptyH",
+      "sha256": "b898e2a328ad015b5cc3400c279f60e0324641bbeeddd0b31a5c19fd9571625c"
+    },
+    {
+      "relative": "baseline/valid/metrics.json",
+      "id": "1c55X2PUTyt70_vG8iyaoo05lKwqEki5J",
+      "sha256": "5771eee7c96e691af9d6e65457bcc25c57e771809148347acdfb2b4c9e3014e0"
+    },
+    {
+      "relative": "baseline/valid/recommendations.npz",
+      "id": "1GmlqxjPTIpCyFlcFtrtSzLaH_D_ve4e2",
+      "sha256": "2fdfa5da9ad8635125faa40184cb629459153fee9fb2f3d1c40e97232c6eb729"
+    }
+  ],
+  "data_parts": [
+    {
+      "id": "121ogA3aw6d59GfWBlRfAfIgNJM4LdFMI",
+      "name": "input.part000",
+      "bytes": 16777216,
+      "sha256": "846496461558e59ff3a9d499463ec061197818b2fa02aa359ceef89e7b472b61"
+    },
+    {
+      "id": "1V2yYeBb9_BjOmxUXgqh7gPKC3wllJOZF",
+      "name": "input.part001",
+      "bytes": 16777216,
+      "sha256": "02923d6be0e6620c38b046f645a85ae330ab88638f7951815e9ebd19739eaf48"
+    },
+    {
+      "id": "1G-kvingzT3SN6d6DfWcSuNEP-IpaSPAT",
+      "name": "input.part002",
+      "bytes": 16777216,
+      "sha256": "a1693d860fe55ec4e9f7240165070ebfcb2215eb06e24b08e29566cf93e9a44d"
+    },
+    {
+      "id": "1a1ZHg1kHja_XlpHt4CjzGk3asrerWa1X",
+      "name": "input.part003",
+      "bytes": 16777216,
+      "sha256": "4ef2b788f29055e5326c8478ac129f2376134e5261b9003599be3958554673db"
+    },
+    {
+      "id": "1txyvIhPrrPEJE9qLk9-82Hvi-I79x-Qs",
+      "name": "input.part004",
+      "bytes": 16777216,
+      "sha256": "01195e025bed2fecf3ba68b50182addf3c4e0a0b9fac5a20fb82bcd2e7fc984a"
+    },
+    {
+      "id": "1Gb94SnruIPOnQ13YFvjNAlrk0hGHWASB",
+      "name": "input.part005",
+      "bytes": 16777216,
+      "sha256": "9894b886958f0a75b366d9f1b5c7fd315ed6e6e5fa0359ebebe7371b799b440a"
+    },
+    {
+      "id": "1bruj6Bi7Fqxyg0EOLuJBH-2c0kEueby3",
+      "name": "input.part006",
+      "bytes": 16777216,
+      "sha256": "41bcc34cacc8607367fe6e768175b35c5d203665b1a8dbafc4aa925e07f64fa0"
+    },
+    {
+      "id": "1TQ6_C2SxtCjszC6x-x4rFk6SL12Dhjb0",
+      "name": "input.part007",
+      "bytes": 16777216,
+      "sha256": "2be7cb7ab33fff7305834c08df131b597b4a45ffe9bd5a55131fdb203e1e33af"
+    },
+    {
+      "id": "1LDRQHRVwX2U-eunPDHmWNnoVHI9AatND",
+      "name": "input.part008",
+      "bytes": 4288512,
+      "sha256": "c02a06c1f9cc8e0a67ab6094a4f90a278b117294c66ad31d0a7429479b0e6a23"
+    }
+  ]
+}

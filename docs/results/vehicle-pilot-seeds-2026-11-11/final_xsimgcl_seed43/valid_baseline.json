@@ -1,0 +1,11 @@
+{
+  "users": 220516,
+  "ground_truth_interactions": 515201,
+  "ndcg": 0.005268598874281787,
+  "recall": 0.008393148717397996,
+  "hit_rate": 0.01884670500099766,
+  "aplt": 4.534818335177493e-07,
+  "arp": 1094.6085771553992,
+  "candidate_recall100": 0.03810288609757995,
+  "matches_archived_metrics": true
+}

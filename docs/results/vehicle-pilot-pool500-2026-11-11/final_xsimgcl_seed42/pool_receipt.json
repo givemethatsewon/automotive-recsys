@@ -1,0 +1,26 @@
+{
+  "run": "final_xsimgcl_seed42",
+  "k": 500,
+  "checkpoint_epoch": 10,
+  "model": "xsimgcl",
+  "splits": {
+    "valid": {
+      "users": 220516,
+      "top100_ids_identical": false,
+      "torch": "2.11.0+cu130",
+      "users_top100_identical": 0.9990839666962942,
+      "users_top10_identical": 0.9999818607266593,
+      "positions_identical": 0.9999819967712094,
+      "max_abs_score_diff_by_position": 1.1444091796875e-05
+    },
+    "test": {
+      "users": 158805,
+      "top100_ids_identical": false,
+      "torch": "2.11.0+cu130",
+      "users_top100_identical": 0.9992443562860112,
+      "users_top10_identical": 0.9999748118762004,
+      "positions_identical": 0.9999850760366488,
+      "max_abs_score_diff_by_position": 1.1444091796875e-05
+    }
+  }
+}

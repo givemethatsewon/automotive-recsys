@@ -1,0 +1,18 @@
+{
+  "run": "final_bpr_mf_seed42",
+  "k": 500,
+  "checkpoint_epoch": 5,
+  "model": "bpr_mf",
+  "splits": {
+    "valid": {
+      "users": 220516,
+      "top100_ids_identical": true,
+      "top100_max_abs_score_diff": 0.0
+    },
+    "test": {
+      "users": 158805,
+      "top100_ids_identical": true,
+      "top100_max_abs_score_diff": 0.0
+    }
+  }
+}

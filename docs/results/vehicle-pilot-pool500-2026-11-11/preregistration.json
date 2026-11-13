@@ -1,0 +1,29 @@
+{
+ "created_at": "2026-11-11T08:05:29Z",
+ "question": "Does widening the rerank candidate pool from top-100 to top-500 increase the vehicle rerank effect?",
+ "candidate_pool": 500,
+ "runs": [
+  "final_bpr_mf_seed42",
+  "final_lightgcn_seed42",
+  "final_xsimgcl_seed42"
+ ],
+ "primary_family": "items-model",
+ "comparison": "same run, same family: test NDCG@10 relative change with top-500 vs archived top-100 pilot; beta reselected on valid for top-500",
+ "unchanged": "same best checkpoints (no fitting), inputs, beta grid, valid-only selection, paired user bootstrap 2000",
+ "integrity": "recomputed top-500 first 100 IDs must equal archived top-100; else abort",
+ "note": "seed42 top-100 vehicle results were already seen when this was specified",
+ "amendment_attempt2": {
+  "reason": "attempt1 on torch 2.14.1: LightGCN recomputed valid top-100 differed from archived (trained on torch 2.11.0); BPR-MF identical. Rerun all three with isolated venv torch==2.11.0+cu130; integrity rule unchanged.",
+  "attempt1_kept": "attempt1-torch2.14-output (BPR-MF test results seen before amendment)"
+ },
+ "amendment_attempt3": {
+  "reason": "attempt2 on torch 2.11.0: LightGCN valid recomputed top-100 still differed (99.88% users identical top-100, 99.999% identical top-10, positions 99.998%, max score diff 1.14e-5): float32 SpMM rounding, not version. BPR-MF identical and completed in attempt2.",
+  "new_integrity": "positions_identical>=0.999, users_top10_identical>=0.9999, max score diff<=1e-4 per split; recomputed pool is its own paired beta=0 baseline; archived metrics must match within 0.1% relative and differences are recorded",
+  "runs": [
+   "final_lightgcn_seed42",
+   "final_xsimgcl_seed42"
+  ],
+  "bpr_from": "attempt2-torch2.11-output",
+  "test_seen_before_amendment": "BPR-MF only; LightGCN/XSimGCL top-500 test results not computed"
+ }
+}

@@ -1,0 +1,9 @@
+{
+  "source_url": "https://drive.google.com/file/d/1CKyj41aDBL6QlPZjKhIsUA1fH_fP97Oe/view",
+  "source_folder": "https://drive.google.com/drive/folders/1mYYDiornIreYYatRbICYNKmlPFhjPYRn",
+  "file_id": "1CKyj41aDBL6QlPZjKhIsUA1fH_fP97Oe",
+  "modified_time": "2026-11-10T14:09:37.427Z",
+  "fetched_date": "2026-11-11",
+  "preservation": "Connector returned decoded text; CRLF normalized to LF. Parquet files preserved under ignored results/vehicle-pilot-20261111/inputs with hashes.",
+  "normalized_copy_sha256": "0712c8a6096c20b51c166b7ff6bba715c5dcfad261a9b9a50276fcfac07d6325"
+}
