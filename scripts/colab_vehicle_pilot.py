@@ -37,6 +37,8 @@ def main():
         help='candidate pool size; >100 recomputes top-K from each run best checkpoint (no fitting)')
     p.add_argument('--torch-pin',default='',help='torch version installed in the isolated venv, e.g. 2.11.0 (training-time version)')
     p.add_argument('--candidate-diagnostic', action='store_true', help='Valid-only candidate availability and fixed-scale reranking; no test evaluation')
+    p.add_argument('--v2-comparison', action='store_true', help='Paired v1/v2 data and provider-rule comparison; no fitting')
+    p.add_argument('--adopt-owned-endpoint', default='', help='Reconnect a specifically verified allocation from this task after a lost allocation response')
     args=p.parse_args()
     run=args.directory.resolve()
     run.mkdir(parents=True,exist_ok=True)
@@ -49,6 +51,12 @@ def main():
     assert {f.name for f,_ in files}=={'user_vehicles.parquet','user_vehicles_items.parquet','product_fitment.parquet'}
     files += [(f,f.relative_to(ROOT).as_posix()) for f in sorted((ROOT/'src').rglob('*.py'))]
     files += [(ROOT/f'scripts/{name}',f'scripts/{name}') for name in ['vehicle_pilot.py','candidate_pool.py']]
+    if args.v2_comparison:
+        assert not args.candidate_diagnostic and args.pool == 1000
+        extra=[(f,'v2/'+f.name) for f in sorted((run/'v2').glob('*.parquet'))]
+        assert {f.name for f,_ in extra}=={'user_vehicles.parquet','user_vehicles_items.parquet','product_fitment.parquet'}
+        files += extra + [(run/'provider/vehicle_fit.py','provider/vehicle_fit.py'),
+                          (ROOT/'scripts/vehicle_v2_experiment.py','scripts/vehicle_v2_experiment.py')]
     if args.candidate_diagnostic:
         assert args.pool >= 1000
         files.append((ROOT/'scripts/candidate_diagnostic.py', 'scripts/candidate_diagnostic.py'))
@@ -60,7 +68,12 @@ def main():
               'added_data_folder':'https://drive.google.com/drive/folders/1mYYDiornIreYYatRbICYNKmlPFhjPYRn',
               'baseline_runs':args.runs,'primary_family':args.primary,'candidate_pool':args.pool,'torch_pin':args.torch_pin,'baseline_campaign':config['campaign_id'],
               'candidate_diagnostic':args.candidate_diagnostic,
+              'v2_comparison':args.v2_comparison,
               'baseline':[],'data_parts':config['parts']}
+    if (ROOT/'execution_source.json').exists():
+        manifest['execution_source']=json.loads((ROOT/'execution_source.json').read_text())
+    if args.v2_comparison:
+        manifest['added_data_folder']='https://drive.google.com/drive/folders/1VAMayFmurb8EMH12LGtSDzKbMIiooB_z'
     for name,meta in completed[args.runs[0]]['summary']['inputs'].items():manifest['files']['data/'+name]=meta
     for run_id,record in completed.items():
         for artifact in record['artifacts']:
@@ -102,7 +115,24 @@ def main():
     # New session is task-owned, never resume the completed campaign.
     owned=True
     try:
-        call('new','-s',args.session,'--gpu','L4')
+        if args.adopt_owned_endpoint:
+            from colab_cli.client import Client, Prod
+            from colab_cli.state import StateStore, SessionState
+            from google.auth.transport.requests import AuthorizedSession
+            from google.oauth2.credentials import Credentials
+            private=Path.home()/'.config/automotive-recsys'
+            client=Client(Prod(),AuthorizedSession(Credentials.from_authorized_user_file(str(private/'colab/gcloud/application_default_credentials.json'))))
+            assignments=[x for x in client.list_assignments() if x.endpoint==args.adopt_owned_endpoint]
+            assert len(assignments)==1 and assignments[0].accelerator.value=='L4'
+            assignment=assignments[0];proxy=assignment.runtime_proxy_info
+            states=StateStore(str(private/'colab/sessions.json'))
+            assert states.get(args.session) is None, 'Named session already exists; inspect before adopting'
+            states.add(SessionState(name=args.session,endpoint=assignment.endpoint,token=proxy.token,url=proxy.url,
+                token_expires_at=proxy.expires_at(),variant='GPU',accelerator='L4',machine_shape='STANDARD'))
+            (run/'allocation_adopted.json').write_text(json.dumps({'endpoint':assignment.endpoint,'session':args.session,'time':datetime.now(timezone.utc).isoformat()})+'\n')
+            print('Adopted verified task allocation; no new allocation requested.',flush=True)
+        else:
+            call('new','-s',args.session,'--gpu','L4')
         init=run/'initialize.py'
         init.write_text("from pathlib import Path\nimport os,torch,json\n"
             +f"Path('{remote}').mkdir(exist_ok=True)\n"
@@ -131,7 +161,7 @@ with (root/'upload.tar').open('wb') as out:
 with tarfile.open(root/'upload.tar') as tar:tar.extractall(root,filter='data')
 sys.path.insert(0,str(root/'src'))
 subprocess.run([sys.executable,'-m','venv','--without-pip','--system-site-packages',str(root/'venv')],check=True)
-subprocess.run([sys.executable,'-m','pip','--python',str(root/'venv/bin/python'),'install','-q','polars>=1.30,<2','numba'],check=True)
+subprocess.run([sys.executable,'-m','pip','--python',str(root/'venv/bin/python'),'install','-q','polars>=1.30,<2','numba','pandas','pyarrow'],check=True)
 if TORCH_PIN:
  # Recomputing rankings must use the training-time kernels; the archived
  # campaign ran on torch 2.11.0+cu130 and graph SpMM differs across versions.
@@ -182,14 +212,16 @@ for run_id in RUNS:
  with (out/'execution.log').open('w') as log:
   base=root/'baseline'/run_id
   codes[run_id]=0
-  if DIAGNOSTIC:
+  if V2_COMPARISON:
+   codes[run_id]=stream([sys.executable,'-u',str(root/'scripts/vehicle_v2_experiment.py'),'--root',str(root),'--run',run_id,'--output',str(out)],log)
+  elif DIAGNOSTIC:
    codes[run_id]=stream([sys.executable,'-u',str(root/'scripts/candidate_diagnostic.py'),'--root',str(root),'--run',run_id,'--output',str(out)],log)
   elif POOL!=100:
    codes[run_id]=stream([sys.executable,'-u',str(root/'scripts/candidate_pool.py'),'--root',str(root),'--run',run_id,'--k',str(POOL)],log)
    base=root/'pool'/run_id
    if (base/'pool_receipt.json').exists():
     import shutil;shutil.copy(base/'pool_receipt.json',out/'pool_receipt.json')
-  if codes[run_id]==0 and not DIAGNOSTIC:
+  if codes[run_id]==0 and not DIAGNOSTIC and not V2_COMPARISON:
    codes[run_id]=stream([sys.executable,'-u',str(root/'scripts/vehicle_pilot.py'),'--root',str(root),
     '--model',run_id,'--baseline',str(base),'--output',str(out),'--primary',PRIMARY,'--candidates',str(POOL)],log)
   if POOL!=100:
@@ -210,7 +242,7 @@ with archive.open('rb') as stream:
 with archive.open('rb') as stream:archive_hash=hashlib.file_digest(stream,'sha256').hexdigest()
 archive.with_name('vehicle-results-manifest.json').write_text(json.dumps({'sha256':archive_hash,'parts':parts}))
 (root/'worker_done.json').write_text(json.dumps({'returncode':code}))
-'''.replace('RUNS',repr(args.runs)).replace('PRIMARY',repr(args.primary)).replace('POOL',repr(args.pool)).replace('DIAGNOSTIC',repr(args.candidate_diagnostic)))
+'''.replace('RUNS',repr(args.runs)).replace('PRIMARY',repr(args.primary)).replace('POOL',repr(args.pool)).replace('DIAGNOSTIC',repr(args.candidate_diagnostic)).replace('V2_COMPARISON',repr(args.v2_comparison)))
         call('upload','-s',args.session,worker,remote+'/worker.py')
         entry.write_text('''import json,os,subprocess
 from pathlib import Path

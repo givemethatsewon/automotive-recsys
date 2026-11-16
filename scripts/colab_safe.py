@@ -15,7 +15,16 @@ def main():
         if flag:
             state = StateStore(config)
             session = state.get(command[command.index(flag) + 1])
-            if session: state.add(session.model_copy(update={"session_id": None}))
+            if session:
+                update = {"session_id": None}
+                fresh = Path(__file__).resolve().parents[1] / ".fresh-kernel-once"
+                if fresh.exists():
+                    # Explicit task-scoped recovery only, before a worker starts.
+                    # Let the CLI open a new kernel when a cached one has a
+                    # broken websocket. VM files survive; no VM is allocated.
+                    update["kernel_id"] = None
+                    fresh.unlink()
+                state.add(session.model_copy(update=update))
     executable = Path(sys.executable).with_name("colab")
     process = subprocess.Popen([str(executable), *sys.argv[1:]], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     try:

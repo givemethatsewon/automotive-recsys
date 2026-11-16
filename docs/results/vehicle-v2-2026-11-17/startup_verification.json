@@ -1,0 +1,200 @@
+{
+  "observed_at": "2026-11-16T17:42:58.387113+00:00",
+  "status": "running_at_initial_verification",
+  "completed_experiment": false,
+  "training": false,
+  "controller_host": "ubuntu-wan",
+  "unit": "automotive-v2-1117.service",
+  "session": "automotive-v2-1117",
+  "server_directory": "~/git/automotive-recsys-v2-20261117",
+  "execution_revision": "1998a88fdad60d2e72fafa61658d22a0c097ed5e",
+  "origin_revision": "33418457ada676ea4cdcf67711aa7286a04d1d92",
+  "source_sha256": {
+    "src/automotive_recsys/__init__.py": "d961e2f236632eac47ddd442523c5331a6e4117a440d5bc1d28a98f0b8f67320",
+    "src/automotive_recsys/audit.py": "0a561a81007180e77b0b57749c3546926a577906c5110d3eb69ccc1719a929d7",
+    "src/automotive_recsys/campaign.py": "78dc371dcd2a18fe1f25e6a10180adc5ed973da3b70902523a0288d8375dde0f",
+    "src/automotive_recsys/campaign_io.py": "0a086be2c8e79851f36b9a8946c3628f305b0b1b1d211d96350dafdeb2066750",
+    "src/automotive_recsys/cli.py": "01b6d503fcd1b85511f49492111c862f4f26ab5fb31009d9769e589bc71b9526",
+    "src/automotive_recsys/controller_policy.py": "b431d6a20d186667d9f8797a10770917e30208ba483d76b518352a137e843554",
+    "src/automotive_recsys/drive_store.py": "74155bfa468b144c4cdfce9c461099763b1ab213d45ae18af5d65c68192f6654",
+    "src/automotive_recsys/evaluate_run.py": "edd773439738ac15374842d64ec6fa6f8c5fc9b4281b0fc61fd13f313e08a006",
+    "src/automotive_recsys/evaluation.py": "6f85d3e8bde0d32d6f98ca950874a09cda65ada72f69ce38303c3721d6a89f53",
+    "src/automotive_recsys/experiment_plan.py": "ac3d59347039c429a1d00eaede6f51588376de7bbe7a76aaa41eb36f4d7d9a65",
+    "src/automotive_recsys/experiment_report.py": "07318f21d7bfc97b541c4092f02b8322cd4ccedd3f96db55ec592237f83d4d04",
+    "src/automotive_recsys/gpu_kernels.py": "57450f0a7dbb4efc65e9b739ed7dc7b42c754f2c759388e85a157ba1e5e541a6",
+    "src/automotive_recsys/popularity.py": "8e15fd2789517b7268d27c3e1622405d82acb751d729756339dd23238a936dca",
+    "src/automotive_recsys/train_gpu.py": "a416242adbb352eb5a5463a40ad853fa82ca0d3bbd1cb7120c10ea045bc1e4bb",
+    "src/automotive_recsys/vehicle_rerank.py": "892b8d96890c7a60231cf25716b81aec0a7e9765e7be02867763c20f66685eca",
+    "src/automotive_recsys/vehicle_v2.py": "d9cc886eaeeee734d5fe6bdc0f81fbcdea23c06810a4b82960e5d71e59dc4733",
+    "scripts/vehicle_pilot.py": "7c1443bae4677205185f589a0dfe4590ed4bd35f822e220151876302f59c61c7",
+    "scripts/candidate_pool.py": "db68557bf5226d3a1ec93236b616947f1b7761cda9510022e2518b1c66b19034",
+    "scripts/vehicle_v2_experiment.py": "3aff6102add65de8d55e72f8e3fae5c0c5d454036d5e20684eee6e0b1d3f4736"
+  },
+  "input_hashes": {
+    "inputs/product_fitment.parquet": {
+      "sha256": "20fb4382a7f3049b04094a57e9c8472837cc9af56fcbc6b9a8e1471b38216511",
+      "bytes": 17084780
+    },
+    "inputs/user_vehicles.parquet": {
+      "sha256": "55fb0241784d662ad4048c31dc5e5719ff6136314d0e7afb31fa1720c7b3a237",
+      "bytes": 21586648
+    },
+    "inputs/user_vehicles_items.parquet": {
+      "sha256": "8c3fc467d990f372c9801131bcb885cef0bb4fefe847a99b979330f3b73ded10",
+      "bytes": 41670655
+    },
+    "v2/product_fitment.parquet": {
+      "sha256": "a1d644296ce7ebe3137a8184fcb667e485420915766fa536b79734f5fb8398c9",
+      "bytes": 17443371
+    },
+    "v2/user_vehicles.parquet": {
+      "sha256": "230c9ddc96ff6ef6779eb6e5f2480fabed2991fa1d2c30d17e6b95fbd43f0ec4",
+      "bytes": 22228144
+    },
+    "v2/user_vehicles_items.parquet": {
+      "sha256": "d15634ce30e96891b09210a23ea8c4b7df5d8e481c180442d0791769a50f4b60",
+      "bytes": 45231510
+    },
+    "provider/vehicle_fit.py": {
+      "sha256": "33dc94c2bf09ea8f2f496d4e3e589b266fd1a15e41b4669d30aaea05bd0168fb",
+      "bytes": 13023
+    }
+  },
+  "events": [
+    {
+      "stage": "input_audit_complete",
+      "run": "final_bpr_mf_seed42",
+      "datasets": {
+        "v1": {
+          "inputs": {
+            "user_vehicles.parquet": {
+              "rows": 482827,
+              "last_seen_max": 1628643280716,
+              "schema": {
+                "user_id": "String",
+                "make": "String",
+                "model": "String",
+                "year": "Float64",
+                "n_mentions": "Int64",
+                "best_pattern": "String",
+                "segment": "String",
+                "first_seen": "Int64",
+                "last_seen": "Int64"
+              }
+            },
+            "user_vehicles_items.parquet": {
+              "rows": 2343729,
+              "last_seen_max": 1628643202280,
+              "schema": {
+                "user_id": "String",
+                "make": "String",
+                "model": "String",
+                "year": "Float64",
+                "n_items": "Int64",
+                "segment": "String",
+                "last_seen": "Int64"
+              }
+            }
+          },
+          "profile_users": 379912,
+          "fitment_items": 97958,
+          "universal_items": 9734
+        },
+        "v2": {
+          "inputs": {
+            "user_vehicles.parquet": {
+              "rows": 500473,
+              "last_seen_max": 1628643280716,
+              "schema": {
+                "user_id": "String",
+                "make": "String",
+                "model": "String",
+                "year": "Float64",
+                "n_mentions": "Int64",
+                "year_mentions": "Float64",
+                "best_pattern": "String",
+                "segment": "String",
+                "first_seen": "Int64",
+                "last_seen": "Int64"
+              }
+            },
+            "user_vehicles_items.parquet": {
+              "rows": 2804156,
+              "last_seen_max": 1628643202280,
+              "schema": {
+                "user_id": "String",
+                "make": "String",
+                "model": "String",
+                "year": "Float64",
+                "n_items": "Int64",
+                "segment": "String",
+                "last_seen": "Int64"
+              }
+            }
+          },
+          "profile_users": 389951,
+          "fitment_items": 97887,
+          "universal_items": 3830
+        }
+      }
+    },
+    {
+      "stage": "pool_check",
+      "run": "final_bpr_mf_seed42",
+      "split": "valid",
+      "torch": "2.11.0+cu130",
+      "users_top100_identical": 1.0,
+      "users_top10_identical": 1.0,
+      "positions_identical": 1.0,
+      "max_abs_score_diff_by_position": 0.0
+    },
+    {
+      "stage": "pool",
+      "run": "final_bpr_mf_seed42",
+      "split": "valid",
+      "users": 220516,
+      "top100_ids_identical": true,
+      "torch": "2.11.0+cu130",
+      "users_top100_identical": 1.0,
+      "users_top10_identical": 1.0,
+      "positions_identical": 1.0,
+      "max_abs_score_diff_by_position": 0.0
+    },
+    {
+      "stage": "pool_check",
+      "run": "final_bpr_mf_seed42",
+      "split": "test",
+      "torch": "2.11.0+cu130",
+      "users_top100_identical": 1.0,
+      "users_top10_identical": 1.0,
+      "positions_identical": 1.0,
+      "max_abs_score_diff_by_position": 0.0
+    },
+    {
+      "stage": "pool",
+      "run": "final_bpr_mf_seed42",
+      "split": "test",
+      "users": 158805,
+      "top100_ids_identical": true,
+      "torch": "2.11.0+cu130",
+      "users_top100_identical": 1.0,
+      "users_top10_identical": 1.0,
+      "positions_identical": 1.0,
+      "max_abs_score_diff_by_position": 0.0
+    },
+    {
+      "stage": "valid",
+      "case": "v1_exact",
+      "run": "final_bpr_mf_seed42",
+      "users": 220516,
+      "choices": {
+        "100": 1,
+        "500": 2,
+        "1000": 1
+      }
+    }
+  ],
+  "startup_worker_log_sha256": "b8fd441ee1c4a9bdf2d2acff8e1bd1bd5eddadd9966086d01f9cbfd07519a655",
+  "cleanup": "Controller recovers results then stops only its owned session; no completion/release claim yet",
+  "operational_recovery": "Adopted sole assignment created after request timeout; fresh Jupyter kernel recovered stalled startup websocket. Worker learning/evaluation source unchanged."
+}
