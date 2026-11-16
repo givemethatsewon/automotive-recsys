@@ -1,0 +1,205 @@
+{
+  "observed_at": "2026-11-17T01:26:26+09:00",
+  "folder": "https://drive.google.com/drive/folders/1VAMayFmurb8EMH12LGtSDzKbMIiooB_z",
+  "files": [
+    {
+      "id": "1dApuqVFKwQRhQ3M55_lX46LcYhX5c_sC",
+      "title": "handoff_to_B.md",
+      "size": "9377",
+      "mime_type": "text/markdown",
+      "modified_time": "2026-11-14T15:24:19.464Z"
+    },
+    {
+      "id": "1BLZCMCVzfunXHiSNwpeXb2aCOHvvYVS_",
+      "title": "README.txt",
+      "size": "32050",
+      "mime_type": "text/plain",
+      "modified_time": "2026-11-14T15:24:14.425Z"
+    },
+    {
+      "id": "1TdMkT-4AC8mqUZTtyT1J2Gx6Au7OKkbG",
+      "title": "evidence",
+      "size": null,
+      "mime_type": "application/vnd.google-apps.folder",
+      "modified_time": "2026-11-14T15:17:52.966Z"
+    },
+    {
+      "id": "185-aWZPJcjwGUDIsWUTEqF1ndvULXeBl",
+      "title": "review",
+      "size": null,
+      "mime_type": "application/vnd.google-apps.folder",
+      "modified_time": "2026-11-14T15:17:52.965Z"
+    },
+    {
+      "id": "1WuNwPc1tobi6vAedEwmWsmO5BJlVMjU1",
+      "title": "code",
+      "size": null,
+      "mime_type": "application/vnd.google-apps.folder",
+      "modified_time": "2026-11-14T15:17:52.958Z"
+    },
+    {
+      "id": "1PUYMjP9YiXh89VtKU_6nsarUYbs6HazW",
+      "title": "dictionary",
+      "size": null,
+      "mime_type": "application/vnd.google-apps.folder",
+      "modified_time": "2026-11-14T15:17:52.955Z"
+    },
+    {
+      "id": "1shId09989cwyixnJH3zvga0E4-jSbS-c",
+      "title": "vehicle_source_comparison.csv",
+      "size": "826",
+      "mime_type": "text/csv",
+      "modified_time": "2026-11-14T15:16:28.106Z"
+    },
+    {
+      "id": "1JeUWJfDd2vyYYocC7ie5O3HjcOeaC7JT",
+      "title": "product_fitment_stats.json",
+      "size": "762",
+      "mime_type": "application/json",
+      "modified_time": "2026-11-14T15:16:28.101Z"
+    },
+    {
+      "id": "16jzfZ0h9W_Oihd76PvNs_xBCZ6NTEc7_",
+      "title": "user_vehicles_test_stats.json",
+      "size": "1228",
+      "mime_type": "application/json",
+      "modified_time": "2026-11-14T15:16:28.085Z"
+    },
+    {
+      "id": "1DnNcNDEO5tQH3ZymHazvjJRLJVOw4ius",
+      "title": "user_vehicles_stats.json",
+      "size": "1227",
+      "mime_type": "application/json",
+      "modified_time": "2026-11-14T15:16:28.068Z"
+    },
+    {
+      "id": "1SM7en6xXrJ2z0JqJBkHNn28YCATSGDvc",
+      "title": "user_vehicles_items_test.parquet",
+      "size": "49152786",
+      "mime_type": "application/octet-stream",
+      "modified_time": "2026-11-14T15:16:28.033Z"
+    },
+    {
+      "id": "10BgqRUJvwjtNsJhepvJuKjWvLkh_1gUO",
+      "title": "user_vehicles_items.parquet",
+      "size": "45231510",
+      "mime_type": "application/octet-stream",
+      "modified_time": "2026-11-14T15:16:27.975Z"
+    },
+    {
+      "id": "1Uj_tc_o_p88CcGeNLQ_BFtL5_YQ5RkBu",
+      "title": "user_vehicles_test.parquet",
+      "size": "24726317",
+      "mime_type": "application/octet-stream",
+      "modified_time": "2026-11-14T15:16:27.937Z"
+    },
+    {
+      "id": "1IbXL7L0NiWTEZ8z_FvQLwWN0YyOw1i-S",
+      "title": "user_vehicles.parquet",
+      "size": "22228144",
+      "mime_type": "application/octet-stream",
+      "modified_time": "2026-11-14T15:16:27.897Z"
+    },
+    {
+      "id": "15vBLUrBdrZyxreeKUjM6Gby9ptFH6NcU",
+      "title": "product_fitment.parquet",
+      "size": "17443371",
+      "mime_type": "application/octet-stream",
+      "modified_time": "2026-11-14T15:16:27.872Z"
+    }
+  ],
+  "code": [
+    {
+      "id": "152OrwsxyYzo1rtg4q-psupGd5PSvfrbS",
+      "title": "explore_vehicle_mentions.py",
+      "size": "2766",
+      "modified_time": "2026-11-14T15:16:28.812Z"
+    },
+    {
+      "id": "1jBtCpsSRI2EV-LtMRD9lycxBqQ68-FzY",
+      "title": "fetch_vehicle_list.py",
+      "size": "4641",
+      "modified_time": "2026-11-14T15:16:28.795Z"
+    },
+    {
+      "id": "1IyoCtlp2DvKhqojWCX1PGy0HT8RqJ6mz",
+      "title": "make_review_samples.py",
+      "size": "7304",
+      "modified_time": "2026-11-14T15:16:28.778Z"
+    },
+    {
+      "id": "1PsxZT_E8gbfiIw1s2Vqzr4zSBHSs4EPN",
+      "title": "compare_vehicle_sources.py",
+      "size": "3700",
+      "modified_time": "2026-11-14T15:16:28.762Z"
+    },
+    {
+      "id": "1AQJwngkE9TuDfv4f1LGqHO8tS9XHnHwJ",
+      "title": "infer_vehicles_from_items.py",
+      "size": "3707",
+      "modified_time": "2026-11-14T15:16:28.745Z"
+    },
+    {
+      "id": "1cY5y9Gvv5YuoG6kqoHAMEix1f-E1-Tyv",
+      "title": "extract_user_vehicles.py",
+      "size": "19700",
+      "modified_time": "2026-11-14T15:16:28.730Z"
+    },
+    {
+      "id": "1qU7GM7KRsK8auP0HeDIIoDpBAcPZZPJw",
+      "title": "extract_product_fitment.py",
+      "size": "28691",
+      "modified_time": "2026-11-14T15:16:28.717Z"
+    },
+    {
+      "id": "17Jbjypr7L996typzWMjM1mKZgTlQAQD1",
+      "title": "build_vehicle_vocab.py",
+      "size": "11958",
+      "modified_time": "2026-11-14T15:16:28.697Z"
+    },
+    {
+      "id": "1UXIyDpsuYC1PbwIhttFq4Z0R7JXBU3uz",
+      "title": "vehicle_match.py",
+      "size": "2587",
+      "modified_time": "2026-11-14T15:16:28.685Z"
+    },
+    {
+      "id": "1dQC1pOVv180_J6exboEHmUAK_47t3nKT",
+      "title": "vehicle_fit.py",
+      "size": "13023",
+      "modified_time": "2026-11-14T15:16:28.665Z"
+    }
+  ],
+  "review": [
+    {
+      "id": "1xXuSePLpxqq7XVXZqE0N-Btl8BVFltzu",
+      "title": "review_user_vehicles_v2_with_error_type.csv",
+      "size": "20555",
+      "modified_time": "2026-11-14T15:16:28.371Z"
+    },
+    {
+      "id": "11XV0lm1uV4-JHtOOBJnPXWckgD7nEg6v",
+      "title": "review_user_vehicles_v3_claude.csv",
+      "size": "20504",
+      "modified_time": "2026-11-14T15:16:28.339Z"
+    },
+    {
+      "id": "1xQJWd6BKsUlZ8GJYo4XGtHjDy7EngPo-",
+      "title": "review_product_fitment_v3_claude.csv",
+      "size": "26413",
+      "modified_time": "2026-11-14T15:16:28.273Z"
+    },
+    {
+      "id": "1i5yAJNLlrqcqOmOeJb43rE0WCd2EmILS",
+      "title": "review_user_vehicles_v3.csv",
+      "size": "19218",
+      "modified_time": "2026-11-14T15:16:28.204Z"
+    },
+    {
+      "id": "1tEfkON3uVcRQAg9GIVPztBNyauXvV-MD",
+      "title": "review_product_fitment_v3.csv",
+      "size": "17633",
+      "modified_time": "2026-11-14T15:16:28.169Z"
+    }
+  ]
+}

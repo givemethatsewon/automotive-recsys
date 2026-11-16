@@ -1,0 +1,86 @@
+{
+  "checked_at": "2026-11-16T16:30:56.320327+00:00",
+  "gmail": {
+    "message_id": "1a1d4e6e0c02d831",
+    "sent_at": "2026-11-13T12:34:22+00:00",
+    "subject": "Notes: “신빈<>세원 빅데이터 2차 회의” Nov 13, 2026"
+  },
+  "sources": [
+    {
+      "file": "docs/sources/meeting-2026-11-13.project-excerpt.txt",
+      "url": "https://docs.google.com/document/d/1PGWPs66c-iHsJ708xfDhiT5iOIp_ety3zOkrEImriAs/edit",
+      "bytes": 17789,
+      "sha256": "31eb87a3484688a76638ff7e0bcb226343684a1bac032d6c29033b2f41ef5c2e",
+      "kind": "automatic_transcript_excerpt",
+      "meeting_date": "2026-11-13",
+      "gmail_message_id": "1a1d4e6e0c02d831",
+      "source_modified_at": "2026-11-13T12:33:26.258Z",
+      "scope": "00:00:01 through 00:22:21; excludes later personal conversation",
+      "normalization": "LF line endings; strip excerpt boundary whitespace; one final newline; one final newline"
+    },
+    {
+      "file": "docs/sources/project-overview-2026-11-17.fetch.json",
+      "url": "https://app.notion.com/p/40de3a7d9408803eb856e3efecedf8a1",
+      "bytes": 3273,
+      "sha256": "3d5b73919c36fedf158841a267adcca2df4e385e79107d70e00a115ad4be655e",
+      "kind": "notion_fetch_snapshot",
+      "source_modified_at": "2026-11-16T16:23:42.339Z",
+      "verification": "unverified",
+      "completeness": "unknown external object block and file/image references; no explicit truncation count returned"
+    },
+    {
+      "file": "docs/sources/vehicles-v2-readme-2026-11-17.txt",
+      "url": "https://drive.google.com/file/d/1BLZCMCVzfunXHiSNwpeXb2aCOHvvYVS_/view",
+      "bytes": 31646,
+      "sha256": "2602fc8d2625bf4611ab772d2073ca3ffc0217b3dd451aa14118662e204efdd7",
+      "kind": "provider_readme",
+      "source_modified_at": "2026-11-14T15:24:14.425Z",
+      "document_declared_final_date": "2026-11-15",
+      "normalization": "connector returned text; LF line endings; one final newline"
+    },
+    {
+      "file": "docs/sources/vehicles-v2-handoff-2026-11-17.md",
+      "url": "https://drive.google.com/file/d/1dApuqVFKwQRhQ3M55_lX46LcYhX5c_sC/view",
+      "bytes": 9245,
+      "sha256": "e3964d69c89a2d22e69c45bf1dd009069e907120f91ba8a08a556c1949cd4260",
+      "kind": "provider_handoff",
+      "source_modified_at": "2026-11-14T15:24:19.464Z",
+      "document_declared_final_date": "2026-11-15",
+      "normalization": "connector returned text; LF line endings; one final newline"
+    },
+    {
+      "file": "docs/sources/vehicles-v2-inventory-2026-11-17.json",
+      "url": "https://drive.google.com/drive/folders/1VAMayFmurb8EMH12LGtSDzKbMIiooB_z",
+      "bytes": 6163,
+      "sha256": "16d8fd56222f29f7244b66d53c2c588d9bb4f0896dffc367ba02e96ff9c5b327",
+      "kind": "metadata_inventory",
+      "parquet_content_verified": false
+    }
+  ],
+  "private_full_text": {
+    "file": "results/meeting-update-20261117/meeting-2026-11-13.txt",
+    "url": "https://docs.google.com/document/d/1PGWPs66c-iHsJ708xfDhiT5iOIp_ety3zOkrEImriAs/edit",
+    "bytes": 28974,
+    "sha256": "69d2be4032e55e0e89c06b62a4edc4fdfe5d67b5ac9470d9a0f670b3bbbe7276",
+    "kind": "complete_connector_text_private",
+    "normalization": "LF line endings; preserve connector text including later conversation",
+    "git_excluded": true
+  },
+  "scope": "Source read and project documentation update; no v2 evaluation/training, GPU allocation, remote publication or teammate messages",
+  "spark_inventory_observed": {
+    "folder": "https://drive.google.com/drive/folders/1WBq2APsaPj09wJwaZroAM1uSpnVZXpzd",
+    "files": [
+      {
+        "name": "rq1_stats.json",
+        "id": "1t4WHQKDd3es4uo2YTMAx9xtAFZEt3pQX",
+        "bytes": 563
+      },
+      {
+        "name": "timing.csv",
+        "id": "1zsDox_w5pVW-8athldD5_Pb-ozGRCiEW",
+        "bytes": 1138
+      }
+    ],
+    "content_reviewed": false
+  }
+}

@@ -1,5 +1,15 @@
 # 보관한 원문과 출처
 
+**2026-11-17 추가:** [11/13 회의 해설](../MEETING_2026-11-13.md)에 사용한 Gmail→Google Docs, 최신 Notion 및 차종 v2 자료를 별도 사본으로 보관했다. 아래의 11/10 원문은 덮어쓰지 않는다.
+
+|추가 사본|범위·보존 방식|
+|---|---|
+|[11/13 프로젝트 대화 발췌](meeting-2026-11-13.project-excerpt.txt)|Google Docs 자동 스크립트 00:00:01–22:21 구간의 원문. LF 정규화, 끝 공백 제거. 후반 사적 대화는 공유 사본에서 제외. 전체 fetch 텍스트는 Git 제외 `results/meeting-update-20261117/meeting-2026-11-13.txt`에 보관|
+|[최신 Notion fetch](project-overview-2026-11-17.fetch.json)|11/17 KST 조회, page_last_edited_at 11/16 UTC. v2 링크·역할·미체크 액션 보존. verification=unverified, 일부 unknown block 존재. 전체 페이지가 완전히 추출됐다고 단정하지 않음|
+|[v2 README](vehicles-v2-readme-2026-11-17.txt), [인수인계](vehicles-v2-handoff-2026-11-17.md)|11/15 최종본이라고 명시된 Drive 문서의 반환 텍스트. LF 정규화. 원문 수치·제안은 수정하지 않고 회의 해설/v2 계획에서 한계를 설명|
+|[v2 파일 목록](vehicles-v2-inventory-2026-11-17.json)|루트·code·review의 조회 ID·이름·수정 시각·bytes. Parquet 다운로드/hash 검증 기록이 아님|
+|[추가 출처 manifest](meeting-update-2026-11-17.manifest.json)|조회 시각·원본 URL·공유 사본 SHA-256·보존 범위. 과거 source-manifest.json은 당시 기록으로 보존|
+
 보관일: 2026-11-10. 다른 채팅에서 원래 파일이나 Notion 로그인 없이 내용을 읽을 수 있게 사본을 둔다. 프로젝트 개요·실행 상태를 먼저 보려면 루트의 [PROJECT_BRIEF.md](../../PROJECT_BRIEF.md)를 읽는다.
 
 | 파일 | 성격·출처 | 보존 방식 |
