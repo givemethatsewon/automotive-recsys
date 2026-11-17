@@ -1,5 +1,7 @@
 # 차종 v2 비교 실행 기록
 
+**최신 확인: 실패 종료.** 2026-11-17 12:02 KST에 서버를 조회했다. 세션이 사라진 뒤 제어기가 04:10 KST에 시간 초과로 실패했고 최종 결과 archive는 없다. 초기 진행만 보존됐으므로 v2 성능 개선 여부를 보고할 수 없다. 현재 잔액96.33 CU·소모율0·활성 할당0개를 확인했다. [실패 검증 JSON](results/vehicle-v2-2026-11-17/failure_verification.json). 아래 시작·초기 검증 기록은 당시 관측으로 보존한다.
+
 2026-11-17 KST. 사용자 요청에 따라 [v2 계획](VEHICLES_V2_PLAN.md)의 첫 단계인 **기존 checkpoint에서 v1↔v2 재정렬 비교**를 시작했다. 완료를 기다리지 않고 초기 실행을 검증한 뒤 백그라운드 제어기에 맡기는 요청이다. 학습 단계 실험은 이 실행에 포함하지 않는다.
 
 ## 실행 범위
@@ -36,3 +38,11 @@ Colab 작업 세션은 `automotive-v2-1117` 하나다. 제어기는 완료·실�
 [시작 검증 JSON](results/vehicle-v2-2026-11-17/startup_verification.json)에 입력 hash·시점 검사와 실제 worker 이벤트를 보관했다. PyTorch2.11.0+cu130/NVIDIA L4에서 BPR-MF의 valid220,516명·test158,805명 후보 재계산이 완료됐고, 두 split의 보관 top100 ID·점수와 정확히 일치했다. 이후 v1_exact의 valid 전체 sweep 완료를 확인했다. test 후보 계산은 점수/ID 생성이며 test 정답을 이용한 β 선택이 아니다. 전체 test 비교·나머지 모델의 완료를 기다리지는 않았다.
 
 시작 WebSocket이 끊긴 문제는 같은 VM에서 새 Jupyter kernel로 한 번 재연결해 해결했다. PID 기반 시작 receipt 확인 후 worker가 실제 평가 중인 것을 확인했으며 중복 worker나 VM을 만들지 않았다. 실행/학습 소스와 별개로 제어용 colab_safe.py의 복구 변경을 기록한다. 최종 상태는 서버 controller_status.json을 확인한다.
+
+## 실패와 보존 범위
+
+- 제어기 상태는 failed이며 최종 오류는 Pilot did not finish within the time limit이다. 그보다 앞서 CLI가 Session not found를 반환하기 시작했다. VM 소실 이유 자체는 보존 로그로 확정할 수 없다.
+- 서버에 결과 archive·output 디렉터리·최종 test 결과표가 없다. 마지막으로 별도 저장한 worker.log는 BPR-MF v1_exact valid 전체 sweep까지다. 이후 실행 여부·부분 수치를 추정해 채우지 않는다.
+- 초기 입력 감사에서 train 사용자 차종 프로필은 v1 379,912명→v2 389,951명으로 늘었다. 이것은 입력 coverage이며 추천 정확도 개선 결과가 아니다.
+- 계정 잔액 관측 차이는98.14−96.33=1.81 CU다. 준비·할당 복구·전송을 포함한 계정 차이이며 모델별 정확 비용이 아니다.
+- 결과 회수를 전체 worker 마지막에만 둬 중간 산출물을 VM 밖으로 보존하지 못했다. 다음 실행 전 조건별·모델별 외부 저장, 세션 소실 즉시 감지, 원격 진단 로그 회수, 재개 검증을 보완해야 한다. 이번 상태 조회에서는 GPU를 새로 할당하거나 실험을 재시작하지 않았다.

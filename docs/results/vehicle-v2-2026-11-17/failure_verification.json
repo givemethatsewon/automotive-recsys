@@ -1,0 +1,29 @@
+{
+  "observed_at": "2026-11-17T03:02:59.596569+00:00",
+  "status": "failed",
+  "controller": {
+    "status": "failed",
+    "error": "Colab wrapper exit 1; inspect recovered output and controller.log",
+    "training": false,
+    "inspect": "controller.log and output/<run>/execution.log",
+    "updated_at": "2026-11-16T19:10:11.659173+00:00"
+  },
+  "final_comparison_available": false,
+  "recovered_result_archives": 0,
+  "latest_preserved_milestone": "BPR-MF v1_exact full valid sweep; archived top100 IDs/scores reproduced exactly",
+  "remaining_progress": "Not recoverable from available logs after VM disappeared; do not infer v2/test/model outcomes",
+  "current_account": {
+    "balance_cu": 96.33,
+    "rate_cu_hour": 0.0,
+    "active_assignments": 0
+  },
+  "initial_balance_cu": 98.14,
+  "account_delta_cu": 1.81,
+  "cause": "Session became unavailable before controller timeout; why the VM disappeared is not established",
+  "recovery_gap": "Intermediate output stayed in /content; wrapper attempted final collection only, so no complete v2 comparison survived",
+  "next_requirements": [
+    "Persist progress and each completed case outside VM",
+    "Detect missing assignment promptly instead of polling until global timeout",
+    "Preserve final worker diagnostic logs and support bounded resume"
+  ]
+}
