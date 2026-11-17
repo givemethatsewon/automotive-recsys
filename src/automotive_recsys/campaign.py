@@ -44,7 +44,10 @@ def run_campaign(root, credential_file, root_id, plan, identity="colab", guard=N
         resume = durable.restore()
         journal.log("run_started", {"run_id": run_id, "purpose": job["purpose"]})
         settings = job["settings"]
-        result = run_training(data, run_dir, **settings, epochs=job["epochs"], seed=job["seed"],
+        training_settings = dict(settings)
+        if training_settings.get('interaction_weights'):
+            training_settings['interaction_weights'] = root / training_settings['interaction_weights']
+        result = run_training(data, run_dir, **training_settings, epochs=job["epochs"], seed=job["seed"],
                               eval_every=plan["eval_every"], patience=job["patience"], resume=resume,
                               event_hook=durable.hook, save_recommendations=job["purpose"].startswith("final"),
                               run_metadata={"run_id": run_id, "purpose": job["purpose"], **plan["metadata"]})
@@ -87,6 +90,17 @@ def run_campaign(root, credential_file, root_id, plan, identity="colab", guard=N
         store.put_json({"complete": True, "summary": result["summary"]}, f"baseline/{split}/completed.json", journal.staging)
 
     try:
+        if plan.get("kind") == "vehicle_weight_training":
+            from .vehicle_training import finish_report
+            selection = {"plan_hash":plan_hash(plan), "selection_data":"valid only", "test_used_for_selection":False,
+                         "choices":{j['settings']['variant']:j['settings'] for j in plan['jobs']},
+                         "vehicle_weights_sha256":json.loads((root/'features/train_vehicle_weights.json').read_text())['weights_sha256']}
+            store.put_json(selection, 'frozen_selection.json', journal.staging)
+            for job in plan['jobs']: execute(job, selection)
+            finish_report(output, store, plan, records, journal)
+            journal.state['status']='completed';journal.log('campaign_completed')
+            journal.progress('completed', {}, force=True);journal.sync_small()
+            return {'status':'completed','completed_runs':len(records)}
         baseline("valid")
         tuning = tuning_jobs(plan)
         for job in tuning: execute(job)

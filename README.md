@@ -11,6 +11,8 @@ Amazon Reviews 2023 Automotive의 processed 5-core에서 **정확도를 유지�
 
 ## 현재 상태를 읽는 법
 
+다음은 [차종 신뢰도 가중 BPR-MF 학습](docs/VEHICLE_WEIGHT_TRAINING_2026-11-17.md)이다. 비가중 대조/불일치0.5배, 같은3seeds의6runs를 준비하며 CUDA 외부 checkpoint 복원 검증 뒤 시작한다.
+
 **11/17 v2 비교 완료:** 세 모델 seed42의 네 조건·후보100/500/1000 평가와 전체 결과 회수를 완료했다. 제어기는 정상 종료했고 활성 GPU0개·0 CU/hr를 확인했다. 후보500·같은 β의 v2/v1 test NDCG 변화는 +0.652%/+0.073%/+0.061%이며 모두 paired CI가0을 포함한다. [최종 결과·한계](docs/VEHICLES_V2_RESULTS_2026-11-17.md), [저장·복구 검증 기록](docs/VEHICLES_V2_DURABLE_2026-11-17.md).
 
 11/17 KST에 Gmail의 11/13 회의 문서·스크립트와 최신 Notion·Drive를 확인해 [회의 결정](docs/MEETING_2026-11-13.md)을 반영했다. **모델을 우선 고정하고 데이터 클리닝·원인 분석 중심으로 발표하며, v2로 재정렬 탐색과 학습 단계 비교를 모두 시도**하는 방향이다. v2 최종본은 올라와 있고 [후속 실행 계획](docs/VEHICLES_V2_PLAN.md)을 정리했다. 첫 v2 재정렬 비교는 초기 평가 진행 후 Colab 세션이 사라져 실패 종료했다. 최종 비교 결과는 회수되지 않았고, 11/17 재조회에서 활성 GPU0개·0 CU/hr를 확인했다. [실행 기록](docs/VEHICLES_V2_RUN_2026-11-17.md)에서 진행 위치와 초기 검증 근거를 확인한다. 학습 단계 실험은 아직 시작하지 않았다.

@@ -75,11 +75,13 @@ def info_nce(left, right, temperature=0.2):
 
 def objective(embedding, graph, users, positives, negatives, model="lightgcn", layers=3,
               regularization=1e-4, cl_weight=0.1, temperature=0.2, eps=0.1,
-              contrast_layer=1, noise=None, symmetric_backward=False, return_components=False):
+              contrast_layer=1, noise=None, symmetric_backward=False, return_components=False,
+              interaction_weights=None, weight_normalizer=1.0):
     final, contrast = encode(embedding, graph, model, layers, eps, contrast_layer,
                              perturbed=model == "xsimgcl", noise=noise, symmetric_backward=symmetric_backward)
     user, positive, negative = final[users], final[positives], final[negatives]
-    bpr = F.softplus((user * negative).sum(1) - (user * positive).sum(1)).mean()
+    per_interaction = F.softplus((user * negative).sum(1) - (user * positive).sum(1))
+    bpr = per_interaction.mean() if interaction_weights is None else (per_interaction * interaction_weights).mean() / weight_normalizer
     # Shared raw-embedding L2 protocol across models; record this recipe choice.
     penalty = sum(embedding[index].square().sum() for index in [users, positives, negatives])
     reg = regularization * penalty / (2 * len(users))

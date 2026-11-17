@@ -93,6 +93,8 @@ def evaluate_checkpoint(data_dir, checkpoint, output, selection, save_prediction
         raise ValueError("Test evaluation requires an explicitly frozen validation-only selection.")
     for key in ["model", "dim", "layers", "learning_rate", "regularization", "cl_weight", "eps", "temperature"]:
         if settings[key] != chosen[key]: raise ValueError("Test evaluation setting differs from frozen validation selection.")
+    if settings.get('interaction_weighting') and settings['interaction_weighting']['weights_sha256'] != selection.get('vehicle_weights_sha256'):
+        raise ValueError('Training vehicle weights differ from frozen selection.')
     if fingerprint(Path(data_dir)) != snapshot["inputs"]: raise ValueError("Evaluation input hashes differ.")
     train = pl.read_parquet(Path(data_dir) / "train.parquet", columns=["uid", "iid"])
     n_users = pl.scan_parquet(Path(data_dir) / "user_map.parquet").select(pl.len()).collect().item()

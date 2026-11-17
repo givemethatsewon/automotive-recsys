@@ -13,9 +13,9 @@ def sha256(path):
     return digest.hexdigest()
 
 
-def build_bundle():
+def build_bundle(extra_files=(), destination=None):
     root = Path(__file__).resolve().parents[1]
-    staging = root / "results" / "colab" / "staging"
+    staging = Path(destination) if destination else root / "results" / "colab" / "staging"
     staging.mkdir(parents=True, exist_ok=True)
     files = [(path, path.relative_to(root).as_posix()) for path in sorted((root / "src").rglob("*.py"))]
     files += [(path, path.relative_to(root).as_posix()) for path in sorted((root / "tests").glob("*.py"))]
@@ -24,6 +24,7 @@ def build_bundle():
     files += [(path, path.relative_to(root).as_posix()) for path in sorted((root / "docs").glob("*.md"))]
     files += [(path, f"data/{path.name}") for path in sorted((root / "data").iterdir()) if path.suffix in {".parquet", ".json", ".txt"}]
     files += [(root / "results/popularity_valid/metrics.json", "reference/popularity_valid_metrics.json")]
+    files += [(Path(path), name) for path, name in extra_files]
     archive = staging / "input.tar"
     with tarfile.open(archive, "w") as bundle:
         for source, name in files:

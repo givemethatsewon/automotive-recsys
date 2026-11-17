@@ -25,7 +25,7 @@ def run_training(data_dir, output, model, epochs=50, seed=42, dim=64, layers=3,
                  cl_weight=0.1, eps=0.1, temperature=0.2, eval_every=5,
                  patience=5, validation_batch=1024, resume=None,
                  verify_resume=False, save_recommendations=True, variant=None,
-                 event_hook=None, run_metadata=None):
+                 event_hook=None, run_metadata=None, interaction_weights=None):
     if not torch.cuda.is_available():
         raise RuntimeError("CUDA is required. Run on Colab; local CPU/MPS fallback is disabled.")
     if epochs < 1 or batch_size < 1 or eval_every < 1 or dim < 1:
@@ -50,6 +50,12 @@ def run_training(data_dir, output, model, epochs=50, seed=42, dim=64, layers=3,
     if int(users["n_train"].max()) >= n_items:
         raise ValueError("A user has no available negative item.")
     history_uid, history_iid = train["uid"].to_numpy(), train["iid"].to_numpy()
+    gpu_interaction_weights, weight_normalizer, weight_metadata = None, 1.0, {}
+    if interaction_weights is not None:
+        from .vehicle_training import load_weights
+        weights, weight_metadata = load_weights(interaction_weights, data_dir, train.height)
+        weight_normalizer = float(weights.mean(dtype=np.float64))
+        gpu_interaction_weights = torch.as_tensor(weights, device="cuda")
     gpu_uid = torch.as_tensor(history_uid.astype(np.int64), device="cuda")
     gpu_iid = torch.as_tensor(history_iid.astype(np.int64), device="cuda")
     keys = training_keys(gpu_uid, gpu_iid, n_items, "cuda")
@@ -62,6 +68,8 @@ def run_training(data_dir, output, model, epochs=50, seed=42, dim=64, layers=3,
     settings = dict(model=model, variant=variant or model, dim=dim, layers=layers, seed=seed, batch_size=batch_size,
                     learning_rate=learning_rate, regularization=regularization,
                     cl_weight=cl_weight, eps=eps, temperature=temperature, validation_batch=validation_batch)
+    if weight_metadata:
+        settings["interaction_weighting"] = weight_metadata | {"normalizer": weight_normalizer}
     inputs = fingerprint(data_dir)
     history, best_score, best_epoch, bad_evaluations, first_epoch = [], -math.inf, 0, 0, 1
     valid_uid = truth["uid"].unique().sort().to_numpy()
@@ -127,7 +135,9 @@ def run_training(data_dir, output, model, epochs=50, seed=42, dim=64, layers=3,
         optimizer.zero_grad(set_to_none=True)
         loss, parts = objective(weight, graph, uid, pos, negative, model=model, layers=layers,
                          regularization=regularization, cl_weight=cl_weight, eps=eps,
-                         temperature=temperature, symmetric_backward=model != "bpr_mf", return_components=True)
+                         temperature=temperature, symmetric_backward=model != "bpr_mf", return_components=True,
+                         interaction_weights=None if gpu_interaction_weights is None else gpu_interaction_weights[ids],
+                         weight_normalizer=weight_normalizer)
         loss.backward()
         optimizer.step()
         return loss.detach(), parts

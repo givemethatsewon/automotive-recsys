@@ -76,6 +76,16 @@ try:
     from operational_io import install
     operational_io = install()
     store.put_json(operational_io | {"source_sha256": CONFIG["operational_io_sha256"]}, f"workers/{CONFIG['worker']}/operational_io.json", root / "transfer")
+    if CONFIG['plan'].get('kind')=='vehicle_weight_training':
+        from automotive_recsys.campaign_io import CampaignJournal
+        from automotive_recsys.vehicle_training import prepare_weights,verify_cuda_weighted_objective
+        feature_journal=CampaignJournal(root/'results/feature_journal',store,CONFIG['plan'],CONFIG['worker'],budget_guard)
+        audit=prepare_weights(root,lambda step,total:feature_journal.progress('preparing_vehicle_weights',{'run_id':'feature_preparation','model':'bpr_mf','seed':42,'step':step,'steps':total}))
+        store.put_json(audit,'vehicle_weight_audit.json',root/'transfer')
+        weights=store.put(root/'features/train_vehicle_weights.npy','features/train_vehicle_weights.npy')
+        roundtrip=store.download(weights['id'],root/'features/roundtrip.npy',weights['sha256']);roundtrip.unlink()
+        kernel_check=verify_cuda_weighted_objective(root)
+        store.put_json(kernel_check | {'weights_sha256':weights['sha256'],'external_weights_roundtrip':True},'preflight/weighted_objective.json',root/'transfer')
     # Before the study, prove that a real optimizer/RNG checkpoint survives a
     # Drive round trip into a separate output directory and continues training.
     if not store.get_json("preflight/verified.json"):
@@ -83,28 +93,39 @@ try:
         from automotive_recsys.train_gpu import run_training
         journal = CampaignJournal(root / "results/preflight_journal", store, CONFIG["plan"], CONFIG["worker"], budget_guard)
         run_id = "preflight_bpr_mf_seed42"
+        preflight_settings=dict(CONFIG['plan'].get('preflight_settings',{}))
+        preflight_model=preflight_settings.pop('model','bpr_mf')
+        if preflight_settings.get('interaction_weights'):
+            preflight_settings['interaction_weights']=root/preflight_settings['interaction_weights']
         first = root / "results/preflight_source"
         durable = DurableRun(journal, run_id, first)
         previous = durable.restore()
         if previous is None:
-            run_training(root / "data", first, "bpr_mf", epochs=1, eval_every=1,
+            run_training(root / "data", first, preflight_model, **preflight_settings, epochs=1, eval_every=1,
                          verify_resume=True, save_recommendations=False, event_hook=durable.hook,
                          run_metadata={"purpose": "external checkpoint recovery preflight"})
         recovered = root / "results/preflight_recovered"
         durable = DurableRun(journal, run_id, recovered)
         checkpoint = durable.restore()
         assert checkpoint is not None, "No committed external checkpoint"
-        verified = run_training(root / "data", recovered, "bpr_mf", epochs=2, eval_every=1,
+        verified = run_training(root / "data", recovered, preflight_model, **preflight_settings, epochs=2, eval_every=1,
                                 resume=checkpoint, verify_resume=True, save_recommendations=False,
                                 event_hook=durable.hook, run_metadata={"purpose": "external checkpoint recovery preflight"})
         assert verified["completed_epochs"] == 2 and verified["resume_check"]["passed"]
         durable.completed(verified)
-        store.put_json({"passed": True, "plan_hash": CONFIG["plan"]["metadata"]["source_manifest_sha256"],
+        from automotive_recsys.experiment_plan import plan_hash
+        store.put_json({"passed": True, "plan_hash": plan_hash(CONFIG['plan']),
                         "external_restore_then_epoch": 2, "optimizer_rng_replay": verified["resume_check"],
+                        "training_settings":verified['settings'],
                         "worker": CONFIG["worker"]}, "preflight/verified.json", root / "transfer")
         for folder in [first, recovered]:
             for name in ["last.pt", "best.pt"]: (folder / name).unlink(missing_ok=True)
         print("Verified external Drive restore and epoch-2 continuation.", flush=True)
+    if CONFIG['plan'].get('kind')=='vehicle_weight_training':
+        from automotive_recsys.experiment_plan import plan_hash
+        receipt=store.get_json('preflight/verified.json')
+        assert receipt['passed'] and receipt['plan_hash']==plan_hash(CONFIG['plan'])
+        assert receipt['training_settings']['interaction_weighting']['weights_sha256']==audit['weights_sha256']
     from automotive_recsys.campaign import run_campaign
     result = run_campaign(root, DRIVE_CREDENTIAL, CONFIG["root_id"], CONFIG["plan"], CONFIG["worker"], guard=budget_guard)
     status = result["status"]
@@ -112,6 +133,8 @@ try:
 except Exception as error:
     # Avoid printing HTTP exception URLs or credential-related diagnostics.
     print("Worker ended with " + type(error).__name__ + "; inspect private progress artifacts.", flush=True)
+    import traceback
+    print(json.dumps({'failure_locations':[{'file':Path(f.filename).name,'line':f.lineno,'function':f.name} for f in traceback.extract_tb(error.__traceback__)[-8:]]}),flush=True)
     try:
         from runtime_policy import transient_network_error
         retryable = transient_network_error(error)

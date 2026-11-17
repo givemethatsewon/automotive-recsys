@@ -65,7 +65,7 @@ def control(config):
             progress.update(status="interrupted", controller_reason=reason, detected_at=datetime.now(timezone.utc).isoformat())
             store.put_json(progress, "progress.json", directory / "staging")
             text_path = directory / "staging/interrupted-progress.txt"
-            text_path.write_text("상태: 중단\n이유: " + reason + "\n완료 작업: " + str(progress.get("completed_runs", 0)) + "/32\n마지막 저장: " + (progress.get("durable_checkpoint") or "확인 필요") + "\n")
+            text_path.write_text("상태: 중단\n이유: " + reason + "\n완료 작업: " + str(progress.get("completed_runs", 0)) + "/" + str(config['plan']['planned_run_count']) + "\n마지막 저장: " + (progress.get("durable_checkpoint") or "확인 필요") + "\n")
             store.put(text_path, "progress.txt")
         except Exception: pass
     def call(*arguments, timeout=600):
@@ -113,7 +113,8 @@ def control(config):
         state["workers"].append(item); save()
         try:
             call("exec", "-s", worker, "--timeout", 120, "-f", ROOT / "scripts/colab_campaign_init.py")
-            call("exec", "-s", worker, "--timeout", 900, "-f", ROOT / "scripts/colab_campaign_env.py", timeout=960)
+            if config.get("fresh_kernel_before_launch"): (ROOT / '.fresh-kernel-once').touch()
+            call("exec", "-s", worker, "--timeout", 900, "-f", ROOT / config.get("environment_script", "scripts/colab_campaign_env.py"), timeout=960)
             receipt = directory / "staging" / (worker + "-environment.json")
             receipt.parent.mkdir(exist_ok=True); receipt.unlink(missing_ok=True)
             call("download", "-s", worker, "/content/automotive-bootstrap/kernel_environment.json", receipt)
@@ -139,6 +140,7 @@ def control(config):
                 # A new frontend identity attaches to the same kernel; kernel
                 # variables/data survive without reusing a closed WS session.
                 states.add(connection.model_copy(update={"session_id": None}))
+            if config.get("fresh_kernel_before_launch"): (ROOT / '.fresh-kernel-once').touch()
             stream = (directory / f"{worker}.log").open("a")
             process = subprocess.Popen([str(ROOT / "scripts/colab.sh"), "exec", "-s", worker, "--timeout", "259200", "-f", str(ROOT / "scripts/colab_campaign_launcher.py")], cwd=ROOT, stdout=stream, stderr=subprocess.STDOUT, start_new_session=True)
             item["exec_pid"] = process.pid; item["launched_at"] = datetime.now(timezone.utc).isoformat(); save()
