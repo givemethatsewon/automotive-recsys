@@ -1,0 +1,110 @@
+{
+  "context": "198cff1bafb8628114b425ae50136c064fd7ae3be10e2ea92c90b3b6f736a5fe",
+  "observed_at": "2026-11-17T06:40:14.962560+00:00",
+  "completion": {
+    "status": "completed",
+    "runs": [
+      "final_bpr_mf_seed42",
+      "final_lightgcn_seed42",
+      "final_xsimgcl_seed42"
+    ],
+    "time": "2026-11-17T06:28:58.250924+00:00"
+  },
+  "controller_status": {
+    "status": "completed",
+    "time": "2026-11-17T06:36:35.442839+00:00",
+    "workers": 2,
+    "durable_position": [
+      2,
+      11,
+      0
+    ],
+    "results_recovered": true
+  },
+  "usage": {
+    "balance": 91.43748780980899,
+    "rate": 1.94,
+    "initial_balance": 94.72377583736315,
+    "delta": 3.286288027554164
+  },
+  "verified_local_aggregate_files": 51,
+  "resource_check": {
+    "observed_at": "2026-11-17T06:41:36.856835+00:00",
+    "active_assignments": 0,
+    "rate_cu_hour": 0.0,
+    "balance_cu": 91.11182096558717
+  },
+  "primary_comparison": [
+    {
+      "model": "bpr_mf",
+      "seed": 42,
+      "pool": 500,
+      "beta": 2,
+      "v1_ndcg": 0.0012215377283992855,
+      "v2_ndcg": 0.0012295063476717466,
+      "relative_change_percent": 0.652343279065426,
+      "ndcg_delta": 7.9686192724604e-06,
+      "ci_low": -1.4544803835998519e-05,
+      "ci_high": 3.288708365900668e-05,
+      "v1_profile_coverage": 0.5851390069582192,
+      "v2_profile_coverage": 0.5996095840811058
+    },
+    {
+      "model": "lightgcn",
+      "seed": 42,
+      "pool": 500,
+      "beta": 0.5,
+      "v1_ndcg": 0.0037085663886563475,
+      "v2_ndcg": 0.0037112601558566783,
+      "relative_change_percent": 0.07263634833585275,
+      "ndcg_delta": 2.693767200330541e-06,
+      "ci_low": -1.947419259143312e-05,
+      "ci_high": 2.5216156199072926e-05,
+      "v1_profile_coverage": 0.5851390069582192,
+      "v2_profile_coverage": 0.5996095840811058
+    },
+    {
+      "model": "xsimgcl",
+      "seed": 42,
+      "pool": 500,
+      "beta": 0.2,
+      "v1_ndcg": 0.004303322849789679,
+      "v2_ndcg": 0.0043059381486426,
+      "relative_change_percent": 0.060773940143676874,
+      "ndcg_delta": 2.6152988529194228e-06,
+      "ci_low": -1.0312074878796876e-05,
+      "ci_high": 1.5210753846319083e-05,
+      "v1_profile_coverage": 0.5851390069582192,
+      "v2_profile_coverage": 0.5996095840811058
+    }
+  ],
+  "runs": {
+    "final_bpr_mf_seed42": {
+      "status": "completed",
+      "position": [
+        0,
+        11,
+        0
+      ],
+      "artifact_count": 53
+    },
+    "final_lightgcn_seed42": {
+      "status": "completed",
+      "position": [
+        1,
+        11,
+        0
+      ],
+      "artifact_count": 53
+    },
+    "final_xsimgcl_seed42": {
+      "status": "completed",
+      "position": [
+        2,
+        11,
+        0
+      ],
+      "artifact_count": 53
+    }
+  }
+}
