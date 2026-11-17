@@ -11,7 +11,7 @@ Amazon Reviews 2023 Automotive의 processed 5-core에서 **정확도를 유지�
 
 ## 현재 상태를 읽는 법
 
-다음은 [차종 신뢰도 가중 BPR-MF 학습](docs/VEHICLE_WEIGHT_TRAINING_2026-11-17.md)이다. 비가중 대조/불일치0.5배, 같은3seeds의6runs를 준비하며 CUDA 외부 checkpoint 복원 검증 뒤 시작한다.
+현재 [차종 신뢰도 가중 BPR-MF 학습](docs/VEHICLE_WEIGHT_TRAINING_2026-11-17.md)을 진행 중이다. 비가중 대조/불일치0.5배, 같은3seeds의6runs다. 로컬41개·CUDA 수식·Drive optimizer/RNG checkpoint 외부 복원/2epoch 재개가 통과했고, 본 학습의 첫 checkpoint 외부 저장과 이후 epoch 진척을 확인했다.
 
 **11/17 v2 비교 완료:** 세 모델 seed42의 네 조건·후보100/500/1000 평가와 전체 결과 회수를 완료했다. 제어기는 정상 종료했고 활성 GPU0개·0 CU/hr를 확인했다. 후보500·같은 β의 v2/v1 test NDCG 변화는 +0.652%/+0.073%/+0.061%이며 모두 paired CI가0을 포함한다. [최종 결과·한계](docs/VEHICLES_V2_RESULTS_2026-11-17.md), [저장·복구 검증 기록](docs/VEHICLES_V2_DURABLE_2026-11-17.md).
 

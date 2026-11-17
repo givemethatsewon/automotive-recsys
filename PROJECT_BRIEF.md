@@ -2,7 +2,7 @@
 
 갱신: **2026-11-17 KST**. 이 문서가 **현재 연구 상태·확정 결정·다음 작업의 SSOT**다. [팀원 인수인계](docs/HANDOFF.md)는 코드·최적화·로그·재현 경로, [후속 실험 색인](docs/EXPERIMENT_INDEX.md)은 차종 실행별 근거를 연결한다. Gmail의 11/13 회의 문서·스크립트, 최신 Notion 개요와 팀 Drive/v2 목록·안내를 조회했다. 팀원의 Drive 권한은 확인하지 않았다. 오늘 자원·재시작 검증 상태는 아래 별도 기록을 따른다.
 
-**다음 학습 실험 준비:** BPR-MF에서 차종 불일치 train 상호작용의 손실 가중치를0.5로 낮추는 조건과 비가중 대조군을 seed42/43/44로 비교한다. 모델 구조·train·음성 추출·평가를 맞춘 새6run이다. 로컬41개 검사 통과, CUDA weighted checkpoint 외부 복원 검증 후 본 학습에 진입한다. [고정 설계·운영 계약](docs/VEHICLE_WEIGHT_TRAINING_2026-11-17.md).
+**차종 가중 BPR-MF 학습 진행 중:** 비가중 대조군/차종 불일치0.5배 조건을 같은 seed42·43·44로 처음부터 학습하는 새6run을 실행했다. 로컬41개·CUDA weighted loss/gradient·Drive optimizer/RNG checkpoint 외부 복원 후2epoch 재개 검증을 통과했고, 16:36 KST에 본 대조군 seed42가5epoch 학습 구간으로 전진했다. 전체 train의4.507%가 추정 불일치 대상이며 unknown은 가중치1을 유지한다. 모델 구조·train·음성 추출·평가를 고정한 특징 손실 실험이고 차종 노드 추가는 없다. [동결 설계·Drive·초기 저장 검증](docs/VEHICLE_WEIGHT_TRAINING_2026-11-17.md). 최종 성능 비교는 아직 완료되지 않았다.
 
 **11/17 v2 재정렬 비교 완료:** 저장·복구 검증 후 실행한 세 모델 seed42의 네 조건·후보100/500/1000 비교가 모두 완료됐다. 15:36 KST에 전체 결과 회수·제어기 정상 종료, 15:41 provider 조회에서 활성 할당0개·0 CU/hr를 확인했다. 주 비교(후보500·같은 β)의 v2/v1 test NDCG 변화는 BPR-MF +0.652%, LightGCN +0.073%, XSimGCL +0.061%이며 모두 paired 95% CI가0을 포함한다. [최종 결과·한계](docs/VEHICLES_V2_RESULTS_2026-11-17.md), [검증·복구 이력](docs/VEHICLES_V2_DURABLE_2026-11-17.md). 아래 첫 실행 실패는 과거 관측이다.
 

@@ -29,3 +29,8 @@
 ## v2 같은 조건 비교 완료 (11/17)
 
 기존 seed42 세 checkpoint에서 v1/v2 동일 규칙, 제공 matcher·연식 효과를 후보100/500/1000으로 비교한다. [첫 실행 실패 이력](VEHICLES_V2_RUN_2026-11-17.md)을 보존하고, [외부 저장·재개 검증 후 실행](VEHICLES_V2_DURABLE_2026-11-17.md)을 완료했다. [최종 결과·주 비교 CSV](VEHICLES_V2_RESULTS_2026-11-17.md)는 별도 family로 보존하며, 재학습·3-seed 반복과 구분한다.
+
+
+## 차종 가중 학습 실행 중 (11/17)
+
+[차종 신뢰도 가중 BPR-MF](VEHICLE_WEIGHT_TRAINING_2026-11-17.md): 동일3seeds, 비가중 대조/불일치0.5배의6runs. raw ID 모델은 같고 train BPR 손실만 바꾼다. CUDA 외부 checkpoint 재개 검증과 첫 본 학습 저장을 확인했다. 기존 재정렬·32개 캠페인과 별도이며 최종 지표는 아직 미완료다.

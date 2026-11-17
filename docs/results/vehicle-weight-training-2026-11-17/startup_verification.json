@@ -1,0 +1,63 @@
+{
+  "observed_at": "2026-11-17T07:36:14.495203+00:00",
+  "plan_hash": "10736612793ffb22940b2cf7f1f95fa30a45388f068a9737d33c73624e311849",
+  "git_revision": "c0cefeffcf8398e8abe1b4329be099d8cabd0dcb",
+  "source_manifest_sha256": "defc76ae7417f45ed7f642701854c52bdb0dd1c65bffb09d609e485b0ac06177",
+  "campaign_id": "vehicle-weight-20261117T071534Z",
+  "drive_url": "https://drive.google.com/drive/folders/1F_2uIHAA4zePcD04PFe_j6haQb4M6-xH",
+  "status": "six_run_training_started",
+  "verified_control_epoch": 1,
+  "best_checkpoint_sha256": "0c51ad98569140149060948833a9943ee1d8d714aa731572d5d275c03800b386",
+  "best_checkpoint_bytes": 217072980,
+  "progress": {
+    "campaign_id": "vehicle-weight-20261117T071534Z",
+    "status": "running",
+    "started_at": "2026-11-17T07:22:16.985572+00:00",
+    "worker": "auto-vehicle-weight-20261117t071534z-1",
+    "completed_runs": 0,
+    "planned_runs": 6,
+    "current": {
+      "epoch": 5,
+      "best_epoch": 1,
+      "best_valid_ndcg": 1.9221372939623872e-05,
+      "model": "bpr_mf",
+      "seed": 42,
+      "variant": "vehicle_control",
+      "max_epochs": 100,
+      "run_id": "vehicle_control_seed42",
+      "step": 4472832,
+      "steps": 4818321,
+      "mean_loss": 0.12943755090236664,
+      "epoch_metrics": {
+        "epoch": 4,
+        "training_seconds": 23.868651750000026,
+        "mean_loss": 0.20913854241371155,
+        "cl_weight": 0.1,
+        "train_bpr": 0.2090512067079544,
+        "train_cl_raw": null,
+        "train_regularization": 8.735957089811563e-05,
+        "cl_raw_evaluated": false,
+        "wall_seconds_with_validation_and_checkpoint": 25.205421301000115
+      }
+    },
+    "stage": "training",
+    "updated_at": "2026-11-17T07:35:38.075901+00:00",
+    "durable_checkpoint": "vehicle_control_seed42 epoch 1 (2026-11-17T07:34:00.250234+00:00)",
+    "account_balance_cu": 90.63713488260298,
+    "account_cu_since_start": 0.4746860829841921
+  },
+  "controller": {
+    "status": "running",
+    "reason": null,
+    "updated_at": "2026-11-17T07:34:34.947092+00:00",
+    "recovery_limit": "6 consecutive workers without durable progress",
+    "workers_started": 1,
+    "host": "ubuntu",
+    "controller_id": "ubuntu-vehicle-weight-1117",
+    "last_progress_token": [
+      0,
+      "vehicle_control_seed42",
+      1
+    ]
+  }
+}

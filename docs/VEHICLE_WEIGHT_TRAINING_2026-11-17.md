@@ -1,6 +1,6 @@
 # 차종 신뢰도 가중 BPR-MF 학습
 
-2026-11-17. 사용자 요청에 따라 v2 재정렬 완료 다음의 학습 단계 비교를 준비한다. 현재 로컬41개 검사는 통과했고 CUDA preflight와 본 학습 실행은 아직 확인 전이다. 기존32개 학습 캠페인·v2 재정렬 결과를 재개하거나 덮어쓰지 않는다.
+2026-11-17. 사용자 요청에 따라 v2 재정렬 완료 다음의 학습 단계 비교를 준비한다. 로컬41개 검사와 실제 CUDA weighted loss/gradient·Drive checkpoint 외부 복원/2epoch 재개 검증이 통과했다. 현재6개 본 학습이 진행 중이다. 기존32개 학습 캠페인·v2 재정렬 결과를 재개하거나 덮어쓰지 않는다.
 
 ## 질문과 사전 고정 조건
 
@@ -31,3 +31,21 @@ PYTHONPATH=src .venv/bin/python scripts/prepare_vehicle_training.py --directory 
 ```
 
 credential은 기존 owner-only 로컬 경로에서 별도 전달하고 source/input bundle·Drive·log에 포함하지 않는다. 학습 진행 확인 후 실제 campaign/Drive/서버 경로와 검증 receipt를 이 문서에 추가한다.
+
+## 실제 실행 확인
+
+- campaign: `vehicle-weight-20261117T071534Z`, frozen plan hash `10736612793ffb22940b2cf7f1f95fa30a45388f068a9737d33c73624e311849`.
+- [새 Drive: checkpoints·epochs·progress·보고서](https://drive.google.com/drive/folders/1F_2uIHAA4zePcD04PFe_j6haQb4M6-xH).
+- 서버: `ubuntu-wan:~/git/automotive-recsys-vehicle-weight-20261117`, user service `automotive-vehicle-weight-1117.service`. host config: `results/vehicle-weight-training-20261117/config.json`.
+- 실행 소스 [c0cefef](https://github.com/givemethatsewon/automotive-recsys/commit/c0cefeffcf8398e8abe1b4329be099d8cabd0dcb). bundle의 소스55개 SHA가 로컬과 일치했다. 현재 문서의 후속 갱신과 실제 동결 소스 revision을 구분한다.
+- train4,818,321개 중 unknown3,617,538 / mismatch217,168(4.507%) / match983,615. 제공 구현과 실제223쌍을 대조했고, 가중치 파일의 실제 Drive 왕복 SHA를 확인했다. 고정 train 평균 가중치는0.977464349095878이다.
+- 실제 CUDA8,192 batch loss 차이0, gradient 최대 절대 차이5.82e-11. 전체 가중 train1epoch + 전체 valid를 마친 checkpoint를 Drive에서 별도 폴더로 복원해2epoch까지 이어 학습했다. optimizer/RNG next-update replay의 관측 파라미터 차이는0이었다. 관측값을 다른 환경의 bitwise 재현 보장으로 일반화하지 않는다.
+- 16:36 KST에 본 대조군 seed42가5epoch 학습 구간으로 전진했고, epoch1의217,072,980-byte best checkpoint와 집계 로그/manifest를 Drive에서 hash 확인했다. 이것은6runs 전체 완료나 최종 성능 개선의 증거는 아니다.
+
+검증 근거: [로컬41개·소스 해시](results/vehicle-weight-training-2026-11-17/local_verification.json), [가중치 감사](results/vehicle-weight-training-2026-11-17/vehicle_weight_audit.json), [CUDA 대조](results/vehicle-weight-training-2026-11-17/weighted_objective.json), [외부 복원/재개](results/vehicle-weight-training-2026-11-17/preflight_verified.json), [본 학습 초기 진척·체크포인트](results/vehicle-weight-training-2026-11-17/startup_verification.json).
+
+```bash
+ssh ubuntu-wan 'systemctl --user status automotive-vehicle-weight-1117.service --no-pager'
+```
+
+Drive의 `progress.txt/json`, `events.jsonl`, `runs/<run>/restore.json`, `runs/<run>/completed.json`, `workers/<worker>/events.jsonl`과 cost observations를 확인한다. 완료 보고서는 `report/`에 seed별 결과·평균/SD·paired CI로 저장되고 Ubuntu controller가 회수한 뒤 자기 GPU를 반납한다. 사용자별 추천·개인 입력·credential은 Git 제외다.
