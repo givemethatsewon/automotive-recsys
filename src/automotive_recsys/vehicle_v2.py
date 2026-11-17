@@ -7,6 +7,11 @@ the caller and archived unchanged alongside each experiment.
 import numpy as np
 
 
+def relative_ndcg_change(delta, baseline):
+    """A zero baseline has no defined relative change; retain absolute delta."""
+    return float(delta / baseline) if baseline > 0 else None
+
+
 def compact_v2(user_rows, item_rows, n_users, n_items, canon, model_ok):
     # Input tuples: user id/make/model/segment/year; item additionally year_to/open_end.
     users, items = list(user_rows), list(item_rows)

@@ -1,9 +1,16 @@
 import unittest
 import numpy as np
-from automotive_recsys.vehicle_v2 import compact_v2, match_v2
+from automotive_recsys.vehicle_v2 import compact_v2, match_v2, relative_ndcg_change
 
 
 class VehicleV2Tests(unittest.TestCase):
+    def test_zero_ndcg_baseline_has_no_relative_percentage(self):
+        import json
+        self.assertIsNone(relative_ndcg_change(0.,0.))
+        self.assertIsNone(relative_ndcg_change(.1,0.))
+        self.assertEqual(relative_ndcg_change(.01,.02),.5)
+        self.assertEqual(json.dumps({'relative':relative_ndcg_change(0.,0.)},allow_nan=False),'{"relative": null}')
+
     def test_missing_models_years_segments_universal_and_multiple_vehicles(self):
         def canon(make, model): return make, model
         def model_ok(a, b): return a is None or b is None or a == b

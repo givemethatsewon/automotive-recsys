@@ -1,0 +1,54 @@
+{
+  "status": "running_with_verified_validation_output",
+  "context": "198cff1bafb8628114b425ae50136c064fd7ae3be10e2ea92c90b3b6f736a5fe",
+  "observed_at": "2026-11-17T05:11:40.043552+00:00",
+  "training": false,
+  "run": "final_bpr_mf_seed42",
+  "stage": "valid_v1_exact",
+  "cursor": 220516,
+  "completed_stages": [
+    "audit",
+    "candidates",
+    "valid_v1_exact"
+  ],
+  "validation_sweep_sha256": "6a35f418bb2fcb2ab42b561b9292ba7e17151f14d6a7c70add27b0b4a15a9bc0",
+  "downloaded_and_sha256_verified": true,
+  "train_only_profiles": true,
+  "controller_status": {
+    "status": "running",
+    "time": "2026-11-17T05:11:06.883594+00:00",
+    "workers": 1,
+    "durable_position": [
+      0,
+      2,
+      220516
+    ],
+    "worker": "automotive-v2-durable-1117-1",
+    "phase": "final_bpr_mf_seed42"
+  },
+  "heartbeat": {
+    "worker": "automotive-v2-durable-1117-1",
+    "phase": "final_bpr_mf_seed42",
+    "time": "2026-11-17T05:11:14.921222+00:00"
+  },
+  "candidate_reproduction": {
+    "valid": {
+      "users": 220516,
+      "top100_ids_identical": true,
+      "torch": "2.11.0+cu130",
+      "users_top100_identical": 1.0,
+      "users_top10_identical": 1.0,
+      "positions_identical": 1.0,
+      "max_abs_score_diff_by_position": 0.0
+    },
+    "test": {
+      "users": 158805,
+      "top100_ids_identical": true,
+      "torch": "2.11.0+cu130",
+      "users_top100_identical": 1.0,
+      "users_top10_identical": 1.0,
+      "positions_identical": 1.0,
+      "max_abs_score_diff_by_position": 0.0
+    }
+  }
+}

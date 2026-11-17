@@ -24,3 +24,8 @@
 - pool500은 후보별 점수 범위를 사용했고 후보 수·가점 크기가 함께 바뀐다. 후보 수 자체의 비교는 [고정 단위 후보 진단](CANDIDATE_DIAGNOSTIC_2026-11-11.md)을 사용한다.
 - 후보 진단은 세 모델 seed42, valid 220,516명, 후보100/500/1000이다. 추가 test나 학습은 없다. [receipt](results/candidate-diagnostic-2026-11-11/receipts.json), [CSV](results/candidate-diagnostic-2026-11-11/candidate_availability.csv).
 - 최초 파일럿의 test/특징 개발 탐색·메타데이터 시점·동일 규칙 mismatch 한계는 [파일럿 해설](VEHICLE_PILOT_2026-11-11.md)에 있다.
+
+
+## v2 같은 조건 비교 재시작 (11/17)
+
+기존 seed42 세 checkpoint에서 v1/v2 동일 규칙, 제공 matcher·연식 효과를 후보100/500/1000으로 비교한다. [첫 실행 실패 이력](VEHICLES_V2_RUN_2026-11-17.md)을 보존하고, [외부 저장·재개 검증 후 새 실행](VEHICLES_V2_DURABLE_2026-11-17.md)을 진행한다. 아직 최종 성능표에 합치지 않는다. 재학습·3-seed 반복과 구분한다.

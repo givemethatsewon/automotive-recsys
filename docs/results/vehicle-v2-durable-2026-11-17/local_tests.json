@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "tests": 36,
+  "context": "198cff1bafb8628114b425ae50136c064fd7ae3be10e2ea92c90b3b6f736a5fe",
+  "log_sha256": "57233e161e14d80ca2bd955a22067d34512a694cacef685193b61f1f8d3a7a1a",
+  "command": "uv run --locked --extra training --group colab python -m unittest discover -s tests -v"
+}

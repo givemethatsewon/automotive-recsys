@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "context": "198cff1bafb8628114b425ae50136c064fd7ae3be10e2ea92c90b3b6f736a5fe",
+  "cuda": true,
+  "gpu": "NVIDIA L4",
+  "torch": "2.11.0+cu130",
+  "abrupt_process_exit": 86,
+  "forced_crashes": 2,
+  "partial_batch_resume": true,
+  "test_recommendation_arrays_resume": true,
+  "restored_from_external_drive_after_output_deletion": true,
+  "completed_stage_skipped_after_restore": true,
+  "results_equal_uninterrupted": true,
+  "all_committed_artifacts_downloaded_with_sha256": true,
+  "test_rows": 12
+}

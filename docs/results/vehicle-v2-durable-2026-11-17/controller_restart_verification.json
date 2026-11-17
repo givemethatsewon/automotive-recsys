@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "context": "198cff1bafb8628114b425ae50136c064fd7ae3be10e2ea92c90b3b6f736a5fe",
+  "observed_at": "2026-11-17T04:48:31.725360+00:00",
+  "forced_signal": "SIGKILL main only",
+  "old_main_pid": 6370,
+  "new_main_pid": 24074,
+  "same_vm": true,
+  "same_worker_started_receipt": true,
+  "no_duplicate_allocation_or_launch": true,
+  "worker_count": 1,
+  "heartbeat_advanced": true
+}
