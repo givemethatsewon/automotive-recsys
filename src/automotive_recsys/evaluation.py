@@ -7,7 +7,9 @@ def contains(sorted_keys: np.ndarray, queries: np.ndarray) -> np.ndarray:
     if len(sorted_keys) == 0:
         return np.zeros(queries.shape, dtype=bool)
     positions = np.searchsorted(sorted_keys, queries)
-    return (positions < len(sorted_keys)) & (sorted_keys[np.minimum(positions, len(sorted_keys) - 1)] == queries)
+    return (positions < len(sorted_keys)) & (
+        sorted_keys[np.minimum(positions, len(sorted_keys) - 1)] == queries
+    )
 
 
 def user_metrics(recommendations, relevant, unpopular, train_counts):
@@ -22,9 +24,15 @@ def user_metrics(recommendations, relevant, unpopular, train_counts):
     }
 
 
-def metrics_at_k(user_ids, recommendations, answer_keys, answer_counts, unpopular, train_counts):
+def metrics_at_k(
+    user_ids, recommendations, answer_keys, answer_counts, unpopular, train_counts
+):
     n_items = len(train_counts)
-    if recommendations.ndim != 2 or len(user_ids) != len(recommendations) or recommendations.shape[1] == 0:
+    if (
+        recommendations.ndim != 2
+        or len(user_ids) != len(recommendations)
+        or recommendations.shape[1] == 0
+    ):
         raise ValueError("Expected one nonempty ranked list for each user.")
     if np.any(recommendations < 0) or np.any(recommendations >= n_items):
         raise ValueError("Invalid item ID in recommendations.")

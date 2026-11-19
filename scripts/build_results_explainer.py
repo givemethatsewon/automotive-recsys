@@ -6,6 +6,7 @@ body-only page used for the claude.ai Artifact publish (the host adds the skelet
 UV_CACHE_DIR=.uv-cache uv run --no-project --python .venv/bin/python \
   --with latex2mathml==3.78.1 scripts/build_results_explainer.py [--fragment OUT]
 """
+
 import argparse
 import csv
 import json
@@ -20,7 +21,14 @@ TEMPLATES = ROOT / "scripts/templates"
 SOURCE = ROOT / "docs/results/final"
 OUTPUT = ROOT / "docs/explainers/experiment-results-explainer.html"
 N_ITEMS = 248186
-METRICS = {"ndcg": "ndcg", "recall": "recall", "hit": "hit_rate", "aplt": "aplt", "cov": "catalog_coverage", "arp": "arp"}
+METRICS = {
+    "ndcg": "ndcg",
+    "recall": "recall",
+    "hit": "hit_rate",
+    "aplt": "aplt",
+    "cov": "catalog_coverage",
+    "arp": "arp",
+}
 
 
 def read_csv(name):
@@ -33,7 +41,9 @@ def build_data():
     for variant in ["popularity", "bpr_mf", "lightgcn", "xsimgcl", "xsimgcl_cl0"]:
         models[variant] = {}
         for group in ["all", "1-5", "6+"]:
-            selected = [r for r in rows if r["variant"] == variant and r["group"] == group]
+            selected = [
+                r for r in rows if r["variant"] == variant and r["group"] == group
+            ]
             assert selected, (variant, group)
             stats = {"n": len(selected)}
             for key, column in METRICS.items():
@@ -49,9 +59,18 @@ def build_data():
     depth = [{k: float(v) for k, v in r.items()} for r in read_csv("depth_results.csv")]
     for d in depth:
         d["layers"] = int(d["layers"])
-    paired = [{"seed": int(r["seed"]), "left": r["left"], "right": r["right"], "metric": r["metric"],
-               "mean": float(r["mean_difference"]), "lo": float(r["ci95_low"]), "hi": float(r["ci95_high"])}
-              for r in read_csv("paired_differences.csv")]
+    paired = [
+        {
+            "seed": int(r["seed"]),
+            "left": r["left"],
+            "right": r["right"],
+            "metric": r["metric"],
+            "mean": float(r["mean_difference"]),
+            "lo": float(r["ci95_low"]),
+            "hi": float(r["ci95_high"]),
+        }
+        for r in read_csv("paired_differences.csv")
+    ]
     return {"models": models, "depth": depth, "paired": paired, "n_items": N_ITEMS}
 
 
@@ -63,19 +82,27 @@ def inner(latex):
 
 def build_tex():
     tex = {f"term{r}": inner(rf"\frac{{1}}{{\log_2({r}+1)}}") for r in range(1, 11)}
-    tex.update({
-        "dcgL": inner(r"\mathrm{DCG}="),
-        "idcgL": inner(r"\mathrm{IDCG}="),
-        # 900000x are numeric placeholders replaced in the browser.
-        "approx": inner(r"\approx 9000001"),
-        "ndcgL": inner(r"\mathrm{NDCG@10}=\frac{9000001}{9000002}\approx 9000003"),
-        "recallL": inner(r"\mathrm{Recall@10}=\frac{9000001}{9000002}\approx 9000003"),
-        "apltL": inner(r"\mathrm{APLT@10}=\frac{9000001}{10}=9000003"),
-        "sep": inner(r"\qquad"),
-        "G": inner(r"|G|"),
-        "pair_ndcg": inner(r"\bar d=\frac{1}{158805}\sum_{u}\left(\mathrm{NDCG}_u^{\text{B}}-\mathrm{NDCG}_u^{\text{A}}\right)"),
-        "pair_aplt": inner(r"\bar d=\frac{1}{158805}\sum_{u}\left(\mathrm{APLT}_u^{\text{B}}-\mathrm{APLT}_u^{\text{A}}\right)"),
-    })
+    tex.update(
+        {
+            "dcgL": inner(r"\mathrm{DCG}="),
+            "idcgL": inner(r"\mathrm{IDCG}="),
+            # 900000x are numeric placeholders replaced in the browser.
+            "approx": inner(r"\approx 9000001"),
+            "ndcgL": inner(r"\mathrm{NDCG@10}=\frac{9000001}{9000002}\approx 9000003"),
+            "recallL": inner(
+                r"\mathrm{Recall@10}=\frac{9000001}{9000002}\approx 9000003"
+            ),
+            "apltL": inner(r"\mathrm{APLT@10}=\frac{9000001}{10}=9000003"),
+            "sep": inner(r"\qquad"),
+            "G": inner(r"|G|"),
+            "pair_ndcg": inner(
+                r"\bar d=\frac{1}{158805}\sum_{u}\left(\mathrm{NDCG}_u^{\text{B}}-\mathrm{NDCG}_u^{\text{A}}\right)"
+            ),
+            "pair_aplt": inner(
+                r"\bar d=\frac{1}{158805}\sum_{u}\left(\mathrm{APLT}_u^{\text{B}}-\mathrm{APLT}_u^{\text{A}}\right)"
+            ),
+        }
+    )
     for key in ("approx", "ndcgL", "recallL", "apltL"):
         assert "<mn>9000001</mn>" in tex[key], key
     return tex
@@ -83,8 +110,14 @@ def build_tex():
 
 def render():
     page = (TEMPLATES / "results_explainer.html").read_text()
-    page = re.sub(r'<span data-tex-block="([^"]+)"></span>', lambda m: convert(m.group(1), display="block"), page)
-    page = re.sub(r'<span data-tex="([^"]+)"></span>', lambda m: convert(m.group(1)), page)
+    page = re.sub(
+        r'<span data-tex-block="([^"]+)"></span>',
+        lambda m: convert(m.group(1), display="block"),
+        page,
+    )
+    page = re.sub(
+        r'<span data-tex="([^"]+)"></span>', lambda m: convert(m.group(1)), page
+    )
     assert "data-tex" not in page
     page = page.replace("__DATA__", json.dumps(build_data(), ensure_ascii=False))
     page = page.replace("__TEX__", json.dumps(build_tex(), ensure_ascii=False))
@@ -95,15 +128,22 @@ def render():
 
 def standalone(fragment):
     head, body = fragment.split("</style>", 1)
-    return ('<!doctype html>\n<html lang="ko">\n<head>\n<meta charset="utf-8">\n'
-            '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
-            '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; script-src \'unsafe-inline\'; img-src data:">\n'
-            + head + "</style>\n</head>\n<body>" + body + "</body>\n</html>\n")
+    return (
+        '<!doctype html>\n<html lang="ko">\n<head>\n<meta charset="utf-8">\n'
+        '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
+        "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:\">\n"
+        + head
+        + "</style>\n</head>\n<body>"
+        + body
+        + "</body>\n</html>\n"
+    )
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--fragment", type=Path, help="write the Artifact body-only page here instead")
+    parser.add_argument(
+        "--fragment", type=Path, help="write the Artifact body-only page here instead"
+    )
     args = parser.parse_args()
     page = render()
     out = args.fragment or OUTPUT

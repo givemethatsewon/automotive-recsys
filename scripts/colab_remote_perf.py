@@ -1,4 +1,5 @@
 """Actual-data CUDA performance/correctness check; not model selection or fitting."""
+
 import gc
 import json
 import math
@@ -16,8 +17,13 @@ import polars as pl
 import torch
 from automotive_recsys.audit import write_json
 from automotive_recsys.gpu_kernels import (
-    deterministic_topk, full_catalog_topk, key_membership, normalized_graph, objective,
-    sample_unseen, training_keys,
+    deterministic_topk,
+    full_catalog_topk,
+    key_membership,
+    normalized_graph,
+    objective,
+    sample_unseen,
+    training_keys,
 )
 
 
@@ -30,18 +36,42 @@ def verify_cuda_math():
     results = []
     for model in ["bpr_mf", "lightgcn", "xsimgcl"]:
         reference = initial.clone().requires_grad_()
-        expected = objective(reference, cpu_graph, users, pos, neg, model=model, noise=noise)
+        expected = objective(
+            reference, cpu_graph, users, pos, neg, model=model, noise=noise
+        )
         expected.backward()
         for layout, symmetric in [("coo", False), ("csr", False), ("csr", True)]:
             parameter = initial.cuda().requires_grad_()
             graph = cpu_graph.cuda()
             if layout == "csr":
                 graph = graph.to_sparse_csr()
-            actual = objective(parameter, graph, users.cuda(), pos.cuda(), neg.cuda(), model=model, noise=[value.cuda() for value in noise], symmetric_backward=symmetric)
+            actual = objective(
+                parameter,
+                graph,
+                users.cuda(),
+                pos.cuda(),
+                neg.cuda(),
+                model=model,
+                noise=[value.cuda() for value in noise],
+                symmetric_backward=symmetric,
+            )
             actual.backward()
-            torch.testing.assert_close(actual.cpu(), expected.detach(), rtol=2e-4, atol=2e-6)
-            torch.testing.assert_close(parameter.grad.cpu(), reference.grad, rtol=2e-3, atol=2e-6)
-            results.append({"model": model, "layout": layout, "symmetric_backward": symmetric, "gradient_max_abs_difference": float((parameter.grad.cpu() - reference.grad).abs().max())})
+            torch.testing.assert_close(
+                actual.cpu(), expected.detach(), rtol=2e-4, atol=2e-6
+            )
+            torch.testing.assert_close(
+                parameter.grad.cpu(), reference.grad, rtol=2e-3, atol=2e-6
+            )
+            results.append(
+                {
+                    "model": model,
+                    "layout": layout,
+                    "symmetric_backward": symmetric,
+                    "gradient_max_abs_difference": float(
+                        (parameter.grad.cpu() - reference.grad).abs().max()
+                    ),
+                }
+            )
     left, right = torch.nn.Parameter(initial.cuda()), torch.nn.Parameter(initial.cuda())
     eager = torch.optim.Adam([left], lr=1e-3, fused=False)
     fused = torch.optim.Adam([right], lr=1e-3, fused=True)
@@ -54,7 +84,12 @@ def verify_cuda_math():
     tied_scores = torch.randint(0, 5, (16, 64), device="cuda").float()
     selected = deterministic_topk(tied_scores, 10).cpu().numpy()
     host_scores = tied_scores.cpu().numpy()
-    expected_ids = np.array([sorted(range(64), key=lambda iid: (-row[iid], iid))[:10] for row in host_scores])
+    expected_ids = np.array(
+        [
+            sorted(range(64), key=lambda iid: (-row[iid], iid))[:10]
+            for row in host_scores
+        ]
+    )
     np.testing.assert_array_equal(selected, expected_ids)
     return results
 
@@ -67,10 +102,18 @@ def main():
     output = ROOT / "results/gpu_performance"
     output.mkdir(parents=True, exist_ok=True)
     report = {
-        "gpu": torch.cuda.get_device_name(0), "torch": torch.__version__,
-        "dtype": "float32", "tf32": False, "amp": False, "dim": 64,
-        "layers": 3, "batch_size": 8192, "warmup_updates": 2, "measured_updates": 7,
-        "cuda_math_checks": verify_cuda_math(), "timings": [],
+        "gpu": torch.cuda.get_device_name(0),
+        "torch": torch.__version__,
+        "dtype": "float32",
+        "tf32": False,
+        "amp": False,
+        "dim": 64,
+        "layers": 3,
+        "batch_size": 8192,
+        "warmup_updates": 2,
+        "measured_updates": 7,
+        "cuda_math_checks": verify_cuda_math(),
+        "timings": [],
         "recipe_note": "Shared raw embedding squared L2 for all models; XSimGCL's published repository uses a different regularizer. This is a controlled recipe variant, not a verbatim paper reproduction.",
     }
     train = pl.read_parquet(ROOT / "data/train.parquet", columns=["uid", "iid"])
@@ -79,13 +122,24 @@ def main():
     n_nodes = n_users + n_items
     report["train_interactions"] = train.height
     report["updates_per_epoch"] = math.ceil(train.height / report["batch_size"])
-    graphs = {"coo": normalized_graph(train["uid"].to_numpy(), train["iid"].to_numpy(), n_users, n_items, "cuda", "coo")}
+    graphs = {
+        "coo": normalized_graph(
+            train["uid"].to_numpy(),
+            train["iid"].to_numpy(),
+            n_users,
+            n_items,
+            "cuda",
+            "coo",
+        )
+    }
     graphs["csr"] = graphs["coo"].to_sparse_csr()
     gpu_users = torch.as_tensor(train["uid"].to_numpy().astype(np.int64), device="cuda")
     gpu_items = torch.as_tensor(train["iid"].to_numpy().astype(np.int64), device="cuda")
     keys = training_keys(gpu_users, gpu_items, n_items, "cuda")
     torch.manual_seed(42)
-    batch_indices = torch.randint(len(gpu_users), (report["batch_size"],), device="cuda")
+    batch_indices = torch.randint(
+        len(gpu_users), (report["batch_size"],), device="cuda"
+    )
     users = gpu_users[batch_indices]
     positives = gpu_items[batch_indices] + n_users
     probe = sample_unseen(users, keys, n_items)
@@ -101,16 +155,45 @@ def main():
     fixed_noise = [torch.rand_like(initial) for _ in range(3)]
     for model in ["lightgcn", "xsimgcl"]:
         reference = initial.clone().requires_grad_()
-        expected_loss = objective(reference, graphs["csr"], users, positives, fixed_negatives, model=model, noise=fixed_noise)
+        expected_loss = objective(
+            reference,
+            graphs["csr"],
+            users,
+            positives,
+            fixed_negatives,
+            model=model,
+            noise=fixed_noise,
+        )
         expected_loss.backward()
         expected_gradient = reference.grad.detach().clone()
         del reference
         candidate = initial.clone().requires_grad_()
-        actual_loss = objective(candidate, graphs["csr"], users, positives, fixed_negatives, model=model, noise=fixed_noise, symmetric_backward=True)
+        actual_loss = objective(
+            candidate,
+            graphs["csr"],
+            users,
+            positives,
+            fixed_negatives,
+            model=model,
+            noise=fixed_noise,
+            symmetric_backward=True,
+        )
         actual_loss.backward()
-        torch.testing.assert_close(actual_loss, expected_loss.detach(), rtol=1e-5, atol=1e-6)
-        torch.testing.assert_close(candidate.grad, expected_gradient, rtol=2e-3, atol=2e-7)
-        record = {"model": model, "gradient_max_abs_difference": float((candidate.grad - expected_gradient).abs().max()), "loss_absolute_difference": float((actual_loss.detach() - expected_loss.detach()).abs())}
+        torch.testing.assert_close(
+            actual_loss, expected_loss.detach(), rtol=1e-5, atol=1e-6
+        )
+        torch.testing.assert_close(
+            candidate.grad, expected_gradient, rtol=2e-3, atol=2e-7
+        )
+        record = {
+            "model": model,
+            "gradient_max_abs_difference": float(
+                (candidate.grad - expected_gradient).abs().max()
+            ),
+            "loss_absolute_difference": float(
+                (actual_loss.detach() - expected_loss.detach()).abs()
+            ),
+        }
         report["full_graph_backward_checks"].append(record)
         print("FULL_GRAPH_PARITY " + json.dumps(record), flush=True)
         del expected_gradient, candidate, actual_loss, expected_loss
@@ -130,7 +213,15 @@ def main():
             def step():
                 negatives = sample_unseen(users, keys, n_items) + n_users
                 optimizer.zero_grad(set_to_none=True)
-                loss = objective(parameter, graphs[layout], users, positives, negatives, model=model, symmetric_backward=symmetric)
+                loss = objective(
+                    parameter,
+                    graphs[layout],
+                    users,
+                    positives,
+                    negatives,
+                    model=model,
+                    symmetric_backward=symmetric,
+                )
                 loss.backward()
                 optimizer.step()
                 return loss.detach()
@@ -142,7 +233,10 @@ def main():
             events = []
             started = time.perf_counter()
             for _ in range(report["measured_updates"]):
-                begin, end = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+                begin, end = (
+                    torch.cuda.Event(enable_timing=True),
+                    torch.cuda.Event(enable_timing=True),
+                )
                 begin.record()
                 loss = step()
                 end.record()
@@ -152,12 +246,17 @@ def main():
             assert bool(torch.isfinite(loss))
             seconds = elapsed / report["measured_updates"]
             record = {
-                "model": model, "layout": layout, "fused_adam": fused,
+                "model": model,
+                "layout": layout,
+                "fused_adam": fused,
                 "symmetric_backward": symmetric,
                 "wall_seconds_per_update": seconds,
-                "cuda_event_median_seconds": statistics.median(a.elapsed_time(b) / 1000 for a, b in events),
+                "cuda_event_median_seconds": statistics.median(
+                    a.elapsed_time(b) / 1000 for a, b in events
+                ),
                 "peak_allocated_MiB": torch.cuda.max_memory_allocated() / 2**20,
-                "extrapolated_training_seconds_per_epoch": seconds * report["updates_per_epoch"],
+                "extrapolated_training_seconds_per_epoch": seconds
+                * report["updates_per_epoch"],
             }
             report["timings"].append(record)
             print(json.dumps(record), flush=True)
@@ -170,7 +269,9 @@ def main():
     valid_users = valid["uid"].unique().sort().to_numpy()
     history_uid, history_iid = train["uid"].to_numpy(), train["iid"].to_numpy()
     selected = valid_users[:8]
-    observed = full_catalog_topk(initial, selected, n_users, history_uid, history_iid, k=10, batch_size=8)
+    observed = full_catalog_topk(
+        initial, selected, n_users, history_uid, history_iid, k=10, batch_size=8
+    )
     cpu = initial.cpu()
     scores = cpu[torch.as_tensor(selected.astype(np.int64))] @ cpu[n_users:].T
     for row, uid in enumerate(selected):
@@ -185,10 +286,23 @@ def main():
         torch.cuda.synchronize()
         torch.cuda.reset_peak_memory_stats()
         started = time.perf_counter()
-        predictions = full_catalog_topk(initial, valid_users, n_users, history_uid, history_iid, k=100, batch_size=batch_size)
+        predictions = full_catalog_topk(
+            initial,
+            valid_users,
+            n_users,
+            history_uid,
+            history_iid,
+            k=100,
+            batch_size=batch_size,
+        )
         torch.cuda.synchronize()
-        record = {"user_batch_size": batch_size, "users": len(valid_users), "candidate_items": n_items,
-                  "seconds": time.perf_counter() - started, "peak_allocated_MiB": torch.cuda.max_memory_allocated() / 2**20}
+        record = {
+            "user_batch_size": batch_size,
+            "users": len(valid_users),
+            "candidate_items": n_items,
+            "seconds": time.perf_counter() - started,
+            "peak_allocated_MiB": torch.cuda.max_memory_allocated() / 2**20,
+        }
         report["validation_timings"].append(record)
         print("VALIDATION " + json.dumps(record), flush=True)
         del predictions
@@ -196,45 +310,96 @@ def main():
         torch.cuda.empty_cache()
 
     # Obtain a real CUDA trace, separately from the timed measurements.
-    best_light = min((row for row in report["timings"] if row["model"] == "lightgcn"), key=lambda row: row["wall_seconds_per_update"])
+    best_light = min(
+        (row for row in report["timings"] if row["model"] == "lightgcn"),
+        key=lambda row: row["wall_seconds_per_update"],
+    )
     parameter = torch.nn.Parameter(initial.clone())
     optimizer = torch.optim.Adam([parameter], lr=1e-3, fused=best_light["fused_adam"])
     try:
         from torch.profiler import ProfilerActivity, profile
-        with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True) as profiler:
+
+        with profile(
+            activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True
+        ) as profiler:
             for _ in range(3):
                 optimizer.zero_grad(set_to_none=True)
                 negative = sample_unseen(users, keys, n_items) + n_users
-                objective(parameter, graphs[best_light["layout"]], users, positives, negative,
-                          symmetric_backward=best_light["symmetric_backward"]).backward()
+                objective(
+                    parameter,
+                    graphs[best_light["layout"]],
+                    users,
+                    positives,
+                    negative,
+                    symmetric_backward=best_light["symmetric_backward"],
+                ).backward()
                 optimizer.step()
                 profiler.step()
             torch.cuda.synchronize()
-        events = [event for event in profiler.events() if "CUDA" in str(event.device_type)]
+        events = [
+            event for event in profiler.events() if "CUDA" in str(event.device_type)
+        ]
         report["profiler_cuda_events"] = len(events)
         report["profiler_verified_cuda"] = len(events) > 0
         profiler.export_chrome_trace(str(output / "cuda-trace.json"))
         averages = profiler.key_averages()
-        names = sorted(averages, key=lambda event: getattr(event, "self_device_time_total", 0), reverse=True)[:12]
-        report["profile_top_ops"] = [{"name": event.key, "self_device_microseconds": getattr(event, "self_device_time_total", 0), "calls": event.count} for event in names]
+        names = sorted(
+            averages,
+            key=lambda event: getattr(event, "self_device_time_total", 0),
+            reverse=True,
+        )[:12]
+        report["profile_top_ops"] = [
+            {
+                "name": event.key,
+                "self_device_microseconds": getattr(event, "self_device_time_total", 0),
+                "calls": event.count,
+            }
+            for event in names
+        ]
     except (RuntimeError, AssertionError) as error:
         report["profiler_verified_cuda"] = False
         report["profiler_error"] = str(error).splitlines()[0][:400]
     validation_seconds = min(row["seconds"] for row in report["validation_timings"])
     report["chosen_kernels"] = {
-        model: min((row for row in report["timings"] if row["model"] == model), key=lambda row: row["wall_seconds_per_update"])
+        model: min(
+            (row for row in report["timings"] if row["model"] == model),
+            key=lambda row: row["wall_seconds_per_update"],
+        )
         for model in ["bpr_mf", "lightgcn", "xsimgcl"]
     }
     report["time_scenario"] = {
-        "epochs": 50, "seeds": 3, "validation_every_epochs": 5,
+        "epochs": 50,
+        "seeds": 3,
+        "validation_every_epochs": 5,
         "final_training_runs": 9,
-        "final_runs_hours": sum(3 * (50 * row["extrapolated_training_seconds_per_epoch"] + 10 * validation_seconds) for row in report["chosen_kernels"].values()) / 3600,
-        "small_search_hours": sum(trials * (10 * report["chosen_kernels"][model]["extrapolated_training_seconds_per_epoch"] + 2 * validation_seconds) for model, trials in [("bpr_mf", 2), ("lightgcn", 6), ("xsimgcl", 4)]) / 3600,
+        "final_runs_hours": sum(
+            3
+            * (
+                50 * row["extrapolated_training_seconds_per_epoch"]
+                + 10 * validation_seconds
+            )
+            for row in report["chosen_kernels"].values()
+        )
+        / 3600,
+        "small_search_hours": sum(
+            trials
+            * (
+                10
+                * report["chosen_kernels"][model][
+                    "extrapolated_training_seconds_per_epoch"
+                ]
+                + 2 * validation_seconds
+            )
+            for model, trials in [("bpr_mf", 2), ("lightgcn", 6), ("xsimgcl", 4)]
+        )
+        / 3600,
         "limits": "Short fixed-minibatch extrapolation, not measured full epochs or convergence. Validation timing includes full-catalog scoring/masking/top-k/copy but excludes embedding propagation, metric aggregation and checkpoint I/O. Search counts and epoch counts are a proposed budget, not empirical convergence requirements.",
     }
     report["passed"] = True
     write_json(output / "summary.json", report)
-    with tarfile.open("/content/automotive-recsys-perf-results.tar.gz", "w:gz") as bundle:
+    with tarfile.open(
+        "/content/automotive-recsys-perf-results.tar.gz", "w:gz"
+    ) as bundle:
         bundle.add(output, arcname="gpu_performance")
     print("TIME_SCENARIO " + json.dumps(report["time_scenario"]), flush=True)
     print("Performance and CUDA correctness checks complete.", flush=True)

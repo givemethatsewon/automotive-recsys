@@ -16,7 +16,9 @@ def normalized_graph(uid, iid, n_users, n_items, device="cpu", layout="csr"):
     n_nodes = n_users + n_items
     degree = torch.bincount(rows, minlength=n_nodes).float()
     values = torch.rsqrt(degree[rows] * degree[cols])
-    graph = torch.sparse_coo_tensor(torch.stack([rows, cols]), values, (n_nodes, n_nodes)).coalesce()
+    graph = torch.sparse_coo_tensor(
+        torch.stack([rows, cols]), values, (n_nodes, n_nodes)
+    ).coalesce()
     graph = graph.to(device)
     return graph.to_sparse_csr() if layout == "csr" else graph
 
@@ -37,12 +39,21 @@ class _FixedSymmetricMM(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, output_gradient):
-        adjacency, = ctx.saved_tensors
+        (adjacency,) = ctx.saved_tensors
         return torch.sparse.mm(adjacency, output_gradient), None
 
 
-def encode(embedding, graph, model, layers=3, eps=0.1, contrast_layer=1, perturbed=False, noise=None,
-           symmetric_backward=False):
+def encode(
+    embedding,
+    graph,
+    model,
+    layers=3,
+    eps=0.1,
+    contrast_layer=1,
+    perturbed=False,
+    noise=None,
+    symmetric_backward=False,
+):
     if model == "bpr_mf":
         return embedding, None
     if model not in {"lightgcn", "xsimgcl"} or layers < 1:
@@ -53,7 +64,11 @@ def encode(embedding, graph, model, layers=3, eps=0.1, contrast_layer=1, perturb
     total = embedding if model == "lightgcn" else None
     contrast = None
     for layer in range(layers):
-        current = _FixedSymmetricMM.apply(current, graph) if symmetric_backward else torch.sparse.mm(graph, current)
+        current = (
+            _FixedSymmetricMM.apply(current, graph)
+            if symmetric_backward
+            else torch.sparse.mm(graph, current)
+        )
         if model == "xsimgcl" and perturbed:
             random = noise[layer] if noise is not None else torch.rand_like(current)
             current = current + eps * current.sign() * F.normalize(random, dim=-1)
@@ -73,39 +88,76 @@ def info_nce(left, right, temperature=0.2):
     return F.cross_entropy(logits, targets)
 
 
-def objective(embedding, graph, users, positives, negatives, model="lightgcn", layers=3,
-              regularization=1e-4, cl_weight=0.1, temperature=0.2, eps=0.1,
-              contrast_layer=1, noise=None, symmetric_backward=False, return_components=False,
-              interaction_weights=None, weight_normalizer=1.0):
-    final, contrast = encode(embedding, graph, model, layers, eps, contrast_layer,
-                             perturbed=model == "xsimgcl", noise=noise, symmetric_backward=symmetric_backward)
+def objective(
+    embedding,
+    graph,
+    users,
+    positives,
+    negatives,
+    model="lightgcn",
+    layers=3,
+    regularization=1e-4,
+    cl_weight=0.1,
+    temperature=0.2,
+    eps=0.1,
+    contrast_layer=1,
+    noise=None,
+    symmetric_backward=False,
+    return_components=False,
+    interaction_weights=None,
+    weight_normalizer=1.0,
+):
+    final, contrast = encode(
+        embedding,
+        graph,
+        model,
+        layers,
+        eps,
+        contrast_layer,
+        perturbed=model == "xsimgcl",
+        noise=noise,
+        symmetric_backward=symmetric_backward,
+    )
     user, positive, negative = final[users], final[positives], final[negatives]
     per_interaction = F.softplus((user * negative).sum(1) - (user * positive).sum(1))
-    bpr = per_interaction.mean() if interaction_weights is None else (per_interaction * interaction_weights).mean() / weight_normalizer
+    bpr = (
+        per_interaction.mean()
+        if interaction_weights is None
+        else (per_interaction * interaction_weights).mean() / weight_normalizer
+    )
     # Shared raw-embedding L2 protocol across models; record this recipe choice.
-    penalty = sum(embedding[index].square().sum() for index in [users, positives, negatives])
+    penalty = sum(
+        embedding[index].square().sum() for index in [users, positives, negatives]
+    )
     reg = regularization * penalty / (2 * len(users))
     contrastive = bpr.new_zeros(())
     if model == "xsimgcl" and cl_weight != 0:
         uids, iids = torch.unique(users), torch.unique(positives)
-        contrastive = (
-            info_nce(final[uids], contrast[uids], temperature)
-            + info_nce(final[iids], contrast[iids], temperature)
+        contrastive = info_nce(final[uids], contrast[uids], temperature) + info_nce(
+            final[iids], contrast[iids], temperature
         )
     loss = bpr + reg + cl_weight * contrastive
     if return_components:
-        return loss, {"bpr": bpr.detach(), "cl_raw": contrastive.detach(), "regularization": reg.detach()}
+        return loss, {
+            "bpr": bpr.detach(),
+            "cl_raw": contrastive.detach(),
+            "regularization": reg.detach(),
+        }
     return loss
 
 
 def training_keys(uid, iid, n_items, device):
-    return torch.sort(torch.as_tensor(uid, dtype=torch.long, device=device) * n_items
-                      + torch.as_tensor(iid, dtype=torch.long, device=device)).values
+    return torch.sort(
+        torch.as_tensor(uid, dtype=torch.long, device=device) * n_items
+        + torch.as_tensor(iid, dtype=torch.long, device=device)
+    ).values
 
 
 def key_membership(sorted_keys, queries):
     positions = torch.searchsorted(sorted_keys, queries)
-    return (positions < sorted_keys.numel()) & (sorted_keys[positions.clamp_max(sorted_keys.numel() - 1)] == queries)
+    return (positions < sorted_keys.numel()) & (
+        sorted_keys[positions.clamp_max(sorted_keys.numel() - 1)] == queries
+    )
 
 
 def sample_unseen(users, sorted_train_keys, n_items, generator=None):
@@ -114,13 +166,19 @@ def sample_unseen(users, sorted_train_keys, n_items, generator=None):
     Eval answers are not consulted. The caller must reject users with no unseen
     item in the catalog. Every user in the supplied dataset has unseen items.
     """
-    negatives = torch.randint(n_items, users.shape, device=users.device, generator=generator)
+    negatives = torch.randint(
+        n_items, users.shape, device=users.device, generator=generator
+    )
     for _ in range(100):
         rejected = key_membership(sorted_train_keys, users * n_items + negatives)
         if not bool(rejected.any()):
             return negatives
-        negatives[rejected] = torch.randint(n_items, (int(rejected.sum()),), device=users.device, generator=generator)
-    raise RuntimeError("Negative sampler exhausted rejection limit; check user degrees.")
+        negatives[rejected] = torch.randint(
+            n_items, (int(rejected.sum()),), device=users.device, generator=generator
+        )
+    raise RuntimeError(
+        "Negative sampler exhausted rejection limit; check user degrees."
+    )
 
 
 @torch.inference_mode()
@@ -137,14 +195,23 @@ def deterministic_topk(scores, k):
             threshold = values[row, k - 1]
             stronger = indices[row, :k][values[row, :k] > threshold]
             tied = (scores[row] == threshold).nonzero().flatten()
-            selected[row] = torch.cat([stronger, tied[:k - len(stronger)]])
+            selected[row] = torch.cat([stronger, tied[: k - len(stronger)]])
     ids = selected.sort(dim=1).values
     ranked = torch.argsort(scores.gather(1, ids), dim=1, descending=True, stable=True)
     return ids.gather(1, ranked)
 
 
 @torch.inference_mode()
-def full_catalog_topk(embedding, user_ids, n_users, seen_uid, seen_iid, k=100, batch_size=512, return_scores=False):
+def full_catalog_topk(
+    embedding,
+    user_ids,
+    n_users,
+    seen_uid,
+    seen_iid,
+    k=100,
+    batch_size=512,
+    return_scores=False,
+):
     """Exact all-item scoring/top-k on GPU, bounded by a user batch.
 
     Embeddings remain on GPU. Small history indices and final top-k IDs cross
@@ -160,20 +227,28 @@ def full_catalog_topk(embedding, user_ids, n_users, seen_uid, seen_iid, k=100, b
     if np.any(embedding.shape[0] - n_users - counts[user_ids] < k):
         raise ValueError("An evaluated user has fewer than k unseen candidates.")
     output = np.empty((len(user_ids), k), dtype=np.int32)
-    selected_scores = np.empty((len(user_ids), k), dtype=np.float32) if return_scores else None
+    selected_scores = (
+        np.empty((len(user_ids), k), dtype=np.float32) if return_scores else None
+    )
     item_embeddings = embedding[n_users:].T
     for start in range(0, len(user_ids), batch_size):
-        batch = user_ids[start:start + batch_size]
+        batch = user_ids[start : start + batch_size]
         ids = torch.as_tensor(batch, dtype=torch.long, device=embedding.device)
         scores = embedding[ids] @ item_embeddings
         lengths = counts[batch]
         local_rows = np.repeat(np.arange(len(batch)), lengths)
-        history = np.concatenate([seen_iid[pointers[uid]:pointers[uid + 1]] for uid in batch])
+        history = np.concatenate(
+            [seen_iid[pointers[uid] : pointers[uid + 1]] for uid in batch]
+        )
         if len(history):
-            scores[torch.as_tensor(local_rows, device=scores.device),
-                   torch.as_tensor(history.astype(np.int64), device=scores.device)] = -torch.inf
+            scores[
+                torch.as_tensor(local_rows, device=scores.device),
+                torch.as_tensor(history.astype(np.int64), device=scores.device),
+            ] = -torch.inf
         selected = deterministic_topk(scores, k)
-        output[start:start + len(batch)] = selected.cpu().numpy().astype(np.int32)
+        output[start : start + len(batch)] = selected.cpu().numpy().astype(np.int32)
         if return_scores:
-            selected_scores[start:start + len(batch)] = scores.gather(1, selected).cpu().numpy()
+            selected_scores[start : start + len(batch)] = (
+                scores.gather(1, selected).cpu().numpy()
+            )
     return (output, selected_scores) if return_scores else output

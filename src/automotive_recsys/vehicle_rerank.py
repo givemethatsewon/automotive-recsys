@@ -3,10 +3,13 @@
 Rows in the compact arrays are (make_id, model_id), with -1 for unknown.
 This pilot deliberately does not score year compatibility.
 """
+
 import numpy as np
 
 
-def match_candidates(uid, iid, user_ptr, user_rows, item_ptr, item_rows, universal, level):
+def match_candidates(
+    uid, iid, user_ptr, user_rows, item_ptr, item_rows, universal, level
+):
     """Return -1 unknown, 0 inferred mismatch, 1 match; optionally JIT on Colab.
 
     Multiple vehicles use any-match semantics. At model level a shared make
@@ -18,7 +21,11 @@ def match_candidates(uid, iid, user_ptr, user_rows, item_ptr, item_rows, univers
         u = uid[row]
         for col in range(iid.shape[1]):
             item = iid[row, col]
-            if universal[item] or user_ptr[u] == user_ptr[u + 1] or item_ptr[item] == item_ptr[item + 1]:
+            if (
+                universal[item]
+                or user_ptr[u] == user_ptr[u + 1]
+                or item_ptr[item] == item_ptr[item + 1]
+            ):
                 continue
             known = False
             unresolved = False

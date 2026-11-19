@@ -14,16 +14,22 @@ class VehicleRerankTests(unittest.TestCase):
         self.universal = np.array([False, False, False, True, False])
 
     def test_multi_vehicle_any_match_and_universal_unknown(self):
-        state = match_candidates(self.uid, self.iid, self.up, self.uv, self.ip, self.pf, self.universal, 1)
-        np.testing.assert_array_equal(state, [[1, 1, 0, -1, -1], [-1, 0, -1, -1, -1], [-1]*5])
+        state = match_candidates(
+            self.uid, self.iid, self.up, self.uv, self.ip, self.pf, self.universal, 1
+        )
+        np.testing.assert_array_equal(
+            state, [[1, 1, 0, -1, -1], [-1, 0, -1, -1, -1], [-1] * 5]
+        )
 
     def test_make_only_is_valid_at_make_level(self):
-        state = match_candidates(self.uid, self.iid, self.up, self.uv, self.ip, self.pf, self.universal, 0)
+        state = match_candidates(
+            self.uid, self.iid, self.up, self.uv, self.ip, self.pf, self.universal, 0
+        )
         np.testing.assert_array_equal(state[1], [1, 0, 1, -1, -1])
 
     def test_unknown_does_not_get_bonus_and_ties_use_item_id(self):
         iid = np.array([[4, 2, 3, 1]])
-        score = np.array([[1., 1., .9, .8]])
+        score = np.array([[1.0, 1.0, 0.9, 0.8]])
         state = np.array([[-1, 0, 1, -1]])
         ranked, _ = stable_rerank(iid, score, state, 1)
         np.testing.assert_array_equal(ranked, [[3, 2, 4, 1]])
@@ -31,9 +37,11 @@ class VehicleRerankTests(unittest.TestCase):
         np.testing.assert_array_equal(baseline, [[2, 4, 3, 1]])
 
     def test_zero_score_range(self):
-        ranked, _ = stable_rerank(np.array([[2, 1]]), np.zeros((1, 2)), np.array([[1, -1]]), .1)
+        ranked, _ = stable_rerank(
+            np.array([[2, 1]]), np.zeros((1, 2)), np.array([[1, -1]]), 0.1
+        )
         np.testing.assert_array_equal(ranked, [[2, 1]])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

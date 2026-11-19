@@ -16,13 +16,24 @@ def main():
     pop_parser.add_argument("--split", choices=["valid", "test"], default="valid")
     pop_parser.add_argument("--k", type=int, default=10)
     pop_parser.add_argument("--save-top-n", type=int, default=100)
-    pop_parser.add_argument("--limit-users", type=int, help="Diagnostic prefix only, not a benchmark")
+    pop_parser.add_argument(
+        "--limit-users", type=int, help="Diagnostic prefix only, not a benchmark"
+    )
     pop_parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     if args.command == "audit":
         result = audit(args.data_dir)
         write_json(args.output, result)
-        print(json.dumps({"passed": result["passed"], "checks": len(result["checks"]), "output": str(args.output)}, indent=2))
+        print(
+            json.dumps(
+                {
+                    "passed": result["passed"],
+                    "checks": len(result["checks"]),
+                    "output": str(args.output),
+                },
+                indent=2,
+            )
+        )
         if not result["passed"]:
             for check in result["checks"]:
                 if not check["passed"]:
@@ -30,8 +41,25 @@ def main():
             raise SystemExit(1)
     else:
         output = args.output or Path("results") / f"popularity_{args.split}"
-        result = run_popularity(args.data_dir, output, args.split, args.k, args.save_top_n, args.limit_users)
-        print(json.dumps({key: result[key] for key in ["model", "split", "evaluated_users", "metrics", "elapsed_seconds"]}, ensure_ascii=False, indent=2))
+        result = run_popularity(
+            args.data_dir, output, args.split, args.k, args.save_top_n, args.limit_users
+        )
+        print(
+            json.dumps(
+                {
+                    key: result[key]
+                    for key in [
+                        "model",
+                        "split",
+                        "evaluated_users",
+                        "metrics",
+                        "elapsed_seconds",
+                    ]
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
 
 
 if __name__ == "__main__":

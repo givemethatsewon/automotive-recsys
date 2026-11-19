@@ -42,8 +42,13 @@ def audit(data_dir: Path) -> dict:
         ("item_map", items, "iid", "parent_asin"),
     ]:
         check(f"{name}: no nulls", sum(frame.null_count().row(0)) == 0)
-        check(f"{name}: original IDs unique", frame[original].n_unique() == frame.height)
-        check(f"{name}: contiguous IDs", np.array_equal(frame[key].to_numpy(), np.arange(frame.height)))
+        check(
+            f"{name}: original IDs unique", frame[original].n_unique() == frame.height
+        )
+        check(
+            f"{name}: contiguous IDs",
+            np.array_equal(frame[key].to_numpy(), np.arange(frame.height)),
+        )
 
     frames = {}
     profiles = {}
@@ -57,43 +62,88 @@ def audit(data_dir: Path) -> dict:
             "items": frame["iid"].n_unique(),
             "schema": {key: str(value) for key, value in frame.schema.items()},
             "null_counts": dict(zip(frame.columns, frame.null_count().row(0))),
-            "duplicate_pairs": frame.height - frame.select("uid", "iid").unique().height,
+            "duplicate_pairs": frame.height
+            - frame.select("uid", "iid").unique().height,
             "timestamp_min_ms": low,
             "timestamp_max_ms": high,
-            "timestamp_min_utc": datetime.fromtimestamp(low / 1000, timezone.utc).isoformat(),
-            "timestamp_max_utc": datetime.fromtimestamp(high / 1000, timezone.utc).isoformat(),
-            "retained_interaction_pct": 100 * frame.height / stats["original"][split]["rows"],
+            "timestamp_min_utc": datetime.fromtimestamp(
+                low / 1000, timezone.utc
+            ).isoformat(),
+            "timestamp_max_utc": datetime.fromtimestamp(
+                high / 1000, timezone.utc
+            ).isoformat(),
+            "retained_interaction_pct": 100
+            * frame.height
+            / stats["original"][split]["rows"],
         }
         profiles[split] = profile
-        check(f"{split}: counts match stats.json", all(
-            profile[key] == stats["processed"][split][key] for key in ["rows", "users", "items"]
-        ))
-        check(f"{split}: schema", frame.schema == {"uid": pl.Int32, "iid": pl.Int32, "timestamp": pl.Int64})
+        check(
+            f"{split}: counts match stats.json",
+            all(
+                profile[key] == stats["processed"][split][key]
+                for key in ["rows", "users", "items"]
+            ),
+        )
+        check(
+            f"{split}: schema",
+            frame.schema == {"uid": pl.Int32, "iid": pl.Int32, "timestamp": pl.Int64},
+        )
         check(f"{split}: no nulls", sum(profile["null_counts"].values()) == 0)
-        check(f"{split}: no duplicate user-item pairs", profile["duplicate_pairs"] == 0, profile["duplicate_pairs"])
-        check(f"{split}: IDs in train vocabulary", (
-            frame["uid"].min() >= 0 and frame["uid"].max() < users.height
-            and frame["iid"].min() >= 0 and frame["iid"].max() < items.height
-        ))
-        check(f"{split}: sorted by user and time", frame.equals(frame.sort("uid", "timestamp")))
+        check(
+            f"{split}: no duplicate user-item pairs",
+            profile["duplicate_pairs"] == 0,
+            profile["duplicate_pairs"],
+        )
+        check(
+            f"{split}: IDs in train vocabulary",
+            (
+                frame["uid"].min() >= 0
+                and frame["uid"].max() < users.height
+                and frame["iid"].min() >= 0
+                and frame["iid"].max() < items.height
+            ),
+        )
+        check(
+            f"{split}: sorted by user and time",
+            frame.equals(frame.sort("uid", "timestamp")),
+        )
 
     train = frames["train"]
     for frame, key, name in [(users, "uid", "user_map"), (items, "iid", "item_map")]:
         counts = train.group_by(key).len().sort(key)["len"].to_numpy()
-        check(f"{name}: n_train matches interactions", np.array_equal(counts, frame["n_train"].to_numpy()))
+        check(
+            f"{name}: n_train matches interactions",
+            np.array_equal(counts, frame["n_train"].to_numpy()),
+        )
     expected_group = np.where(users["n_train"].to_numpy() <= 5, "1-5", "6+")
-    check("user groups match training counts", np.array_equal(users["group"].to_numpy(), expected_group))
+    check(
+        "user groups match training counts",
+        np.array_equal(users["group"].to_numpy(), expected_group),
+    )
 
     counts = items["n_train"].to_numpy()
     sorted_counts = np.sort(counts)[::-1]
     boundary = np.searchsorted(np.cumsum(sorted_counts), 0.8 * counts.sum())
     threshold = int(sorted_counts[boundary])
     popular = counts >= threshold
-    check("popularity threshold matches training-only 80% rule", threshold == stats["popular_min_reviews"], threshold)
-    check("popular flags match threshold including ties", np.array_equal(popular, items["popular"].to_numpy()))
+    check(
+        "popularity threshold matches training-only 80% rule",
+        threshold == stats["popular_min_reviews"],
+        threshold,
+    )
+    check(
+        "popular flags match threshold including ties",
+        np.array_equal(popular, items["popular"].to_numpy()),
+    )
 
-    check("train strictly precedes validation", profiles["train"]["timestamp_max_ms"] < profiles["valid"]["timestamp_min_ms"])
-    check("validation strictly precedes test", profiles["valid"]["timestamp_max_ms"] < profiles["test"]["timestamp_min_ms"])
+    check(
+        "train strictly precedes validation",
+        profiles["train"]["timestamp_max_ms"] < profiles["valid"]["timestamp_min_ms"],
+    )
+    check(
+        "validation strictly precedes test",
+        profiles["valid"]["timestamp_max_ms"] < profiles["test"]["timestamp_min_ms"],
+    )
     for split, expected in [
         ("valid", train.select("uid", "iid")),
         ("test", pl.concat([train, frames["valid"]]).select("uid", "iid").unique()),
@@ -104,7 +154,11 @@ def audit(data_dir: Path) -> dict:
         missing = expected.join(seen, on=["uid", "iid"], how="anti").height
         extra = seen.join(expected, on=["uid", "iid"], how="anti").height
         overlap = frames[split].join(seen, on=["uid", "iid"], how="semi").height
-        check(f"seen_for_{split}: matches expected history", missing == 0 and extra == 0, {"missing": missing, "extra": extra})
+        check(
+            f"seen_for_{split}: matches expected history",
+            missing == 0 and extra == 0,
+            {"missing": missing, "extra": extra},
+        )
         check(f"{split}: no answer masked by seen history", overlap == 0, overlap)
 
     return {
@@ -113,7 +167,10 @@ def audit(data_dir: Path) -> dict:
         "inputs": fingerprint(data_dir),
         "profiles": profiles,
         "training_population": {"users": users.height, "items": items.height},
-        "train_degree_min": {"user": users["n_train"].min(), "item": items["n_train"].min()},
+        "train_degree_min": {
+            "user": users["n_train"].min(),
+            "item": items["n_train"].min(),
+        },
         "popular_min_reviews": threshold,
         "popular_items": int(popular.sum()),
         "popular_review_share": float(counts[popular].sum() / counts.sum()),

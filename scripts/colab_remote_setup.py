@@ -1,4 +1,5 @@
 """Runs only on the Colab VM: verify handoff, CUDA, evaluation, artifact recovery."""
+
 import gc
 import hashlib
 import json
@@ -28,7 +29,10 @@ def main():
     with archive.open("wb") as output:
         for part in manifest["parts"]:
             source = upload / part["name"]
-            assert source.stat().st_size == part["bytes"] and digest(source) == part["sha256"]
+            assert (
+                source.stat().st_size == part["bytes"]
+                and digest(source) == part["sha256"]
+            )
             with source.open("rb") as stream:
                 for block in iter(lambda: stream.read(1 << 20), b""):
                     output.write(block)
@@ -54,13 +58,26 @@ def main():
     checks = audit(root / "data")
     write_json(output / "audit.json", checks)
     assert checks["passed"], "Data contract checks failed."
-    baseline = run_popularity(root / "data", output / "popularity_valid", "valid", 10, 100)
-    reference = json.loads((root / "reference/popularity_valid_metrics.json").read_text())
+    baseline = run_popularity(
+        root / "data", output / "popularity_valid", "valid", 10, 100
+    )
+    reference = json.loads(
+        (root / "reference/popularity_valid_metrics.json").read_text()
+    )
     for group in ["all", "1-5", "6+"]:
         for metric in ["ndcg", "recall", "hit_rate", "aplt", "arp"]:
-            assert math.isclose(baseline["metrics"][group][metric]["mean"], reference["metrics"][group][metric]["mean"], rel_tol=1e-10, abs_tol=1e-12)
+            assert math.isclose(
+                baseline["metrics"][group][metric]["mean"],
+                reference["metrics"][group][metric]["mean"],
+                rel_tol=1e-10,
+                abs_tol=1e-12,
+            )
     environment = os.environ | {"PYTHONPATH": str(root / "src")}
-    subprocess.run([sys.executable, "-m", "unittest", "discover", "-s", str(root / "tests"), "-v"], env=environment, check=True)
+    subprocess.run(
+        [sys.executable, "-m", "unittest", "discover", "-s", str(root / "tests"), "-v"],
+        env=environment,
+        check=True,
+    )
 
     torch.manual_seed(42)
     train = pl.read_parquet(root / "data/train.parquet", columns=["uid", "iid"])
@@ -71,7 +88,11 @@ def main():
     rows, cols = torch.cat([user, item]), torch.cat([item, user])
     degree = torch.bincount(rows, minlength=n_nodes).float()
     weights = torch.rsqrt(degree[rows] * degree[cols])
-    graph = torch.sparse_coo_tensor(torch.stack([rows, cols]), weights, (n_nodes, n_nodes)).coalesce().to("cuda")
+    graph = (
+        torch.sparse_coo_tensor(torch.stack([rows, cols]), weights, (n_nodes, n_nodes))
+        .coalesce()
+        .to("cuda")
+    )
     uid = user[:8192].to("cuda")
     positive = item[:8192].to("cuda")
     negative = torch.randint(n_users, n_nodes, (8192,), device="cuda")
@@ -86,22 +107,34 @@ def main():
     torch.cuda.synchronize()
     seconds = time.perf_counter() - started
     assert bool(torch.isfinite(loss))
-    checkpoint = {"purpose": "CUDA plumbing smoke only; not a trained recommender", "tensor": embedding[:4].detach().cpu()}
+    checkpoint = {
+        "purpose": "CUDA plumbing smoke only; not a trained recommender",
+        "tensor": embedding[:4].detach().cpu(),
+    }
     torch.save(checkpoint, output / "gpu_smoke.pt")
-    restored = torch.load(output / "gpu_smoke.pt", map_location="cpu", weights_only=True)
+    restored = torch.load(
+        output / "gpu_smoke.pt", map_location="cpu", weights_only=True
+    )
     torch.testing.assert_close(checkpoint["tensor"], restored["tensor"])
     summary = {
-        "passed": True, "gpu": torch.cuda.get_device_name(0), "torch": torch.__version__,
-        "python": sys.version.split()[0], "data_checks": len(checks["checks"]),
-        "uploaded_files_verified": len(manifest["files"]), "popularity_matches_local": True,
-        "valid_users": baseline["evaluated_users"], "ndcg_at_10": baseline["metrics"]["all"]["ndcg"]["mean"],
+        "passed": True,
+        "gpu": torch.cuda.get_device_name(0),
+        "torch": torch.__version__,
+        "python": sys.version.split()[0],
+        "data_checks": len(checks["checks"]),
+        "uploaded_files_verified": len(manifest["files"]),
+        "popularity_matches_local": True,
+        "valid_users": baseline["evaluated_users"],
+        "ndcg_at_10": baseline["metrics"]["all"]["ndcg"]["mean"],
         "full_train_graph_lightgcn_3_layer_update_seconds": seconds,
         "cuda_peak_allocated_MiB": torch.cuda.max_memory_allocated() / 2**20,
         "note": "Two diagnostic GPU updates only; no model convergence or final test evaluation.",
         "checkpoint_sha256": digest(output / "gpu_smoke.pt"),
     }
     write_json(output / "summary.json", summary)
-    with tarfile.open("/content/automotive-recsys-smoke-results.tar.gz", "w:gz") as bundle:
+    with tarfile.open(
+        "/content/automotive-recsys-smoke-results.tar.gz", "w:gz"
+    ) as bundle:
         bundle.add(output, arcname="colab_smoke")
     print(json.dumps(summary, indent=2), flush=True)
 

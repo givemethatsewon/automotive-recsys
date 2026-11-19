@@ -12,7 +12,9 @@ from .audit import fingerprint, write_json
 from .evaluation import contains, metrics_at_k, summarize
 
 
-def rank_popularity(train_counts: np.ndarray, user_ids: np.ndarray, seen: pl.DataFrame, top_n: int) -> np.ndarray:
+def rank_popularity(
+    train_counts: np.ndarray, user_ids: np.ndarray, seen: pl.DataFrame, top_n: int
+) -> np.ndarray:
     n_items = len(train_counts)
     if not 1 <= top_n <= n_items:
         raise ValueError("top_n must be between 1 and the number of items.")
@@ -26,7 +28,7 @@ def rank_popularity(train_counts: np.ndarray, user_ids: np.ndarray, seen: pl.Dat
     seen_items = history["iid"].to_numpy()
     result = np.empty((len(user_ids), top_n), dtype=np.int32)
     for row, uid in enumerate(user_ids):
-        previous = seen_items[offsets[uid]:offsets[uid + 1]]
+        previous = seen_items[offsets[uid] : offsets[uid + 1]]
         # At most len(previous) candidates can be removed. This prefix is exact.
         prefix_len = min(n_items, top_n + len(previous))
         available = np.ones(prefix_len, dtype=bool)
@@ -39,7 +41,9 @@ def rank_popularity(train_counts: np.ndarray, user_ids: np.ndarray, seen: pl.Dat
     return result
 
 
-def run_popularity(data_dir: Path, output: Path, split: str, k: int, save_top_n: int, limit_users=None) -> dict:
+def run_popularity(
+    data_dir: Path, output: Path, split: str, k: int, save_top_n: int, limit_users=None
+) -> dict:
     started = time.perf_counter()
     if split not in {"valid", "test"}:
         raise ValueError("split must be valid or test")
@@ -62,20 +66,34 @@ def run_popularity(data_dir: Path, output: Path, split: str, k: int, save_top_n:
         user_ids = user_ids[:limit_users]
     recommendations = rank_popularity(counts, user_ids, seen, save_top_n)
     pairs = recommendations[:, :k]
-    seen_keys = np.sort(seen["uid"].to_numpy().astype(np.int64) * n_items + seen["iid"].to_numpy())
-    if contains(seen_keys, user_ids[:, None].astype(np.int64) * n_items + recommendations).any():
+    seen_keys = np.sort(
+        seen["uid"].to_numpy().astype(np.int64) * n_items + seen["iid"].to_numpy()
+    )
+    if contains(
+        seen_keys, user_ids[:, None].astype(np.int64) * n_items + recommendations
+    ).any():
         raise ValueError("A recommendation includes a previously seen item.")
-    answer_keys = np.sort(truth["uid"].to_numpy().astype(np.int64) * n_items + truth["iid"].to_numpy())
+    answer_keys = np.sort(
+        truth["uid"].to_numpy().astype(np.int64) * n_items + truth["iid"].to_numpy()
+    )
     if contains(seen_keys, answer_keys).any():
         raise ValueError("An answer is masked by seen history.")
-    answer_counts = np.bincount(truth["uid"].to_numpy(), minlength=users.height)[user_ids]
-    values = metrics_at_k(user_ids, pairs, answer_keys, answer_counts, unpopular, counts)
+    answer_counts = np.bincount(truth["uid"].to_numpy(), minlength=users.height)[
+        user_ids
+    ]
+    values = metrics_at_k(
+        user_ids, pairs, answer_keys, answer_counts, unpopular, counts
+    )
     groups = users["group"].to_numpy()[user_ids]
     summaries = {"all": summarize(values, pairs, n_items)}
     for group in ["1-5", "6+"]:
         mask = groups == group
         if mask.any():
-            summaries[group] = summarize({key: value[mask] for key, value in values.items()}, pairs[mask], n_items)
+            summaries[group] = summarize(
+                {key: value[mask] for key, value in values.items()},
+                pairs[mask],
+                n_items,
+            )
     stats = json.loads((data_dir / "stats.json").read_text())
     summary = {
         "model": "popularity",
@@ -86,7 +104,9 @@ def run_popularity(data_dir: Path, output: Path, split: str, k: int, save_top_n:
         "eligible_users": all_users,
         "evaluated_users": len(user_ids),
         "evaluated_interactions": int(answer_counts.sum()),
-        "retained_interaction_pct": 100 * truth.height / stats["original"][split]["rows"],
+        "retained_interaction_pct": 100
+        * truth.height
+        / stats["original"][split]["rows"],
         "candidate_items": n_items,
         "candidate_protocol": "all train items minus seen_for_split; no sampled negatives",
         "training_data": "train only; no train+valid retraining",
@@ -101,7 +121,11 @@ def run_popularity(data_dir: Path, output: Path, split: str, k: int, save_top_n:
         "elapsed_seconds": time.perf_counter() - started,
         "inputs": fingerprint(data_dir),
     }
-    np.savez_compressed(output / "recommendations.npz", uid=user_ids, iid=recommendations)
-    pl.DataFrame({"uid": user_ids, "group": groups, "answer_count": answer_counts, **values}).write_parquet(output / "per_user.parquet")
+    np.savez_compressed(
+        output / "recommendations.npz", uid=user_ids, iid=recommendations
+    )
+    pl.DataFrame(
+        {"uid": user_ids, "group": groups, "answer_count": answer_counts, **values}
+    ).write_parquet(output / "per_user.parquet")
     write_json(output / "metrics.json", summary)
     return summary
