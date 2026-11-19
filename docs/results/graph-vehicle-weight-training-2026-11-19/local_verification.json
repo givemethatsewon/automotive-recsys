@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "tests": 43,
+  "log_sha256": "e831616b6ec325ca6aabfd74ac75d1a83f557c6bc0885c120b2d1a5df0694261",
+  "source_files": 55,
+  "source_manifest_sha256": "bf30d863246a3f321cab7881923ed9f7087238d2a39d911f8dba704d7af47440",
+  "source_revision": "696dec147b21f875f97a0b257a91dea578effb3c"
+}

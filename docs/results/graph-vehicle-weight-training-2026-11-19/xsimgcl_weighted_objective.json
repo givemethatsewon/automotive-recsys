@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "model": "xsimgcl",
+  "batch": 8192,
+  "loss_abs_difference": 0.0,
+  "gradient_max_abs_difference": 2.3646862246096134e-11,
+  "cuda": true,
+  "reference": "native CSR autograd; same fixed full graph, parameters and XSimGCL noise",
+  "weights_sha256": "477f562f0c656b35fd207522ada9571e3f5978cb6a1d0733239509b56bc9a833"
+}

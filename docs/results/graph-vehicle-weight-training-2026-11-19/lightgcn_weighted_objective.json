@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "model": "lightgcn",
+  "batch": 8192,
+  "loss_abs_difference": 0.0,
+  "gradient_max_abs_difference": 1.8189894035458565e-12,
+  "cuda": true,
+  "reference": "native CSR autograd; same fixed full graph, parameters and XSimGCL noise",
+  "weights_sha256": "477f562f0c656b35fd207522ada9571e3f5978cb6a1d0733239509b56bc9a833"
+}

@@ -11,7 +11,7 @@ Amazon Reviews 2023 Automotive의 processed 5-core에서 **정확도를 유지�
 
 ## 현재 상태를 읽는 법
 
-[BPR-MF 차종 가중 학습6runs](docs/VEHICLE_WEIGHT_TRAINING_2026-11-17.md)는 완료됐다. 11/19에는 [LightGCN·XSimGCL 확장12runs](docs/GRAPH_VEHICLE_WEIGHT_TRAINING_2026-11-19.md)를 새 캠페인으로 준비한다. 모델별 CUDA 수식·외부 optimizer/RNG checkpoint 재개 검증을 통과한 뒤 시작한다.
+[BPR-MF 차종 가중 학습6runs](docs/VEHICLE_WEIGHT_TRAINING_2026-11-17.md)는 완료됐다. 11/19에는 [LightGCN·XSimGCL 확장12runs](docs/GRAPH_VEHICLE_WEIGHT_TRAINING_2026-11-19.md)를 새 캠페인으로 실행했다. 두 모델의 CUDA·Drive optimizer/RNG 외부 복원 검증이 통과했고, 15:09 KST 기준1/12개 완료·두 번째 조건10epoch 저장을 확인했다.
 
 **11/17 v2 비교 완료:** 세 모델 seed42의 네 조건·후보100/500/1000 평가와 전체 결과 회수를 완료했다. 제어기는 정상 종료했고 활성 GPU0개·0 CU/hr를 확인했다. 후보500·같은 β의 v2/v1 test NDCG 변화는 +0.652%/+0.073%/+0.061%이며 모두 paired CI가0을 포함한다. [최종 결과·한계](docs/VEHICLES_V2_RESULTS_2026-11-17.md), [저장·복구 검증 기록](docs/VEHICLES_V2_DURABLE_2026-11-17.md).
 

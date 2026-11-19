@@ -1,0 +1,71 @@
+{
+  "passed": true,
+  "plan_hash": "ceb79ce5643b5216c35e26e45c2ab91241d47cbbfe430ec053391f56f0d8c7f3",
+  "models": {
+    "lightgcn": {
+      "passed": true,
+      "plan_hash": "ceb79ce5643b5216c35e26e45c2ab91241d47cbbfe430ec053391f56f0d8c7f3",
+      "model": "lightgcn",
+      "external_restore_then_epoch": 2,
+      "optimizer_rng_replay": {
+        "passed": true,
+        "max_parameter_abs_difference": 1.1920928955078125e-07
+      },
+      "training_settings": {
+        "model": "lightgcn",
+        "variant": "preflight_weighted_lightgcn",
+        "dim": 64,
+        "layers": 3,
+        "seed": 42,
+        "batch_size": 8192,
+        "learning_rate": 0.003,
+        "regularization": 1e-05,
+        "cl_weight": 0.1,
+        "eps": 0.1,
+        "temperature": 0.2,
+        "validation_batch": 1024,
+        "interaction_weighting": {
+          "weights_sha256": "477f562f0c656b35fd207522ada9571e3f5978cb6a1d0733239509b56bc9a833",
+          "train_sha256": "cff9ff66db1fa0b14f1f83b19e17b65f268ceaa5d80c96ebad2cb02b56f47834",
+          "mismatch_weight": 0.5,
+          "recipe": "v2 A1+A2 n_items>=2; provider no-year; unknown/match=1, mismatch=.5; globally normalized BPR only",
+          "normalizer": 0.977464349095878
+        }
+      },
+      "worker": "auto-vehicle-weight-20261119t035520z-1"
+    },
+    "xsimgcl": {
+      "passed": true,
+      "plan_hash": "ceb79ce5643b5216c35e26e45c2ab91241d47cbbfe430ec053391f56f0d8c7f3",
+      "model": "xsimgcl",
+      "external_restore_then_epoch": 2,
+      "optimizer_rng_replay": {
+        "passed": true,
+        "max_parameter_abs_difference": 5.960464477539063e-08
+      },
+      "training_settings": {
+        "model": "xsimgcl",
+        "variant": "preflight_weighted_xsimgcl",
+        "dim": 64,
+        "layers": 3,
+        "seed": 42,
+        "batch_size": 8192,
+        "learning_rate": 0.001,
+        "regularization": 0.0001,
+        "cl_weight": 0.1,
+        "eps": 0.1,
+        "temperature": 0.2,
+        "validation_batch": 1024,
+        "interaction_weighting": {
+          "weights_sha256": "477f562f0c656b35fd207522ada9571e3f5978cb6a1d0733239509b56bc9a833",
+          "train_sha256": "cff9ff66db1fa0b14f1f83b19e17b65f268ceaa5d80c96ebad2cb02b56f47834",
+          "mismatch_weight": 0.5,
+          "recipe": "v2 A1+A2 n_items>=2; provider no-year; unknown/match=1, mismatch=.5; globally normalized BPR only",
+          "normalizer": 0.977464349095878
+        }
+      },
+      "worker": "auto-vehicle-weight-20261119t035520z-1"
+    }
+  },
+  "weights_sha256": "477f562f0c656b35fd207522ada9571e3f5978cb6a1d0733239509b56bc9a833"
+}

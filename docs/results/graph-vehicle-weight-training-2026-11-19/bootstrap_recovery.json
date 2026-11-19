@@ -1,0 +1,7 @@
+{
+  "same_vm": true,
+  "reason": "pre-worker websocket failure",
+  "verified_worker_started": true,
+  "recovery_script_sha256": "ad67735b0f05c9859e9df968741e11dca857c33ae26f21d19754160e9dddc7e3",
+  "time": "2026-11-19T04:03:34.717194+00:00"
+}

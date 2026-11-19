@@ -1,6 +1,6 @@
 # LightGCN·XSimGCL 차종 신뢰도 가중 학습
 
-2026-11-19. 사용자가 별도 그래프 실험의 즉시 실행을 요청했다. 완료된 [BPR-MF6runs](VEHICLE_WEIGHT_TRAINING_2026-11-17.md)의 같은 차종 가중치를 LightGCN·XSimGCL로 확장한다. 현재 로컬 검사를 통과한 준비 단계이며, CUDA 모델별 검증·실제 실행 증거는 아래에 추가한다.
+2026-11-19. 사용자가 별도 그래프 실험의 즉시 실행을 요청했다. 완료된 [BPR-MF6runs](VEHICLE_WEIGHT_TRAINING_2026-11-17.md)의 같은 차종 가중치를 LightGCN·XSimGCL로 확장한다. 로컬43개 검사와 두 모델의 실제 CUDA·외부 checkpoint 재개 검증이 통과했고, 본12개 학습이 진행 중이다. 15:09 KST 조회에서1/12개 완료·LightGCN 가중 seed42의10epoch 저장을 확인했다.
 
 ## 동결할 비교
 
@@ -27,3 +27,22 @@ PYTHONPATH=src .venv/bin/python scripts/prepare_vehicle_training.py \
 ```
 
 불일치는 추정 정보이며 실제 비선호/정답이 아니다. A2 자기 일관성, 상품 메타데이터 시점·v2 규칙의 기존 test 개발 사용 등 탐색적 한계를 BPR 실험과 함께 유지한다. 그래프 확장 결과로 과제 전체 RQ가 완료됐다고 표시하지 않는다.
+
+## 실제 실행과 검증 (11/19 15:09 KST)
+
+- campaign: `vehicle-weight-20261119T035520Z`, plan hash `ceb79ce5643b5216c35e26e45c2ab91241d47cbbfe430ec053391f56f0d8c7f3`.
+- [Drive checkpoints·events·epochs·progress](https://drive.google.com/drive/folders/1alraUeKPD0QMoM3777vNX-FJ-S_duEX5).
+- 서버: `ubuntu-wan:~/git/automotive-recsys-graph-vehicle-weight-20261119`, user service `automotive-graph-vehicle-weight-1119.service`, config `results/graph-vehicle-weight-training-20261119/config.json`.
+- 동결 모델/worker 소스 [696dec1](https://github.com/givemethatsewon/automotive-recsys/commit/696dec147b21f875f97a0b257a91dea578effb3c). bundle의 src/scripts55개 파일을 로컬 SHA와 대조했다. 아래 실행 기록의 후속 커밋과 동결 소스 revision은 구분한다.
+- LightGCN native CSR 대조 loss 차이0, gradient 최대 절대 차이1.82e-12. XSimGCL은 loss 차이0, gradient 최대 절대 차이2.36e-11였다. 전체 train 한 epoch와 전체 valid를 거친 optimizer/RNG checkpoint를 Drive에서 별도 폴더로 복원한 뒤 각각2epoch까지 이어 학습했다.
+- next-update replay의 파라미터 최대 절대 차이는 LightGCN1.19e-7, XSimGCL5.96e-8로 통과했다. 해당 환경의 허용 오차 검증이며 bitwise 동일성이나 수렴 보장이 아니다.
+- LightGCN 비가중 seed42는55epoch에서 완료됐다. best checkpoint217,075,732bytes와 집계 manifest/epochs/valid 파일의 Drive hash를 확인했다. 현재 가중 seed42가10epoch를 마쳤으며 나머지는 같은 고정 계획으로 이어간다. 아직12runs 전체 최종 비교 결과는 없다.
+- 초기 프런트엔드 연결이 끊긴 상태에서 원격 worker 미시작을 확인하고, 같은 VM의 새 kernel 연결로 준비를 복구했다. worker 시작 receipt 뒤 제어기가 같은 endpoint를 채택한 것을 확인했다. 복구 과정에서 GPU를 추가 할당하지 않았고 모델·입력 source bundle은 유지했다.
+
+검증 자료: [로컬43개·소스 SHA](results/graph-vehicle-weight-training-2026-11-19/local_verification.json), [train 가중치 감사](results/graph-vehicle-weight-training-2026-11-19/vehicle_weight_audit.json), [LightGCN CUDA](results/graph-vehicle-weight-training-2026-11-19/lightgcn_weighted_objective.json)/[외부 복원](results/graph-vehicle-weight-training-2026-11-19/lightgcn_verified.json), [XSimGCL CUDA](results/graph-vehicle-weight-training-2026-11-19/xsimgcl_weighted_objective.json)/[외부 복원](results/graph-vehicle-weight-training-2026-11-19/xsimgcl_verified.json), [통합 preflight](results/graph-vehicle-weight-training-2026-11-19/preflight_verified.json), [본 학습 진척·checkpoint](results/graph-vehicle-weight-training-2026-11-19/startup_verification.json).
+
+```bash
+ssh ubuntu-wan 'systemctl --user status automotive-graph-vehicle-weight-1119.service --no-pager'
+```
+
+Drive `progress.txt/json`, `events.jsonl`, `runs/<run>/restore.json`, `runs/<run>/completed.json`에서 확인한다. 완성 보고서는 `report/`로 저장·회수하고 해당 VM을 반납한다. 현재는 한 L4에서 자동 진행 중이다.

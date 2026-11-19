@@ -1,0 +1,28 @@
+{
+  "recipe": "v2 A1+A2 n_items>=2; provider no-year; unknown/match=1, mismatch=.5; globally normalized BPR only",
+  "training_split": "train",
+  "train_sha256": "cff9ff66db1fa0b14f1f83b19e17b65f268ceaa5d80c96ebad2cb02b56f47834",
+  "weights_sha256": "477f562f0c656b35fd207522ada9571e3f5978cb6a1d0733239509b56bc9a833",
+  "source_sha256": {
+    "vehicles/v2/product_fitment.parquet": "a1d644296ce7ebe3137a8184fcb667e485420915766fa536b79734f5fb8398c9",
+    "vehicles/v2/user_vehicles.parquet": "230c9ddc96ff6ef6779eb6e5f2480fabed2991fa1d2c30d17e6b95fbd43f0ec4",
+    "vehicles/v2/user_vehicles_items.parquet": "d15634ce30e96891b09210a23ea8c4b7df5d8e481c180442d0791769a50f4b60",
+    "provider/vehicle_fit.py": "33dc94c2bf09ea8f2f496d4e3e589b266fd1a15e41b4669d30aaea05bd0168fb"
+  },
+  "mismatch_weight": 0.5,
+  "rows": 4818321,
+  "states": {
+    "-1": 3617538,
+    "0": 217168,
+    "1": 983615
+  },
+  "normalizer": 0.977464349095878,
+  "profile_cutoff_exclusive": 1628643426821,
+  "provider_reference_pairs": 223,
+  "test_profiles_used": false,
+  "limitations": [
+    "fitment is inferred, not true dislike",
+    "A2 inferred from the same train items; self-consistency can reduce mismatch coverage",
+    "product metadata and v2 rules have exploratory test-development history"
+  ]
+}

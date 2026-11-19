@@ -36,6 +36,6 @@
 [차종 신뢰도 가중 BPR-MF](VEHICLE_WEIGHT_TRAINING_2026-11-17.md): 동일3seeds, 비가중 대조/불일치0.5배의6runs. raw ID 모델은 같고 train BPR 손실만 바꾼다. CUDA 외부 checkpoint 재개 검증과 첫 본 학습 저장을 확인했다. 기존 재정렬·32개 캠페인과 별도다. 최종6runs 완료, 3seed 평균 NDCG 변화 -0.345%·seed별 paired CI는 모두0을 포함한다.
 
 
-## 그래프 차종 가중 학습 준비 (11/19)
+## 그래프 차종 가중 학습 실행 중 (11/19)
 
-[LightGCN·XSimGCL12runs](GRAPH_VEHICLE_WEIGHT_TRAINING_2026-11-19.md): 모델별 고정 설정과 같은3seeds의 비가중/불일치0.5 비교다. 그래프나 CL 수식은 유지한다. 모델별 CUDA·외부 복원 preflight를 통과한 뒤 본 실행한다.
+[LightGCN·XSimGCL12runs](GRAPH_VEHICLE_WEIGHT_TRAINING_2026-11-19.md): 모델별 고정 설정과 같은3seeds의 비가중/불일치0.5 비교다. 그래프나 CL 수식은 유지한다. 두 모델의 CUDA·외부 복원 preflight를 통과해 본 실행 중이며, 15:09 KST에1/12개 완료와 다음 조건10epoch 저장을 확인했다.

@@ -2,7 +2,7 @@
 
 갱신: **2026-11-19 KST**. 이 문서가 **현재 연구 상태·확정 결정·다음 작업의 SSOT**다. [팀원 인수인계](docs/HANDOFF.md)는 코드·최적화·로그·재현 경로, [후속 실험 색인](docs/EXPERIMENT_INDEX.md)은 차종 실행별 근거를 연결한다. Gmail의 11/13 회의 문서·스크립트, 최신 Notion 개요와 팀 Drive/v2 목록·안내를 조회했다. 팀원의 Drive 권한은 확인하지 않았다. 오늘 자원·재시작 검증 상태는 아래 별도 기록을 따른다.
 
-**그래프 차종 가중 학습 준비 중(11/19):** LightGCN·XSimGCL의 비가중/불일치0.5 조건을 같은3seeds로 비교하는 별도12run을 준비한다. 기존 valid 선택 설정·그래프·CL/noise·L2와 BPR 때의 train 가중치 SHA를 고정한다. 로컬43개 검사 통과 후 모델별 실제 CUDA·외부 checkpoint 재개 검증을 거쳐 실행한다. [고정 설계·새 실행](docs/GRAPH_VEHICLE_WEIGHT_TRAINING_2026-11-19.md).
+**그래프 차종 가중 학습 진행 중(11/19):** LightGCN·XSimGCL의 비가중/불일치0.5 조건 × 같은3seeds의 별도12run을 실행했다. 두 모델의 전체 그래프 native CUDA loss/gradient 대조·전체 weighted train/valid·Drive optimizer/RNG checkpoint 외부 복원 후2epoch 재개가 통과했다. 15:09 KST에1/12개 완료(LightGCN 비가중 seed42,55epoch), 가중 seed42의10epoch 저장을 확인했다. 그래프·CL/noise·L2·가중치 SHA는 고정했다. [동결 설계·Drive·실행 검증](docs/GRAPH_VEHICLE_WEIGHT_TRAINING_2026-11-19.md).
 
 **차종 가중 BPR-MF6runs 완료 재확인(11/19):** 11/17 19:19 KST에6개 완료·보고서 회수·제어기 정상 종료됐으며, 11/19 자원 조회에서 활성0개·0 CU/hr를 확인했다. 가중/비가중3seed 평균 test NDCG는0.001174341/0.001178407(-0.345%)이고 seed별 paired CI는 모두0을 포함한다. [결과·한계·검증](docs/VEHICLE_WEIGHT_TRAINING_2026-11-17.md).
 
