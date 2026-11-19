@@ -1,0 +1,35 @@
+[
+  {
+    "seed": 42,
+    "ndcg_delta": 4.733600154545812e-06,
+    "ci95": {
+      "mean_difference": 4.733600154545812e-06,
+      "ci95_low": -2.5388404826817286e-05,
+      "ci95_high": 3.849698594369649e-05,
+      "users": 158805,
+      "bootstrap_repetitions": 500
+    }
+  },
+  {
+    "seed": 43,
+    "ndcg_delta": -4.855631224957774e-06,
+    "ci95": {
+      "mean_difference": -4.855631224957774e-06,
+      "ci95_low": -3.889973872836402e-05,
+      "ci95_high": 2.7922011071620306e-05,
+      "users": 158805,
+      "bootstrap_repetitions": 500
+    }
+  },
+  {
+    "seed": 44,
+    "ndcg_delta": -1.2075823933524396e-05,
+    "ci95": {
+      "mean_difference": -1.2075823933524396e-05,
+      "ci95_low": -4.449635244720434e-05,
+      "ci95_high": 2.335591816055625e-05,
+      "users": 158805,
+      "bootstrap_repetitions": 500
+    }
+  }
+]

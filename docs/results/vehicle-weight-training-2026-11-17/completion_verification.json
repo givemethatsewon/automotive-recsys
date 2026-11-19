@@ -1,0 +1,78 @@
+{
+  "observed_at": "2026-11-19T03:52:17.246913+00:00",
+  "plan_hash": "10736612793ffb22940b2cf7f1f95fa30a45388f068a9737d33c73624e311849",
+  "completed_runs": 6,
+  "runs": {
+    "vehicle_control_seed42": {
+      "status": "completed",
+      "completed_epochs": 45,
+      "best_epoch": 5,
+      "best_sha256": "6bf8ca1a01c3fce9143bb1c6171676cdd78e3d51f73ccbcac61c78f5874b6ce7"
+    },
+    "vehicle_mismatch_half_seed42": {
+      "status": "completed",
+      "completed_epochs": 45,
+      "best_epoch": 5,
+      "best_sha256": "f729f75d3afafa9479415ed30edc9635b1c8b41eb1c9a6aa4bc98812fa22551d"
+    },
+    "vehicle_control_seed43": {
+      "status": "completed",
+      "completed_epochs": 45,
+      "best_epoch": 5,
+      "best_sha256": "f1b5a9b67ad86307bf0dde60ac3bb1c5910d65690b391e6edf8468ddf81c1498"
+    },
+    "vehicle_mismatch_half_seed43": {
+      "status": "completed",
+      "completed_epochs": 45,
+      "best_epoch": 5,
+      "best_sha256": "2c728d79be1db371cc02b2af819936a7518cb49084bb91092eb313442d385e7e"
+    },
+    "vehicle_control_seed44": {
+      "status": "completed",
+      "completed_epochs": 45,
+      "best_epoch": 5,
+      "best_sha256": "004c2429d9fb1476bf3589d1e1f479728b36b8bf146ef2a5f7cf7c3afc7239df"
+    },
+    "vehicle_mismatch_half_seed44": {
+      "status": "completed",
+      "completed_epochs": 45,
+      "best_epoch": 5,
+      "best_sha256": "0488bf0831970ee17706cbb3f9a67aa471bd57eedd6b0ab296e75d242ca6e9fd"
+    }
+  },
+  "report_sha256": {
+    "paired_by_seed.json": "9fe47ed31594f631b438be65bd32b53d527d4b38d56fc4103a6a93dd7b04f895",
+    "RESULTS.md": "ed0651969540c683aac4dcfae4ed9b12828f23c0cf787bf7788b5c78ff45c796",
+    "seed_summary.csv": "a7848fd6b0896247bf8d7996dbe5bd87fcae84ae7b2e4d3dc92e00f42f79c46b",
+    "all_seed_results.csv": "bf0784af83f765b30479891eb406943eb57212eaadeca0be332a55199c119703"
+  },
+  "progress": {
+    "campaign_id": "vehicle-weight-20261117T071534Z",
+    "status": "completed",
+    "started_at": "2026-11-17T07:22:16.985572+00:00",
+    "worker": "auto-vehicle-weight-20261117t071534z-2",
+    "completed_runs": 6,
+    "planned_runs": 6,
+    "current": {},
+    "stage": "completed",
+    "updated_at": "2026-11-17T10:17:54.369847+00:00",
+    "durable_checkpoint": "vehicle_mismatch_half_seed44 epoch 45 (2026-11-17T10:15:44.013776+00:00)",
+    "account_balance_cu": 85.4969337751602,
+    "account_cu_since_start": 5.61488719042697
+  },
+  "controller": {
+    "status": "completed",
+    "reason": null,
+    "updated_at": "2026-11-17T10:19:30.896845+00:00",
+    "recovery_limit": "6 consecutive workers without durable progress",
+    "workers_started": 2,
+    "host": "ubuntu",
+    "controller_id": "ubuntu-vehicle-weight-1117",
+    "last_progress_token": [
+      6,
+      "vehicle_mismatch_half_seed44",
+      45
+    ]
+  },
+  "active_assignments_before_new_study": 0
+}

@@ -81,14 +81,20 @@ try:
         from automotive_recsys.vehicle_training import prepare_weights,verify_cuda_weighted_objective
         feature_journal=CampaignJournal(root/'results/feature_journal',store,CONFIG['plan'],CONFIG['worker'],budget_guard)
         audit=prepare_weights(root,lambda step,total:feature_journal.progress('preparing_vehicle_weights',{'run_id':'feature_preparation','model':'bpr_mf','seed':42,'step':step,'steps':total}))
+        expected_weights=CONFIG['plan']['metadata'].get('expected_weights_sha256')
+        if expected_weights:assert audit['weights_sha256']==expected_weights,'Vehicle treatment differs from frozen BPR lineage'
         store.put_json(audit,'vehicle_weight_audit.json',root/'transfer')
         weights=store.put(root/'features/train_vehicle_weights.npy','features/train_vehicle_weights.npy')
         roundtrip=store.download(weights['id'],root/'features/roundtrip.npy',weights['sha256']);roundtrip.unlink()
-        kernel_check=verify_cuda_weighted_objective(root)
-        store.put_json(kernel_check | {'weights_sha256':weights['sha256'],'external_weights_roundtrip':True},'preflight/weighted_objective.json',root/'transfer')
+        if CONFIG['plan'].get('preflights'):
+            from automotive_recsys.vehicle_training import run_weighted_preflights
+            run_weighted_preflights(root,store,CONFIG['plan'],CONFIG['worker'],budget_guard)
+        else:
+            kernel_check=verify_cuda_weighted_objective(root)
+            store.put_json(kernel_check | {'weights_sha256':weights['sha256'],'external_weights_roundtrip':True},'preflight/weighted_objective.json',root/'transfer')
     # Before the study, prove that a real optimizer/RNG checkpoint survives a
     # Drive round trip into a separate output directory and continues training.
-    if not store.get_json("preflight/verified.json"):
+    if not CONFIG['plan'].get('preflights') and not store.get_json("preflight/verified.json"):
         from automotive_recsys.campaign_io import CampaignJournal, DurableRun
         from automotive_recsys.train_gpu import run_training
         journal = CampaignJournal(root / "results/preflight_journal", store, CONFIG["plan"], CONFIG["worker"], budget_guard)
@@ -125,7 +131,12 @@ try:
         from automotive_recsys.experiment_plan import plan_hash
         receipt=store.get_json('preflight/verified.json')
         assert receipt['passed'] and receipt['plan_hash']==plan_hash(CONFIG['plan'])
-        assert receipt['training_settings']['interaction_weighting']['weights_sha256']==audit['weights_sha256']
+        if CONFIG['plan'].get('preflights'):
+            assert set(receipt['models'])=={p['model'] for p in CONFIG['plan']['preflights']}
+            for result in receipt['models'].values():
+                assert result['passed'] and result['training_settings']['interaction_weighting']['weights_sha256']==audit['weights_sha256']
+        else:
+            assert receipt['training_settings']['interaction_weighting']['weights_sha256']==audit['weights_sha256']
     from automotive_recsys.campaign import run_campaign
     result = run_campaign(root, DRIVE_CREDENTIAL, CONFIG["root_id"], CONFIG["plan"], CONFIG["worker"], guard=budget_guard)
     status = result["status"]

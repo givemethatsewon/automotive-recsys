@@ -1,6 +1,6 @@
 # 차종 신뢰도 가중 BPR-MF 학습
 
-2026-11-17. 사용자 요청에 따라 v2 재정렬 완료 다음의 학습 단계 비교를 준비한다. 로컬41개 검사와 실제 CUDA weighted loss/gradient·Drive checkpoint 외부 복원/2epoch 재개 검증이 통과했다. 현재6개 본 학습이 진행 중이다. 기존32개 학습 캠페인·v2 재정렬 결과를 재개하거나 덮어쓰지 않는다.
+2026-11-17. 사용자 요청에 따라 v2 재정렬 완료 다음의 학습 단계 비교를 준비한다. 로컬41개 검사와 실제 CUDA weighted loss/gradient·Drive checkpoint 외부 복원/2epoch 재개 검증이 통과했다. 6개 본 학습은 11/17 19:19 KST에 결과 회수까지 완료됐고 제어기가 종료됐다. 11/19 재조회에서 활성 GPU0개를 확인했다. 기존32개 학습 캠페인·v2 재정렬 결과를 재개하거나 덮어쓰지 않는다.
 
 ## 질문과 사전 고정 조건
 
@@ -49,3 +49,10 @@ ssh ubuntu-wan 'systemctl --user status automotive-vehicle-weight-1117.service -
 ```
 
 Drive의 `progress.txt/json`, `events.jsonl`, `runs/<run>/restore.json`, `runs/<run>/completed.json`, `workers/<worker>/events.jsonl`과 cost observations를 확인한다. 완료 보고서는 `report/`에 seed별 결과·평균/SD·paired CI로 저장되고 Ubuntu controller가 회수한 뒤 자기 GPU를 반납한다. 사용자별 추천·개인 입력·credential은 Git 제외다.
+
+
+## 11/19 완료 재확인
+
+비가중/가중 조건3seed 평균 test NDCG@10은0.001178407/0.001174341로 상대 변화는-0.345%다. 세 seed의 사용자 paired CI가 모두0을 포함하며 개선을 확정하지 않는다. 비인기 추천 비율 APLT는0.155243%→0.156103%다.
+
+[완료 marker·보고서 hash 검증](results/vehicle-weight-training-2026-11-17/completion_verification.json), [seed 평균·SD](results/vehicle-weight-training-2026-11-17/seed_summary.csv), [seed별 결과](results/vehicle-weight-training-2026-11-17/all_seed_results.csv), [seed별 paired CI](results/vehicle-weight-training-2026-11-17/paired_by_seed.json)를 보존한다. 기존 시작/검증 기록은 당시 관측이다. 다음 [그래프 모델 확장](GRAPH_VEHICLE_WEIGHT_TRAINING_2026-11-19.md)은 별도 campaign으로 실행한다.
