@@ -1,0 +1,82 @@
+{
+  "observed_at": "2026-11-19T06:54:15.759198+00:00",
+  "campaign_id": "vehicle-weight-20261119T035520Z",
+  "plan_hash": "ceb79ce5643b5216c35e26e45c2ab91241d47cbbfe430ec053391f56f0d8c7f3",
+  "source_revision": "696dec147b21f875f97a0b257a91dea578effb3c",
+  "drive_url": "https://drive.google.com/drive/folders/1alraUeKPD0QMoM3777vNX-FJ-S_duEX5",
+  "progress": {
+    "campaign_id": "vehicle-weight-20261119T035520Z",
+    "status": "running",
+    "started_at": "2026-11-19T04:04:13.972083+00:00",
+    "worker": "auto-vehicle-weight-20261119t035520z-1",
+    "completed_runs": 1,
+    "planned_runs": 12,
+    "current": {
+      "epoch": 42,
+      "best_epoch": 15,
+      "best_valid_ndcg": 0.004216467365905533,
+      "model": "lightgcn",
+      "seed": 42,
+      "variant": "lightgcn_vehicle_mismatch_half",
+      "max_epochs": 100,
+      "run_id": "lightgcn_vehicle_mismatch_half_seed42",
+      "step": 4818321,
+      "steps": 4818321,
+      "mean_loss": 0.00559765612706542,
+      "epoch_metrics": {
+        "epoch": 42,
+        "training_seconds": 62.32501539000077,
+        "mean_loss": 0.005599688738584518,
+        "cl_weight": 0.1,
+        "train_bpr": 0.004721655044704676,
+        "train_cl_raw": null,
+        "train_regularization": 0.0008780340431258082,
+        "cl_raw_evaluated": false,
+        "wall_seconds_with_validation_and_checkpoint": 63.68165974200019
+      }
+    },
+    "stage": "saving_checkpoint",
+    "updated_at": "2026-11-19T06:53:05.894118+00:00",
+    "account_balance_cu": 80.11355616225399,
+    "account_cu_since_start": 5.383377612906216,
+    "durable_checkpoint": "lightgcn_vehicle_mismatch_half_seed42 epoch 42 (2026-11-19T06:53:05.893910+00:00)"
+  },
+  "controller": {
+    "status": "running",
+    "reason": null,
+    "updated_at": "2026-11-19T06:52:44.835118+00:00",
+    "recovery_limit": "6 consecutive workers without durable progress",
+    "workers_started": 1,
+    "host": "ubuntu",
+    "controller_id": "ubuntu-vehicle-weight-20261119t035520z",
+    "last_progress_token": [
+      1,
+      "lightgcn_vehicle_mismatch_half_seed42",
+      33
+    ]
+  },
+  "completed_results": [
+    {
+      "run_id": "lightgcn_vehicle_control_seed42",
+      "seed": 42,
+      "model": "lightgcn",
+      "variant": "lightgcn_vehicle_control",
+      "completed_epochs": 55,
+      "best_epoch": 15,
+      "test_ndcg": 0.0036709658213465216,
+      "test_aplt": 0.007932999590692987
+    }
+  ],
+  "verified_completed_checkpoints": [
+    {
+      "run_id": "lightgcn_vehicle_control_seed42",
+      "sha256": "03c9b224faf86057fff8d515953cb9ee31aa692084f2b6e0abe056d829ef859b",
+      "bytes": 217075732
+    }
+  ],
+  "current_durable_generation": {
+    "run_id": "lightgcn_vehicle_mismatch_half_seed42",
+    "epoch": 42
+  },
+  "interpretation": "Interim snapshot; no completed graph control/weighted pair, no graph treatment conclusion."
+}

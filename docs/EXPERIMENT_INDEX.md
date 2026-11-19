@@ -38,4 +38,4 @@
 
 ## 그래프 차종 가중 학습 실행 중 (11/19)
 
-[LightGCN·XSimGCL12runs](GRAPH_VEHICLE_WEIGHT_TRAINING_2026-11-19.md): 모델별 고정 설정과 같은3seeds의 비가중/불일치0.5 비교다. 그래프나 CL 수식은 유지한다. 두 모델의 CUDA·외부 복원 preflight를 통과해 본 실행 중이며, 15:09 KST에1/12개 완료와 다음 조건10epoch 저장을 확인했다.
+[LightGCN·XSimGCL12runs](GRAPH_VEHICLE_WEIGHT_TRAINING_2026-11-19.md): 모델별 고정 설정과 같은3seeds의 비가중/불일치0.5 비교다. 그래프나 CL 수식은 유지한다. 두 모델의 CUDA·외부 복원 preflight를 통과해 본 실행 중이며, 15:54 KST 조회에서1/12개 완료와 다음 조건42epoch Drive 저장을 확인했다. [의의·현재 결론](EXPERIMENT_INTERPRETATION_2026-11-19.md)은 완료된 BPR 비교와 미완료 그래프 비교를 구분한다.

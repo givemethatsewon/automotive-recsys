@@ -11,11 +11,11 @@ Amazon Reviews 2023 Automotive의 processed 5-core에서 **정확도를 유지�
 
 ## 현재 상태를 읽는 법
 
-[BPR-MF 차종 가중 학습6runs](docs/VEHICLE_WEIGHT_TRAINING_2026-11-17.md)는 완료됐다. 11/19에는 [LightGCN·XSimGCL 확장12runs](docs/GRAPH_VEHICLE_WEIGHT_TRAINING_2026-11-19.md)를 새 캠페인으로 실행했다. 두 모델의 CUDA·Drive optimizer/RNG 외부 복원 검증이 통과했고, 15:09 KST 기준1/12개 완료·두 번째 조건10epoch 저장을 확인했다.
+[BPR-MF 차종 가중 학습6runs](docs/VEHICLE_WEIGHT_TRAINING_2026-11-17.md)는 완료됐다. 11/19에는 [LightGCN·XSimGCL 확장12runs](docs/GRAPH_VEHICLE_WEIGHT_TRAINING_2026-11-19.md)를 새 캠페인으로 실행했다. 두 모델의 CUDA·Drive optimizer/RNG 외부 복원 검증이 통과했고, 15:54 KST 조회에서1/12개 완료·두 번째 조건42epoch Drive 저장을 확인했다. [실험의 의의·현재 결론](docs/EXPERIMENT_INTERPRETATION_2026-11-19.md)은 BPR 완료 결과와 그래프 진행 상태를 구분한다.
 
 **11/17 v2 비교 완료:** 세 모델 seed42의 네 조건·후보100/500/1000 평가와 전체 결과 회수를 완료했다. 제어기는 정상 종료했고 활성 GPU0개·0 CU/hr를 확인했다. 후보500·같은 β의 v2/v1 test NDCG 변화는 +0.652%/+0.073%/+0.061%이며 모두 paired CI가0을 포함한다. [최종 결과·한계](docs/VEHICLES_V2_RESULTS_2026-11-17.md), [저장·복구 검증 기록](docs/VEHICLES_V2_DURABLE_2026-11-17.md).
 
-11/17 KST에 Gmail의 11/13 회의 문서·스크립트와 최신 Notion·Drive를 확인해 [회의 결정](docs/MEETING_2026-11-13.md)을 반영했다. **모델을 우선 고정하고 데이터 클리닝·원인 분석 중심으로 발표하며, v2로 재정렬 탐색과 학습 단계 비교를 모두 시도**하는 방향이다. v2 최종본은 올라와 있고 [후속 실행 계획](docs/VEHICLES_V2_PLAN.md)을 정리했다. 첫 v2 재정렬 비교는 초기 평가 진행 후 Colab 세션이 사라져 실패 종료했다. 최종 비교 결과는 회수되지 않았고, 11/17 재조회에서 활성 GPU0개·0 CU/hr를 확인했다. [실행 기록](docs/VEHICLES_V2_RUN_2026-11-17.md)에서 진행 위치와 초기 검증 근거를 확인한다. 학습 단계 실험은 아직 시작하지 않았다.
+11/17 KST에 Gmail의 11/13 회의 문서·스크립트와 최신 Notion·Drive를 확인해 [회의 결정](docs/MEETING_2026-11-13.md)을 반영했다. **모델을 우선 고정하고 데이터 클리닝·원인 분석 중심으로 발표하며, v2로 재정렬 탐색과 학습 단계 비교를 모두 시도**하는 방향이다. 첫 v2 재정렬 비교는 Colab 세션 소실로 실패했으나 이후 저장·복구 검증을 거쳐 최종 비교를 완료했다. [첫 실패 기록](docs/VEHICLES_V2_RUN_2026-11-17.md)은 과거 상태다. 학습 단계의 BPR-MF 비교는 완료됐고 그래프 확장은 진행 중이다.
 
 기본 모델 32개 학습 작업, 차종 v1의 다른 모델/seed 확장, 후보100/500/1000 valid 진단 산출물은 보존한다. **기존 재정렬은 checkpoint의 후보 순서 조정이며 차종 노드를 추가하거나 재학습한 결과가 아니다.** 인기 감점·텍스트 조건을 포함한 RQ3/RQ4 전체는 완료되지 않았다. 상세 상태와 다음 실험은 PROJECT_BRIEF 한 곳에서 관리한다.
 
@@ -40,6 +40,13 @@ Amazon Reviews 2023 Automotive의 processed 5-core에서 **정확도를 유지�
 ```bash
 uv sync --locked --extra training --group colab
 uv run --locked --extra training --group colab python -m unittest discover -s tests -v
+```
+
+Python 코드는 Ruff 0.17.5 기본 서식으로 통일한다. 11/19 전체64개 파일의 포매팅 전후 AST 일치와43개 테스트 통과를 확인했다. 포매팅은 실행 중인 캠페인의 동결 source bundle을 교체하지 않는다.
+
+```bash
+uvx ruff==0.17.5 format src scripts tests
+uvx ruff==0.17.5 format --check src scripts tests
 ```
 
 실제 입력은 Git 제외다. 소유자 환경의 `data`는 개인 Downloads의 processed를 가리키는 링크이므로 팀원은 입력을 따로 받고 `--data-dir /path/to/processed`를 지정한다. checkpoint·추천 NPZ·사용자별 Parquet·원본 로그의 접근 방법과 hash 검증은 HANDOFF에 있다. 무거운 학습/전체 평가는 Colab CUDA에서 수행한다.

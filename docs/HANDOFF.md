@@ -1,5 +1,7 @@
 # 팀원 인수인계: 결과에서 코드와 로그까지
 
+**11/19 15:54 KST 후속 확인:** 그래프 가중 학습1/12개 완료·LightGCN 가중 seed42의42epoch Drive 저장, Ubuntu 제어기 active·L4 한 개 사용을 확인했다. [실험 의의·현재 결론](EXPERIMENT_INTERPRETATION_2026-11-19.md), [조회 근거](results/graph-vehicle-weight-training-2026-11-19/latest_snapshot.json). BPR 결과는 완료, 그래프 효과는 미확정이다. Python64개 파일의 Ruff 포매팅은 AST가 같고43개 테스트를 통과했으며 실행 중인 동결 bundle은 유지했다.
+
 **후속 결정 갱신(2026-11-17):** [11/13 회의 해설](MEETING_2026-11-13.md)과 [v2 실행 계획](VEHICLES_V2_PLAN.md)을 먼저 읽는다. 최신 Notion은 차종 v2를 연결하고, Drive에는 11/15 최종본·검수 자료가 있다. v2 재정렬은 [최종 결과](VEHICLES_V2_RESULTS_2026-11-17.md)까지 완료했고, [차종 신뢰도 가중 BPR-MF6runs](VEHICLE_WEIGHT_TRAINING_2026-11-17.md)는 완료됐다. 11/19 [그래프 모델 확장12runs](GRAPH_VEHICLE_WEIGHT_TRAINING_2026-11-19.md)는 두 모델의 CUDA·외부 복원 검증 뒤 별도 실행 중이다. 기존 추천·차종 실험 근거는 아래에 보존한다. 아래 11/13 점검의 ‘원격 자료 미조회’는 당시 점검 범위다.
 
 점검일: **2026-11-13**. 로컬 보관 파일을 대조했다. 원격 Git·Drive 권한, 서버와 Colab의 오늘 실시간 상태는 조회하지 않았다. 문서를 읽거나 보고서를 쓰기 위해 GPU를 할당할 필요는 없다.

@@ -1,6 +1,6 @@
 # LightGCN·XSimGCL 차종 신뢰도 가중 학습
 
-2026-11-19. 사용자가 별도 그래프 실험의 즉시 실행을 요청했다. 완료된 [BPR-MF6runs](VEHICLE_WEIGHT_TRAINING_2026-11-17.md)의 같은 차종 가중치를 LightGCN·XSimGCL로 확장한다. 로컬43개 검사와 두 모델의 실제 CUDA·외부 checkpoint 재개 검증이 통과했고, 본12개 학습이 진행 중이다. 15:09 KST 조회에서1/12개 완료·LightGCN 가중 seed42의10epoch 저장을 확인했다.
+2026-11-19. 사용자가 별도 그래프 실험의 즉시 실행을 요청했다. 완료된 [BPR-MF6runs](VEHICLE_WEIGHT_TRAINING_2026-11-17.md)의 같은 차종 가중치를 LightGCN·XSimGCL로 확장한다. 로컬43개 검사와 두 모델의 실제 CUDA·외부 checkpoint 재개 검증이 통과했고, 본12개 학습이 진행 중이다. 최신15:54 KST 조회에서1/12개 완료·LightGCN 가중 seed42의42epoch Drive 저장을 확인했다. [조회 근거](results/graph-vehicle-weight-training-2026-11-19/latest_snapshot.json), [의의·현재 결론](EXPERIMENT_INTERPRETATION_2026-11-19.md). 아래15:09 기록은 시작 후 검증 당시의 스냅샷이다.
 
 ## 동결할 비교
 
